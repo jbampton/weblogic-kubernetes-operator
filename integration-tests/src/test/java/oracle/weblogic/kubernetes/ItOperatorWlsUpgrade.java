@@ -635,6 +635,15 @@ class ItOperatorWlsUpgrade {
         destDomainYaml.toString(), "model-in-image:WLS-v1",
         MII_BASIC_IMAGE_NAME + ":" + MII_BASIC_IMAGE_TAG),
         "Could not modify image name in the domain.yaml file");
+    try {
+      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
+          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
+      ExecResult crdRes = ExecCommand.exec(cmd);
+      logger.info("Crd Result before creating domain " + crdRes.stdout());
+    } catch (Exception ex) {
+      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
+      ex.printStackTrace();
+    }
 
     boolean result = Command
         .withParams(new CommandParams()
