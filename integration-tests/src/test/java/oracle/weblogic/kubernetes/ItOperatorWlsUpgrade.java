@@ -222,7 +222,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 3.4.13 to current with Auxiliary Image Domain, V9 schema.
    */
-  @Disabled
+  @Test
   @DisplayName("Upgrade 3.4.13 Auxiliary Domain(v9 schema) Image to current")
   void testOperatorUpgradeAuxDomainV9From3413ToCurrent() {
     logger.info("Starting testOperatorUpgradeAuxDomainV9From3413ToCurrent "
@@ -233,8 +233,8 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 3.4.13 to current with Auxiliary Image Domain, V8 schema.
    */
+  @Test
   @DisplayName("Upgrade 3.4.13 Auxiliary Domain(v8 schema) Image to current")
-  @Disabled
   void testOperatorUpgradeAuxDomainV8From3413ToCurrent() {
     logger.info("Starting testOperatorUpgradeAuxDomainV8From3413ToCurrent "
         + " to upgrade Domain with Auxiliary Image with v8 schema to current");
@@ -244,7 +244,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Upgrade Operator from 3.4.12 to current with Mii domain in V8 schema.
    */
-  @Disabled
+  @Test
   @DisplayName("Upgrade 3.4.12 Mii Domain(v8 schema) Image to current")
   void testOperatorUpgradeMiiDomainV8From3412ToCurrent() {
     logger.info("Starting testOperatorWlsAuxDomainV8UpgradeFrom3412ToCurrent "
