@@ -252,6 +252,11 @@ public class OperatorParams {
     return this;
   }
 
+  public OperatorParams operatorOnly(boolean operatorOnly) {
+    this.operatorOnly = operatorOnly;
+    return this;
+  }
+
   /**
    * Loads Helm values into a value map.
    * @return Map of values
@@ -304,8 +309,9 @@ public class OperatorParams {
     }
     if (webhookOnly) {
       values.put(WEBHOOK_ONLY, webhookOnly);
-    }  else {
-      values.put(OPERATOR_ONLY, "true");
+    }
+    if (operatorOnly) {
+      values.put(OPERATOR_ONLY, operatorOnly);
     }
 
     values.put(CREATE_LOGSTASH_CONFIGMAP, createLogStashConfigMap);
