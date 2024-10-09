@@ -193,7 +193,6 @@ class ItManageNameSpace {
   @Order(1)
   @DisplayName("install operator helm chart and domain, "
       + " using expression namespace management")
-  @Tag("gate")
   @Tag("crio")
   void testNameSpaceManageByRegularExpression() {
     //create domain namespace
@@ -272,6 +271,7 @@ class ItManageNameSpace {
   @Order(2)
   @DisplayName("install operator helm chart and domain, "
       + " using label namespace management")
+  @Tag("gate")      
   void testNameSpaceManagedByLabelSelector() {
     Map<String, String> managedByLabelDomains = new HashMap<>();
     managedByLabelDomains.put(domainNamespaces[0], domainsUid[0]);
