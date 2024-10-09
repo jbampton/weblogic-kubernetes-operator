@@ -220,24 +220,14 @@ class ItOperatorWlsUpgrade {
   }
 
   /**
-   * Operator upgrade from 3.4.13 to current with Auxiliary Image Domain, V9 schema.
-   */
-  @Test
-  @DisplayName("Upgrade 3.4.13 Auxiliary Domain(v9 schema) Image to current")
-  void testOperatorUpgradeAuxDomainV9From3413ToCurrent() {
-    logger.info("Starting testOperatorUpgradeAuxDomainV9From3413ToCurrent "
-         + "to upgrade Domain with Auxiliary Image with v9 schema to current");
-    installOperatorCreateAuxDomainAndUpgrade("3.4.13", DOMAIN_VERSION);
-  }
-
-  /**
    * Operator upgrade from 3.4.13 to current with Auxiliary Image Domain, V8 schema.
+   * V9 schema is from Operator 4.0.
    */
   @Test
   @DisplayName("Upgrade 3.4.13 Auxiliary Domain(v8 schema) Image to current")
   void testOperatorUpgradeAuxDomainV8From3413ToCurrent() {
     logger.info("Starting testOperatorUpgradeAuxDomainV8From3413ToCurrent "
-        + " to upgrade Domain with Auxiliary Image with v8 schema to current");
+         + "to upgrade Domain with Auxiliary Image with v8 schema to current");
     installOperatorCreateAuxDomainAndUpgrade("3.4.13", OLD_DOMAIN_VERSION);
   }
 
@@ -253,21 +243,6 @@ class ItOperatorWlsUpgrade {
   }
 
   /**
-   * Auxiliary Image Domain upgrade from Operator v3.3.8 to current.
-   * Currently we do not support AuxDomain upgrade 3.3.8 to Latest with 
-   * independent webhook only WebLogic Operator in Latest branch.
-   * Temporarily disabled, re-enable after webhook not pre-created in 
-   * InitializationTasks or the test is moved to a different test suite.
-   */
-  @Disabled
-  @DisplayName("Upgrade 3.3.8 Auxiliary Domain(v8 schema) Image to current")
-  void testOperatorUpgradeAuxDomainV8From338ToCurrent() {
-    logger.info("Starting test testOperatorUpgradeAuxDomainV8From338ToCurrent to upgrade Domain with "
-        + "Auxiliary Image with v8 schema to current");
-    installOperatorCreateAuxDomainAndUpgrade("3.3.8", OLD_DOMAIN_VERSION);
-  }
-
-  /**
    * Cleanup Kubernetes artifacts in the namespaces used by the test and
    * delete CRD.
    */
@@ -280,15 +255,7 @@ class ItOperatorWlsUpgrade {
   }
 
   void installOperatorCreateAuxDomainAndUpgrade(String operatorVersion, String domainApiVersion) {
-    try {
-      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
-          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
-      ExecResult crdRes = ExecCommand.exec(cmd);
-      logger.info("Crd Result before Operator install" + crdRes.stdout());
-    } catch (Exception ex) {
-      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
-      ex.printStackTrace();
-    }
+
     logger.info("Upgrade version/{0} Auxiliary Domain(v8) to current", operatorVersion);
     installOldOperator(operatorVersion, opNamespace, domainNamespace);
     createSecrets();
@@ -325,15 +292,6 @@ class ItOperatorWlsUpgrade {
         () -> generateFileFromTemplate(srcDomainFile.toString(),
         "domain.yaml", templateMap));
     logger.info("Generated Domain Resource file {0}", targetDomainFile);
-    try {
-      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
-          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
-      ExecResult crdRes = ExecCommand.exec(cmd);
-      logger.info("Crd Result after Operator install" + crdRes.stdout());
-    } catch (Exception ex) {
-      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
-      ex.printStackTrace();
-    }
 
     // run KUBERNETES_CLI to create the domain
     logger.info("Run " + KUBERNETES_CLI + " to create the domain");
@@ -407,27 +365,8 @@ class ItOperatorWlsUpgrade {
   // domain1-adminserver-ext  NodePort    10.96.46.242   30001:30001/TCP
   private void installOperatorCreateMiiDomainAndUpgrade(String operatorVersion, String domainVersion,
                                                         String externalServiceNameSuffix) {
-    try {
-      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
-          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
-      ExecResult crdRes = ExecCommand.exec(cmd);
-      logger.info("Crd Result before Operator install" + crdRes.stdout());
-    } catch (Exception ex) {
-      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
-      ex.printStackTrace();
-    }
 
     installOldOperator(operatorVersion,opNamespace,domainNamespace);
-
-    try {
-      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
-          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
-      ExecResult crdRes = ExecCommand.exec(cmd);
-      logger.info("Crd Result after Operator install" + crdRes.stdout());
-    } catch (Exception ex) {
-      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
-      ex.printStackTrace();
-    }
     // create WLS domain and verify
     installMiiDomainResource(domainVersion, externalServiceNameSuffix);
 
@@ -635,15 +574,6 @@ class ItOperatorWlsUpgrade {
         destDomainYaml.toString(), "model-in-image:WLS-v1",
         MII_BASIC_IMAGE_NAME + ":" + MII_BASIC_IMAGE_TAG),
         "Could not modify image name in the domain.yaml file");
-    try {
-      String cmd = KUBERNETES_CLI + " get crd domains.weblogic.oracle "
-          + "-o jsonpath='{.spec.conversion.webhook.clientConfig.service}'";
-      ExecResult crdRes = ExecCommand.exec(cmd);
-      logger.info("Crd Result before creating domain " + crdRes.stdout());
-    } catch (Exception ex) {
-      logger.info("Exception while get crd domains.weblogic.oracle " + ex);
-      ex.printStackTrace();
-    }
 
     boolean result = Command
         .withParams(new CommandParams()
