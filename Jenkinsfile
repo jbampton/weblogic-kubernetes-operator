@@ -20,7 +20,7 @@ def kind_k8s_map = [
 def _kind_image = null
 
 pipeline {
-    agent { label 'large' }
+    agent { label 'large-ol9u4' }
     options {
         timeout(time: 800, unit: 'MINUTES')
     }
@@ -168,11 +168,11 @@ pipeline {
         )
         string(name: 'MONITORING_EXPORTER_WEBAPP_VERSION',
                description: '',
-               defaultValue: '2.0.7'
+               defaultValue: '2.1.2'
         )
         string(name: 'PROMETHEUS_CHART_VERSION',
                description: '',
-               defaultValue: '15.2.0'
+               defaultValue: '17.0.0'
         )
         string(name: 'GRAFANA_CHART_VERSION',
                description: '',
@@ -212,7 +212,7 @@ pipeline {
                             java -version
                             mvn --version
                             python --version
-                            docker version
+                            podman version
                             ulimit -a
                             ulimit -aH
                         '''
@@ -352,14 +352,22 @@ pipeline {
                     steps {
                         sh '''
                             export PATH=${runtime_path}
+                            export KIND_EXPERIMENTAL_PROVIDER=podman
+
+                            podman version
+                            cat /etc/systemd/system/user@.service.d/delegate.conf
+                            cat /etc/modules-load.d/iptables.conf
+                            lsmod|grep -E "^ip_tables|^iptable_filter|^iptable_nat|^ip6"
+
                             if kind delete cluster --name ${kind_name} --kubeconfig "${kubeconfig_file}"; then
                                 echo "Deleted orphaned kind cluster ${kind_name}"
                             fi
+                            # settings needed by elastic logging tests
+                            echo "running sudo sysctl -w vm.max_map_count=262144"
+                            sudo sysctl -w vm.max_map_count=262144
                             cat <<EOF | kind create cluster --name "${kind_name}" --kubeconfig "${kubeconfig_file}" --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-networking:
-  podSubnet: 192.168.0.0/16
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${registry_port}"]
@@ -369,30 +377,105 @@ nodes:
     image: ${kind_image}
   - role: worker
     image: ${kind_image}
+    extraPortMappings:
+      - containerPort: 30511
+        hostPort: 1511    
+      - containerPort: 32480
+        hostPort: 2480
+      - containerPort: 32490
+        hostPort: 2490    
+      - containerPort: 30080
+        hostPort: 2080
+      - containerPort: 30443
+        hostPort: 2043
+      - containerPort: 30180
+        hostPort: 2090
+      - containerPort: 30143
+        hostPort: 2053
+      - containerPort: 31000
+        hostPort: 2100
+      - containerPort: 31004
+        hostPort: 2104
+      - containerPort: 31008
+        hostPort: 2108
+      - containerPort: 31012
+        hostPort: 2112
+      - containerPort: 31016
+        hostPort: 2116
+      - containerPort: 31020
+        hostPort: 2120
+      - containerPort: 31024
+        hostPort: 2124
+      - containerPort: 31028
+        hostPort: 2128
+      - containerPort: 31032
+        hostPort: 2132
+      - containerPort: 31036
+        hostPort: 2136
+      - containerPort: 31040
+        hostPort: 2140
+      - containerPort: 31044
+        hostPort: 2144
+      - containerPort: 31048
+        hostPort: 2148
+      - containerPort: 31052
+        hostPort: 2152
+      - containerPort: 31056
+        hostPort: 2156
+      - containerPort: 31060
+        hostPort: 2160
+      - containerPort: 31064
+        hostPort: 2164
+      - containerPort: 31068
+        hostPort: 2168
+      - containerPort: 31072
+        hostPort: 2172
+      - containerPort: 31076
+        hostPort: 2176
+      - containerPort: 31080
+        hostPort: 2180
+      - containerPort: 31084
+        hostPort: 2184
+      - containerPort: 31088
+        hostPort: 2188
+      - containerPort: 31092
+        hostPort: 2192
+      - containerPort: 31096 
+        hostPort: 2196
+      - containerPort: 31100
+        hostPort: 2200
+      - containerPort: 31104 
+        hostPort: 2204
+      - containerPort: 31108
+        hostPort: 2208
+      - containerPort: 31112
+        hostPort: 2212
+      - containerPort: 31116
+        hostPort: 2216
+      - containerPort: 31120
+        hostPort: 2220
+      - containerPort: 31124
+        hostPort: 2224
+      - containerPort: 31128
+        hostPort: 2228
     extraMounts:
       - hostPath: ${pv_root}
         containerPath: ${pv_root}
+kubeadmConfigPatches:
+- |
+  kind: KubeletConfiguration
+  localStorageCapacityIsolation: true	
 EOF
 
                             export KUBECONFIG=${kubeconfig_file}
                             kubectl cluster-info --context "kind-${kind_name}"
 
+                            podman info
+                            kubectl describe node
+
                             for node in $(kind get nodes --name "${kind_name}"); do
                                 kubectl annotate node ${node} tilt.dev/registry=localhost:${registry_port};
                             done
-
-                            if [ "${kind_network}" != "bridge" ]; then
-                                containers=$(docker network inspect ${kind_network} -f "{{range .Containers}}{{.Name}} {{end}}")
-                                needs_connect="true"
-                                for c in ${containers}; do
-                                    if [ "$c" = "${registry_name}" ]; then
-                                        needs_connect="false"
-                                    fi
-                                done
-                                if [ "${needs_connect}" = "true" ]; then
-                                    docker network connect "${kind_network}" "${registry_name}" || true
-                                fi
-                            fi
 
                             # Document the local registry
                             # https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
@@ -445,6 +528,7 @@ EOF
                                 MAVEN_PROFILE_NAME="integration-tests"
                                 echo "-Dit.test=\"${IT_TEST}\"" >> ${WORKSPACE}/.mvn/maven.config
                             fi
+			    echo "-Dmaven.wagon.http.retryHandler.count=3"                                               >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.wle.download.url=\"${wle_download_url}\""                                     >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.result.root=\"${result_root}\""                                               >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.pv.root=\"${pv_root}\""                                                       >> ${WORKSPACE}/.mvn/maven.config
@@ -470,14 +554,14 @@ EOF
                             echo "-Dwko.it.prometheus.chart.version=\"${PROMETHEUS_CHART_VERSION}\""                     >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.grafana.chart.version=\"${GRAFANA_CHART_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.collect.logs.on.success=\"${COLLECT_LOGS_ON_SUCCESS}\""                       >> ${WORKSPACE}/.mvn/maven.config
+                            echo "-DWLSIMG_BUILDER=\"podman\""                                                           >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.remoteconsole.version=\"${REMOTECONSOLE_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
-			    echo "-Djdk.httpclient.allowRestrictedHeaders=\"host\""                                      >> ${WORKSPACE}/.mvn/maven.config
-			    echo "-DOPERATOR_LOG_LEVEL=\"${OPERATOR_LOG_LEVEL}\""                                        >> ${WORKSPACE}/.mvn/maven.config
-
+                            echo "-Djdk.httpclient.allowRestrictedHeaders=\"host\""                                      >> ${WORKSPACE}/.mvn/maven.config    
 
                             echo "${WORKSPACE}/.mvn/maven.config contents:"
                             cat "${WORKSPACE}/.mvn/maven.config"
                             cp "${WORKSPACE}/.mvn/maven.config" "${result_root}"
+                            kubectl describe node kind-worker
                         '''
                         withMaven(globalMavenSettingsConfig: 'wkt-maven-settings-xml', publisherStrategy: 'EXPLICIT') {
                             withCredentials([
