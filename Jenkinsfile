@@ -2,21 +2,19 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 //
 def kind_k8s_map = [
-    '0.19.0': [
-        '1.27.1':  'kindest/node:v1.27.1@sha256:b7d12ed662b873bd8510879c1846e87c7e676a79fefc93e17b2a52989d3ff42b',
-        '1.27':    'kindest/node:v1.27.1@sha256:b7d12ed662b873bd8510879c1846e87c7e676a79fefc93e17b2a52989d3ff42b',
-        '1.26.4':  'kindest/node:v1.26.4@sha256:f4c0d87be03d6bea69f5e5dc0adb678bb498a190ee5c38422bf751541cebe92e',
-        '1.26':    'kindest/node:v1.26.4@sha256:f4c0d87be03d6bea69f5e5dc0adb678bb498a190ee5c38422bf751541cebe92e',
-        '1.25.9':  'kindest/node:v1.25.9@sha256:c08d6c52820aa42e533b70bce0c2901183326d86dcdcbedecc9343681db45161',
-        '1.25':    'kindest/node:v1.25.9@sha256:c08d6c52820aa42e533b70bce0c2901183326d86dcdcbedecc9343681db45161',
-        '1.24.13': 'kindest/node:v1.24.13@sha256:cea86276e698af043af20143f4bf0509e730ec34ed3b7fa790cc0bea091bc5dd',
-        '1.24':    'kindest/node:v1.24.13@sha256:cea86276e698af043af20143f4bf0509e730ec34ed3b7fa790cc0bea091bc5dd',
-        '1.23.17': 'kindest/node:v1.23.17@sha256:f77f8cf0b30430ca4128cc7cfafece0c274a118cd0cdb251049664ace0dee4ff',
-        '1.23':    'kindest/node:v1.23.17@sha256:f77f8cf0b30430ca4128cc7cfafece0c274a118cd0cdb251049664ace0dee4ff',
-        '1.22.17': 'kindest/node:v1.22.17@sha256:9af784f45a584f6b28bce2af84c494d947a05bd709151466489008f80a9ce9d5',
-        '1.22':    'kindest/node:v1.22.17@sha256:9af784f45a584f6b28bce2af84c494d947a05bd709151466489008f80a9ce9d5',
-        '1.21.14': 'kindest/node:v1.21.14@sha256:220cfafdf6e3915fbce50e13d1655425558cb98872c53f802605aa2fb2d569cf',
-        '1.21':    'kindest/node:v1.21.14@sha256:220cfafdf6e3915fbce50e13d1655425558cb98872c53f802605aa2fb2d569cf'
+    '0.23.0': [
+        '1.30.0':  'kindest/node:v1.30.0@sha256:047357ac0cfea04663786a612ba1eaba9702bef25227a794b52890dd8bcd692e',
+        '1.30':    'kindest/node:v1.30.0@sha256:047357ac0cfea04663786a612ba1eaba9702bef25227a794b52890dd8bcd692e',
+        '1.29.4':  'kindest/node:v1.29.4@sha256:3abb816a5b1061fb15c6e9e60856ec40d56b7b52bcea5f5f1350bc6e2320b6f8',
+        '1.29':    'kindest/node:v1.29.4@sha256:3abb816a5b1061fb15c6e9e60856ec40d56b7b52bcea5f5f1350bc6e2320b6f8',
+        '1.28.9':  'kindest/node:v1.28.9@sha256:dca54bc6a6079dd34699d53d7d4ffa2e853e46a20cd12d619a09207e35300bd0',
+        '1.28':    'kindest/node:v1.28.9@sha256:dca54bc6a6079dd34699d53d7d4ffa2e853e46a20cd12d619a09207e35300bd0',
+        '1.27.13': 'kindest/node:v1.27.13@sha256:17439fa5b32290e3ead39ead1250dca1d822d94a10d26f1981756cd51b24b9d8',
+        '1.27':    'kindest/node:v1.27.13@sha256:17439fa5b32290e3ead39ead1250dca1d822d94a10d26f1981756cd51b24b9d8',
+        '1.26.15': 'kindest/node:v1.26.15@sha256:84333e26cae1d70361bb7339efb568df1871419f2019c80f9a12b7e2d485fe19',
+        '1.26':    'kindest/node:v1.26.15@sha256:84333e26cae1d70361bb7339efb568df1871419f2019c80f9a12b7e2d485fe19',
+        '1.25.16': 'kindest/node:v1.25.16@sha256:5da57dfc290ac3599e775e63b8b6c49c0c85d3fec771cd7d55b45fae14b38d3b',
+        '1.25':    'kindest/node:v1.25.16@sha256:5da57dfc290ac3599e775e63b8b6c49c0c85d3fec771cd7d55b45fae14b38d3b'
     ]
 ]
 def _kind_image = null
@@ -67,30 +65,32 @@ pipeline {
                description: 'Comma separated list of individual It test classes to be run e.g., ItParameterizedDomain, ItMiiUpdateDomainConfig, ItMiiDynamicUpdate*, ItMiiMultiMode',
                defaultValue: ''
         )
+        string(name: 'OPERATOR_LOG_LEVEL',
+               description: 'The default log level is not set',
+               defaultValue: ''
+	)
         choice(name: 'KIND_VERSION',
                description: 'Kind version.',
                choices: [
-                   '0.19.0'
+                   '0.23.0'
                ]
         )
         choice(name: 'KUBE_VERSION',
-               description: 'Kubernetes version. Supported values depend on the Kind version. Kind 0.18.0: 1.26, 1.26.3, 1.25, 1.25.8, 1.24, 1.24.12, 1.23, 1.23.17, 1.22, 1.22.17, 1.21, and 1.21.14. Kind 0.17.0: 1.25, 1.25.3, 1.24, 1.24.7, 1.23, 1.23.13, 1.22, 1.22.15, 1.21, 1.21.14, 1.20, and 1.20.15. Kind 0.16.0: 1.25, 1.25.2, 1.24, 1.24.6, 1.23, 1.23.12, 1.22, 1.22.15, 1.21, 1.21.14, 1.20, and 1.20.15. Kind 0.15.0: 1.25, 1.25.0, 1.24, 1.24.4, 1.23, 1.23.10, 1.22, 1.22.13, 1.21, 1.21.14, 1.20, and 1.20.15 ',
+               description: 'Kubernetes version. Supported values depend on the Kind version. Kind 0.23.0: 1.30, 1.30.0, 1.29, 1.29.4, 1.28, 1.28.9, 1.27, 1.27.13, 1.26, 1.26.15, 1.25, 1.25.16 ',
                choices: [
                     // The first item in the list is the default value...
-                    '1.27.1',
+                    '1.30.0',
+                    '1.30',
+                    '1.29.4',
+                    '1.29',
+                    '1.28.9',
+                    '1.28',
+                    '1.27.13',
                     '1.27',
-                    '1.26.4',
+                    '1.26.15',
                     '1.26',
-                    '1.25.9',
-                    '1.25',
-                    '1.24.13',
-                    '1.24',
-                    '1.23.17',
-                    '1.23',
-                    '1.22.17',
-                    '1.22',
-                    '1.21.14',
-                    '1.21'
+                    '1.25.16',
+                    '1.25'
                ]
         )
         string(name: 'HELM_VERSION',
@@ -100,6 +100,7 @@ pipeline {
         choice(name: 'ISTIO_VERSION',
                description: 'Istio version',
                choices: [
+                   '1.23.0',
                    '1.17.2',
                    '1.16.1',
                    '1.13.2',
@@ -108,7 +109,7 @@ pipeline {
                    '1.10.4',
                    '1.9.9'
                ]
-        )
+        )	
         booleanParam(name: 'PARALLEL_RUN',
                      description: 'Runs tests in parallel. Default is true, test classes run in parallel.',
                      defaultValue: true
@@ -471,6 +472,7 @@ EOF
                             echo "-Dwko.it.collect.logs.on.success=\"${COLLECT_LOGS_ON_SUCCESS}\""                       >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Dwko.it.remoteconsole.version=\"${REMOTECONSOLE_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
 			    echo "-Djdk.httpclient.allowRestrictedHeaders=\"host\""                                      >> ${WORKSPACE}/.mvn/maven.config
+			    echo "-DOPERATOR_LOG_LEVEL=\"${OPERATOR_LOG_LEVEL}\""                                        >> ${WORKSPACE}/.mvn/maven.config
 
 
                             echo "${WORKSPACE}/.mvn/maven.config contents:"
@@ -563,3 +565,4 @@ EOF
         }
     }
 }
+
