@@ -79,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Tag("okd-wls-srg")
 @Tag("oke-arm")
 @Tag("oke-parallel")
+@Tag("gate")
 class ItMultiDomainModels {
 
   // domain constants
