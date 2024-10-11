@@ -2,13 +2,22 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 //
 
+CRON_SETTINGS_MAIN = '''H 3 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=okearm;PARALLEL_RUN=false'''
+
+CRON_SETTINGS_42 = '''H 5 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq42arm;PARALLEL_RUN=false'''
+
+CRON_SETTINGS = "${env.JOB_NAME == 'wko-oke-arm' ? CRON_SETTINGS_42 : CRON_SETTINGS_MAIN}"
 pipeline {
     agent { label 'large-arm' }
     options {
         timeout(time: 1800, unit: 'MINUTES')
-        disableConcurrentBuilds()
     }
-
+    
+    triggers {
+        // timer trigger for "nightly build"
+        parameterizedCron(env.JOB_NAME == 'wko-oke-dev' ?
+                '' : CRON_SETTINGS)
+    }
     tools {
         maven 'maven-3.8.7'
         jdk 'jdk21-arm'
@@ -55,6 +64,7 @@ pipeline {
         MAVEN_PROFILE_NAME = "oke-arm"
         availability_domain = "mFEn:PHX-AD-1"
         PARALLEL_RUN = "false"
+        oke_run = "okemodule"
     }
 
     parameters {
@@ -119,6 +129,10 @@ pipeline {
                        description: '',
                        defaultValue: "main"
         )
+        string(name: 'CLUSTER_NAME',
+                               description: 'OKE cluster name',
+                               defaultValue: "armone"
+        )
         choice(name: 'BASE_IMAGES_REPO',
                choices: ["${env.WKT_OCIR_HOST}", 'container-registry.oracle.com'],
                description: 'Repository to pull the base images. Make sure to modify the image names if you are modifying this parameter value.'
@@ -151,6 +165,10 @@ pipeline {
                description: 'Oracle DB image tag',
                defaultValue: '19.19.0.0'
         )
+        string(name: 'MOUNT_TARGET_OCID',
+               description: 'one mount target for all runs',
+               defaultValue: "ocid1.mounttarget.oc1.phx.aaaaaby27vhqpci5obuhqllqojxwiotqnb4c2ylefuzqaaaa"
+        )
         string(name: 'MONITORING_EXPORTER_BRANCH',
                description: '',
                defaultValue: 'main'
@@ -166,6 +184,10 @@ pipeline {
         string(name: 'GRAFANA_CHART_VERSION',
                description: '',
                defaultValue: '6.44.11'
+        )
+        string(name: 'REMOTECONSOLE_VERSION',
+                       description: 'RemoteConsole version.',
+                       defaultValue: '2.4.7'
         )
         booleanParam(name: 'COLLECT_LOGS_ON_SUCCESS',
                      description: 'Collect logs for successful runs. Default is false.',
@@ -319,6 +341,7 @@ pipeline {
                         #export IMAGE_TAG_WEBLOGIC="12.2.1.4"
                         #export IMAGE_TAG_FMWINFRA="12.2.1.4"
                         ssh_pubkey=`cat ${wkotest_ssh_pubcert}`
+                        ssh_pk=`cat ${wkotest_ssh_pk}`
 
                         #################
                         echo "Generating property file oci.prop for terraform scripts"
@@ -338,19 +361,22 @@ ocipk.path=${jenkins_home_directory}/.oci/oci-signing-key.pem
 vcn.cidr.prefix=${VCN_CIDR_PREFIX}
 vcn.cidr=${VCN_CIDR_PREFIX}.1.0/24
 vcn.ocid=${vcn_ocid}
+mounttarget.ocid=${MOUNT_TARGET_OCID}
 pub.subnet.ocid=${pub_subnet_ocid}
 private.subnet.ocid=${private_subnet_ocid}
 nodepool.shape=${NODE_SHAPE}
 nodepool.imagename=${IMAGE_ID}
 k8s.version=v${OKE_KUBE_VERSION}
 nodepool.ssh.pubkey=${ssh_pubkey}
+nodepool.ssh.pk=${ssh_pk}
+nodepool.ssh.pubkeypath=${wkotest_ssh_pubcert}
+nodepool.ssh.pkpath=${wkotest_ssh_pk}
 terraform.installdir=${WORKSPACE}/terraform/terraforminstall
 EOF
 
                         ##################
                         echo "prop files "
                         cat $OCI_PROP_FILE
-                        cp -rf ${WORKSPACE}/kubernetes/samples/scripts/terraform/template.tfvars ${WORKSPACE}/terraform/.
                         mkdir -p ${WORKSPACE}/terraform/terraforminstall
                         '''
 
@@ -383,7 +409,8 @@ EOF
                         OCI_PROP_FILE="${WORKSPACE}/terraform/oci.prop"
                         CLUSTER_NAME="${CLUSTER_NAME}"
                         KUBECONFIG ="${WORKSPACE}/terraform/${CLUSTER_NAME}_kubeconfig"
-                        terraform_script_dir_name = "${WORKSPACE}/integration-tests/src/test/resources/oke/terraform/okeint"
+                        terraform_script_dir_name = "${WORKSPACE}/integration-tests/src/test/resources/oke/terraform/${oke_run}"
+
 
                     }
                     steps {
@@ -397,14 +424,15 @@ EOF
 
                             echo 'Create a OKE cluster ${CLUSTER_NAME}'
 
-                            cp -rf ${terraform_script_dir_name}/*.* ${WORKSPACE}/terraform/.
+                            cp -rf ${terraform_script_dir_name}/* ${WORKSPACE}/terraform/.
 
                             chmod 777 ${WORKSPACE}/terraform/*.sh
                             mkdir -p ${WORKSPACE}/terraform/terraforminstall
 
                             sh ${WORKSPACE}/terraform/oke.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform arm
 
-                            clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"$CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                            #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"$CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                            clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
                             echo "clusterIp : $clusterIP"
                             clusterPublicIP=${clusterIP:1:-6}
                             echo " clusterPublicIP : ${clusterPublicIP}"
@@ -444,9 +472,12 @@ EOF
                         compartment_ocid=${compartment_id}
                         echo "creating storage class to setup OFSS ..."
                         echo "getting MountTarget ID"
-                        mount_target_id=`oci fs mount-target  list --compartment-id=${compartment_ocid}  --display-name=${clusterName}-mt --availability-domain=${availability_domain} | jq -r '.data[] | .id'`
+                        mount_target_id=${MOUNT_TARGET_OCID}
+                        #mount_target_id=`oci fs mount-target  list --compartment-id=${compartment_ocid}  --display-name=${clusterName}-mt --availability-domain=${availability_domain} | jq -r '.data[] | .id'`
 
-                        clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"${CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                        #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"${CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                        clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+
                         echo "clusterIp : $clusterIP"
                         clusterPublicIP=${clusterIP:1:-6}
                         echo " clusterPublicIP : ${clusterPublicIP}"
@@ -469,12 +500,13 @@ EOF
                     environment {
                         runtime_path = "${WORKSPACE}/bin:${PATH}"
                         clusterName = "${CLUSTER_NAME}"
-                        FSS_DIR = "/oketest1,/oketest2,/oketest3,/oketest4,/oketest5,/oketest6,/oketest7,/oketest8,/oketest9,/oketest10,/oketest11,/oketest12,/oketest13,/oketest14,/oketest15"
+                        FSS_DIR = "${env.JOB_NAME == 'wko-oke-nightly' ? '/${clusterName}oketest1,/${clusterName}oketest2' : '/${clusterName}oketest1,/${clusterName}oketest2'}"
 
                     }
                     steps {
                          script {
                              def res = 0
+                             currentBuild.description = "${GIT_BRANCH} ${MAVEN_PROFILE_NAME} ${CLUSTER_NAME}"
                              res = sh(script: '''
                                      if [ -z "${IT_TEST}" ] && [ "${MAVEN_PROFILE_NAME}" = "integration-tests" ]; then
                                         echo 'ERROR: All tests cannot be run with integration-tests profile'
@@ -504,8 +536,11 @@ EOF
                                 mkdir -m777 -p "${WORKSPACE}/.mvn"
                                 touch ${WORKSPACE}/.mvn/maven.config
                                 export KUBECONFIG=${kubeconfig_file}
+                                export COMPARTMENT_OCID=${compartment_id}
+                                echo "COMPARTMENT_OCID : ${COMPARTMENT_OCID}"
 
-                                clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"${CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                                clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+
                                 echo "clusterIp : $clusterIP"
                                 clusterPublicIP=${clusterIP:1:-6}
                                 echo " clusterPublicIP : ${clusterPublicIP}"
@@ -523,17 +558,24 @@ EOF
                                 DOCKER_CLI_EXPERIMENTAL=enabled
                                 export DOCKER_BUILD_KIT=1
                                 export DOCKER_CLI_EXPERIMENTAL=enabled
+                                export AVAILABILITY_DOMAIN=${availability_domain}
                                 NODE_IP=`kubectl get nodes -o wide| awk '{print $7}'| head -n2 | tail -n1`
                                 echo "second node external IP ${NODE_IP}"
                                 export NODE_IP=${NODE_IP}
 
-                                mt_privateip_id=`oci fs mount-target  list --compartment-id=${compartment_ocid}  --display-name=${clusterName}-mt --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
+                                mt_privateip_id=`oci fs mount-target get --mount-target-id=${MOUNT_TARGET_OCID} | jq -r '.data| ."private-ip-ids"[]'`
 
-                                mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
+                                # Check if the mt_privateip_id is an array
+                                if [ "$(declare -p mt_privateip_id 2>/dev/null | grep -o 'declare -a')" == "declare -a" ]; then
+                                    # Select first
+                                    mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id[0]}" | jq -r '.data | ."ip-address"'`
+                                else
+                                    mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
+                                fi
 
                                 if [ -z "${mt_private_ip}" ]; then
                                    echo "Mount Target was not setup properly , clean up Kubernetes cluster"
-                                   sh ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform
+                                   sh ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform ${AVAILABILITY_DOMAIN}
                                    exit -1
                                 fi
                                 export NFS_SERVER=$mt_private_ip
@@ -571,6 +613,9 @@ EOF
                                 echo "-Dwko.it.prometheus.chart.version=\"${PROMETHEUS_CHART_VERSION}\""                     >> ${WORKSPACE}/.mvn/maven.config
                                 echo "-Dwko.it.grafana.chart.version=\"${GRAFANA_CHART_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
                                 echo "-Dwko.it.collect.logs.on.success=\"${COLLECT_LOGS_ON_SUCCESS}\""                       >> ${WORKSPACE}/.mvn/maven.config
+                                echo "-Dwko.it.oci.compartment.ocid=\"${COMPARTMENT_OCID}\""                                 >> ${WORKSPACE}/.mvn/maven.config
+                                echo "-Dwko.it.remoteconsole.version=\"${REMOTECONSOLE_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
+                                echo "-Djdk.httpclient.allowRestrictedHeaders=\"host\""                                      >> ${WORKSPACE}/.mvn/maven.config
 
                                 echo "${WORKSPACE}/.mvn/maven.config contents:"
                                 cat "${WORKSPACE}/.mvn/maven.config"
@@ -596,6 +641,8 @@ EOF
                                     export TEST_IMAGES_REPO_EMAIL="noreply@oracle.com"
                                     export DOCKER_BUILD_KIT=1
                                     export DOCKER_CLI_EXPERIMENTAL=enabled
+                                    export no_proxy="${NO_PROXY},localhost,127.0.0.1,.us.oracle.com,.oraclecorp.com,login.oracle.com"
+                                    export NO_PROXY="${no_proxy}"
 
                                     if ! mvn -pl integration-tests -P ${MAVEN_PROFILE_NAME} verify 2>&1 | tee "${result_root}/oketest.log"; then
                                         echo "integration-tests failed"
@@ -611,11 +658,12 @@ EOF
                                 export PATH="${WORKSPACE}/bin:${PATH}"
                                 export KUBECONFIG=${kubeconfig_file}
                                 export OCI_CLI_CONFIG_FILE=${WORKSPACE}/oci/config
+                                export AVAILABILITY_DOMAIN=${availability_domain}
                                 export OCI_CLI_PROFILE=${oci_profile}
                                 mkdir -m777 -p ${result_root}/kubelogs
                                 mkdir -m777 -p "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
                                 sudo mv -f ${result_root}/* "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
-                                ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform
+                                ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform ${AVAILABILITY_DOMAIN}
 
                             '''
 
@@ -631,6 +679,12 @@ EOF
                     sh '''
                         export PATH="${WORKSPACE}/bin:${PATH}"
                         export KUBECONFIG=${kubeconfig_file}
+                        export OCI_CLI_CONFIG_FILE=${WORKSPACE}/oci/config
+                        export AVAILABILITY_DOMAIN=${availability_domain}
+                        export OCI_CLI_PROFILE=${oci_profile}
+                        mkdir -m777 -p ${result_root}/kubelogs
+                        mkdir -m777 -p "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
+                        sudo mv -f ${result_root}/* "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
 
                         echo 'Remove old OKE cluster (if any)...'
 
@@ -643,6 +697,9 @@ EOF
                         rm -rf ${WORKSPACE}/.mvn
 
                     '''
+                    archiveArtifacts(artifacts:
+                       "logdir/${BUILD_TAG}/wl_k8s_test_results/diagnostics/**/*,logdir/${BUILD_TAG}/wl_k8s_test_results/workdir/liftandshiftworkdir/**/*")
+                       junit(testResults: 'integration-tests/target/failsafe-reports/*.xml', allowEmptyResults: true)
                 }
             }
         }
