@@ -240,7 +240,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
         logger.info("Build/Check wdt-basic image with tag {0}", WDT_BASIC_IMAGE_TAG);
         // build WDT basic image if does not exits
-        if (!imageExists(WDT_BASIC_IMAGE_NAME, WDT_BASIC_IMAGE_TAG) && !CRIO) {
+        if (!imageExists(WDT_BASIC_IMAGE_NAME, WDT_BASIC_IMAGE_TAG) && !CRIO && !OCNE) {
           logger.info("Building wdt-basic image {0}", wdtBasicImage);
           testUntil(
                 withVeryLongRetryPolicy,
@@ -249,7 +249,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
                 logger,
                 "createBasicImage to be successful");
         } else {
-          logger.info("!!!! domain image {0} exists !!!! or env is not crio-pipeline", wdtBasicImage);
+          logger.info("!!!! domain image {0} exists !!!! or env is not OCNE based", wdtBasicImage);
         }
 
         /* Check image exists using WLSIMG_BUILDER images | grep image tag.
@@ -261,7 +261,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
         assertTrue(doesImageExist(MII_BASIC_IMAGE_TAG),
               String.format("Image %s doesn't exist", miiBasicImage));
 
-        if (!CRIO) {
+        if (!CRIO && !OCNE) {
           assertTrue(doesImageExist(WDT_BASIC_IMAGE_TAG),
               String.format("Image %s doesn't exist", wdtBasicImage));
         }
@@ -282,7 +282,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
           // add images only if SKIP_BUILD_IMAGES_IF_EXISTS is not set
           if (!SKIP_BUILD_IMAGES_IF_EXISTS) {
             images.add(miiBasicImage);
-            if (!CRIO) {
+            if (!CRIO && !OCNE) {
               images.add(wdtBasicImage);
             }
           }
