@@ -66,12 +66,12 @@ pipeline {
 
         string(name: 'OKE_KUBE_VERSION',
                description: 'kube version for oke cluster',
-               defaultValue: '1.27.2'
+               defaultValue: '1.29.1'
         )
         string(name: 'IMAGE_ID',
                        description: 'oci image id for node pool, find image OCID for your region from https://docs.oracle.com/iaas/images/',
                        //defaultValue OKE1.26.2: 'ocid1.image.oc1.phx.aaaaaaaaaizmtmozeudeeuq7o5ir7dkl2bkxbbb3tgomshqbqn6jpomrsjza'
-                       defaultValue: 'ocid1.image.oc1.phx.aaaaaaaa77h3zkjcfjoaou4aa3cz63fswtcglleuslt6d6zbqwacng43nqiq'
+                       defaultValue: 'ocid1.image.oc1.phx.aaaaaaaa22u45gr3ikxnc6rius2qil2kz5k3e7p476c4usr6qnvql4l5dxea'
                        
                 )
         string(name: 'KUBECTL_VERSION',
@@ -113,7 +113,7 @@ pipeline {
         )
         string(name: 'NODE_SHAPE',
                        description: '',
-                       defaultValue: "VM.Standard.A1.Flex"
+                       defaultValue: "VM.Standard.E4.Flex"
         )
         string(name: 'BRANCH',
                        description: '',
