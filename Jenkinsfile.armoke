@@ -313,7 +313,12 @@ pipeline {
                         private_subnet_ocid=$(oci network subnet list --compartment-id=${wkt_compartment_ocid}  | jq '.data[] | select(."display-name" == "Private-Subnet-wktiso1")' | jq -r ."id")
                         export WKT_TENANCY_OCID=${TENANCY_OCID}
                         export WKT_USER_OCID=${USER_OCID}
-                        rm -rf ${WORKSPACE}/.terraform
+                        rm -f ${jenkins_home_directory}/.oci/config
+                                                rm -f ${jenkins_home_directory}/.oci/oci-signing-key.pem
+                                                rm -f ${WORKSPACE}/.ssh/*
+                                                rm -rf ${WORKSPACE}/.mvn
+                                                rm -rf ${WORKSPACE}/terraform
+                                                rm -rf ${WORKSPACE}/*
                         mkdir -p ${WORKSPACE}/terraform
                         mkdir -p ${WORKSPACE}/oci
                         cat ${jenkins_home_directory}/.oci/config
