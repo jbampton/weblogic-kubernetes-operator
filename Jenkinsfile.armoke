@@ -315,6 +315,7 @@ pipeline {
                         export WKT_TENANCY_OCID=${TENANCY_OCID}
                         export WKT_USER_OCID=${USER_OCID}
 
+                        rm -rf ${WORKSPACE}/terraform
                         mkdir -p ${WORKSPACE}/terraform
                         mkdir -p ${WORKSPACE}/oci
                         cat ${jenkins_home_directory}/.oci/config
