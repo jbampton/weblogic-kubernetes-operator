@@ -147,7 +147,8 @@ pipeline {
         )
         string(name: 'WEBLOGIC_IMAGE_TAG',
                description: '12.2.1.4, 12.2.1.4-generic-jdk8-ol7, 12.2.1.4-dev(12.2.1.4-dev-ol7) , 12.2.1.4-slim(12.2.1.4-slim-ol7), 12.2.1.4-ol8, 12.2.1.4-dev-ol8, 12.2.1.4-slim-ol8, 14.1.1.0-11-ol7, 14.1.1.0-dev-11-ol7, 14.1.1.0-slim-11-ol7, 14.1.1.0-8-ol7, 14.1.1.0-dev-8-ol7, 14.1.1.0-slim-8-ol7, 14.1.1.0-11-ol8, 14.1.1.0-dev-11-ol8, 14.1.1.0-slim-11-ol8, 14.1.1.0-8-ol8, 14.1.1.0-dev-8-ol8, 14.1.1.0-slim-8-ol8',
-               defaultValue: '12.2.1.4-generic-jdk8-ol8-241008.161513-arm64'
+               //defaultValue: '12.2.1.4-generic-jdk8-ol8-241008.161513-arm64'
+               defaultValue: '14.1.1.0-generic-jdk8-ol8-241009.121334-arm64'
         )
         string(name: 'FMWINFRA_IMAGE_NAME',
                description: 'FWM Infra image name. Default is the image name in OCIR. Use middleware/fmw-infrastructure for OCR.',
@@ -680,29 +681,27 @@ EOF
                     sh '''
                         export PATH="${WORKSPACE}/bin:${PATH}"
                         export KUBECONFIG=${kubeconfig_file}
-                        export OCI_CLI_CONFIG_FILE=${WORKSPACE}/oci/config
                         export AVAILABILITY_DOMAIN=${availability_domain}
-                        export OCI_CLI_PROFILE=${oci_profile}
-                        mkdir -m777 -p ${result_root}/kubelogs
-                        mkdir -m777 -p "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
-                        sudo mv -f ${result_root}/* "${WORKSPACE}/logdir/${BUILD_TAG}/wl_k8s_test_results"
 
                         echo 'Remove old OKE cluster (if any)...'
 
                         if [ -f "$OCI_PROP_FILE" ] && [ -f "${WORKSPACE}/terraform/oke.delete.sh" ]; then
-                            ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform
+                            ${WORKSPACE}/terraform/oke.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform ${AVAILABILITY_DOMAIN}
+                        fi
+
+                        if [ "${MAVEN_PROFILE_NAME}" = "oke-sequential" ] && [ "${BRANCH}" = "release/4.2" ]; then
+                            compname="wkt"
+                            wkt_compartment_ocid=$(oci iam compartment list --compartment-id-in-subtree true --all | jq --arg compname "$compname" '.data[] | select(."name"==$compname)' | jq -r ."id")
+                            sec_list_id=$(oci network security-list list --compartment-id="$wkt_compartment_ocid" --display-name=Security-List-wktiso1 | jq -r '.data[] | ."id"')
+                            oci network security-list update --security-list-id="$sec_list_id" --ingress-security-rules='[{"description": "east west","icmp-options": null,"is-stateless": false,"protocol": "all","source": "10.196.0.0/16","source-type": "CIDR_BLOCK","tcp-options": null,"udp-options": null},{"description": null,"icmp-options": {"code": null,"type": 3},"is-stateless": false,"protocol": "1", "source": "10.196.0.0/16", "source-type": "CIDR_BLOCK","tcp-options": null, "udp-options": null}, {"description": null, "icmp-options": {"code": 4, "type": 3},"is-stateless": false, "protocol": "1", "source": "0.0.0.0/0","source-type": "CIDR_BLOCK", "tcp-options": null, "udp-options": null}, {"description": null, "icmp-options": null, "is-stateless": false, "protocol": "6","source": "0.0.0.0/0", "source-type": "CIDR_BLOCK", "tcp-options": null, "udp-options": null}, {"description": null, "icmp-options": null, "is-stateless": false,"protocol": "6", "source": "0.0.0.0/0", "source-type": "CIDR_BLOCK", "tcp-options": {"destination-port-range": {"max": 22, "min": 22}, "source-port-range": null}, "udp-options": null}]' --egress-security-rules='[{"description": null, "destination": "0.0.0.0/0", "destinationType": "CIDR_BLOCK", "icmpOptions": null, "isStateless": false, "protocol": "all", "tcpOptions": null, "udpOptions": null}, {"description": null, "destination": "oci-phx-objectstorage", "destinationType": "SERVICE_CIDR_BLOCK", "icmpOptions": null, "isStateless": false, "protocol": "6", "tcpOptions": null, "udpOptions": null}]' --force
                         fi
                         rm -f ${jenkins_home_directory}/.oci/config
                         rm -f ${jenkins_home_directory}/.oci/oci-signing-key.pem
                         rm -f ${WORKSPACE}/.ssh/*
                         rm -rf ${WORKSPACE}/.mvn
-                        rm -rf ${WORKSPACE}/terraform
-                        rm -rf ${WORKSPACE}/*
 
                     '''
-                    archiveArtifacts(artifacts:
-                       "logdir/${BUILD_TAG}/wl_k8s_test_results/diagnostics/**/*,logdir/${BUILD_TAG}/wl_k8s_test_results/workdir/liftandshiftworkdir/**/*")
-                       junit(testResults: 'integration-tests/target/failsafe-reports/*.xml', allowEmptyResults: true)
+
                 }
             }
         }
