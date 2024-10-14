@@ -51,20 +51,6 @@ ${KUBERNETES_CLI} create namespace istio-system
   bin/istioctl verify-install
   ${KUBERNETES_CLI} patch svc -n istio-system istio-ingressgateway --type='json' -p='[{"op":"replace","path":"/spec/ports/1/nodePort","value":32480}]'
   ${KUBERNETES_CLI} patch svc -n istio-system istio-ingressgateway --type='json' -p='[{"op":"replace","path":"/spec/ports/2/nodePort","value":32490}]'
-  # Check if OKE_CLUSTER is set to true
-  if [ "$OKE_CLUSTER" == "true" ]; then
-    echo "OKE_CLUSTER is true, applying OCI Load Balancer annotations to istio-ingressgateway."
-
-    # Apply the OCI load balancer annotations using the Kubernetes CLI
-    # Patch to set the load balancer shape to flexible
-    ${KUBERNETES_CLI} patch svc -n istio-system istio-ingressgateway --type='json' -p='[
-      {"op": "add", "path": "/metadata/annotations/service.beta.kubernetes.io/oci-load-balancer-shape", "value": "flexible"},
-      {"op": "add", "path": "/metadata/annotations/service.beta.kubernetes.io/oci-load-balancer-shape-flex-min", "value": "10"},
-      {"op": "add", "path": "/metadata/annotations/service.beta.kubernetes.io/oci-load-balancer-shape-flex-max", "value": "100"}
-    ]'
-  else
-    echo "OKE_CLUSTER is not set to true, skipping OCI Load Balancer configuration."
-  fi
   bin/istioctl version
 )
 }

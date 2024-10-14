@@ -35,19 +35,6 @@ public class NginxParams {
   private static final String IP_FAMILY_POLICY = "controller.service.ipFamilyPolicy";
   private static final String IP_FAMILIES = "controller.service.ipFamilies";
   private static final String TYPE = "controller.service.type";
-  // Annotations for OCI load balancer shape
-  private static final String OCI_LOAD_BALANCER_SHAPE =
-      "controller.service.annotations.service.beta.kubernetes.io/oci-load-balancer-shape";
-  private static final String OCI_LOAD_BALANCER_SHAPE_MIN =
-      "controller.service.annotations.service.beta.kubernetes.io/oci-load-balancer-shape-flex-min";
-  private static final String OCI_LOAD_BALANCER_SHAPE_MAX =
-      "controller.service.annotations.service.beta.kubernetes.io/oci-load-balancer-shape-flex-max";
-
-
-  // OCI load balancer shape settings
-  private String loadBalancerShape = "flexible"; // Load balancer shape
-  private int minShape = 10; // Minimum shape
-  private int maxShape = 100; // Maximum shape
 
   // Adding some of the most commonly used params for now
   private int nodePortsHttp;
@@ -130,21 +117,6 @@ public class NginxParams {
     this.type = type;
     return this;
   }
-
-  public NginxParams loadBalancerShape(String loadBalancerShape) {
-    this.loadBalancerShape = loadBalancerShape;
-    return this;
-  }
-
-  public NginxParams minShape(int minShape) {
-    this.minShape = minShape;
-    return this;
-  }
-
-  public NginxParams maxShape(int maxShape) {
-    this.maxShape = maxShape;
-    return this;
-  }
   
   public String getType() {
     return type;
@@ -182,10 +154,6 @@ public class NginxParams {
     values.put(IP_FAMILY_POLICY, ipFamilyPolicy);
     values.put(IP_FAMILIES, ipFamilies);
     values.put(TYPE, type);
-    // Adding OCI load balancer shape annotations
-    values.put(OCI_LOAD_BALANCER_SHAPE, loadBalancerShape);
-    values.put(OCI_LOAD_BALANCER_SHAPE_MIN, minShape);
-    values.put(OCI_LOAD_BALANCER_SHAPE_MAX, maxShape);
     values.values().removeIf(Objects::isNull);
     return values;
   }

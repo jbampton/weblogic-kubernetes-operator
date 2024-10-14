@@ -33,18 +33,6 @@ public class TraefikParams {
   private static final String TRAEFIK_IMAGE_TAG = "image.tag";
   private static final String INGRESS_CLASS_NAME = "ingressClass.name";
   private static final String TYPE = "service.type";
-  private static final String OCI_LOAD_BALANCER_SHAPE =
-      "service.beta.kubernetes.io/oci-load-balancer-shape";
-  private static final String OCI_LOAD_BALANCER_SHAPE_MIN =
-      "service.beta.kubernetes.io/oci-load-balancer-shape-flex-min";
-  private static final String OCI_LOAD_BALANCER_SHAPE_MAX =
-      "service.beta.kubernetes.io/oci-load-balancer-shape-flex-max";
-
-  // OCI load balancer shape settings
-  private String loadBalancerShape = "flexible"; // Load balancer shape
-  private int minShape = 10; // Minimum shape
-  private int maxShape = 100; // Maximum shape
-
   
   public TraefikParams() {
     ingressClassName = UniqueName.uniqueName("traefik-");
@@ -84,21 +72,6 @@ public class TraefikParams {
     return this;
   }
 
-  public TraefikParams loadBalancerShape(String loadBalancerShape) {
-    this.loadBalancerShape = loadBalancerShape;
-    return this;
-  }
-
-  public TraefikParams minShape(int minShape) {
-    this.minShape = minShape;
-    return this;
-  }
-
-  public TraefikParams maxShape(int maxShape) {
-    this.maxShape = maxShape;
-    return this;
-  }
-  
   public String getIngressClassName() {
     return ingressClassName;
   }
@@ -132,11 +105,6 @@ public class TraefikParams {
     values.put(TRAEFIK_IMAGE_TAG, traefikImageTag);
     values.put(INGRESS_CLASS_NAME, ingressClassName);
     values.put(TYPE, type);
-    // Adding OCI load balancer shape annotations
-    values.put(OCI_LOAD_BALANCER_SHAPE, loadBalancerShape);
-    values.put(OCI_LOAD_BALANCER_SHAPE_MIN, minShape);
-    values.put(OCI_LOAD_BALANCER_SHAPE_MAX, maxShape);
-
     values.values().removeIf(Objects::isNull);
     return values;
   }
