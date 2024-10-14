@@ -386,6 +386,7 @@ public class LoadBalancerUtils {
   }
 
   private static boolean checkLoadBalancerHealthy(String namespace, String lbServiceName)  {
+
     String lbPublicIP = assertDoesNotThrow(() -> getLoadBalancerIP(namespace, lbServiceName));
     InitializationTasks.registerLoadBalancerExternalIP(lbPublicIP);
     LoggingFacade logger = getLogger();
@@ -408,6 +409,19 @@ public class LoadBalancerUtils {
 
     // Clean up the string to extract the Load Balancer ID
     String lbOCID = result.stdout().trim();
+
+    final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
+        +  lbOCID + "  --shape-name flexible  --shape-details"
+        + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
+
+
+    result = assertDoesNotThrow(() -> exec(command2, true));
+    logger.info("The command returned exit value: " + result.exitValue()
+        + " command output: " + result.stderr() + "\n" + result.stdout());
+
+    if (result == null || result.exitValue() != 0 || result.stdout() == null) {
+      return false;
+    }
 
     //check health status
     final String command1 = "oci lb load-balancer-health get --load-balancer-id " + lbOCID;
