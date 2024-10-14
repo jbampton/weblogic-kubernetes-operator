@@ -8,7 +8,8 @@ CRON_SETTINGS_42 = '''H 5 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq4
 
 CRON_SETTINGS = "${env.JOB_NAME == 'wko-oke-arm' ? CRON_SETTINGS_42 : CRON_SETTINGS_MAIN}"
 pipeline {
-    agent { label 'large-arm' }
+    //agent { label 'large-arm' }
+    agent { label 'large' }
     options {
         timeout(time: 1800, unit: 'MINUTES')
     }
