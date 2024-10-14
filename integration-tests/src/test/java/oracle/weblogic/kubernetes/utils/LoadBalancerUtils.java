@@ -393,6 +393,7 @@ public class LoadBalancerUtils {
     String testcompartmentid = System.getProperty("wko.it.oci.compartment.ocid");
     logger.info("wko.it.oci.compartment.ocid property " + testcompartmentid);
 
+
     final String command = "oci lb load-balancer list --compartment-id "
         + testcompartmentid + " --query \"data[?contains(\\\"ip-addresses\\\"[0].\\\"ip-address\\\", '"
         + lbPublicIP + "')].id | [0]\" --raw-output --all";
@@ -410,17 +411,30 @@ public class LoadBalancerUtils {
     // Clean up the string to extract the Load Balancer ID
     String lbOCID = result.stdout().trim();
 
-    final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
-        +  lbOCID + "  --shape-name flexible  --shape-details"
-        + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
-
-
-    result = assertDoesNotThrow(() -> exec(command2, true));
+    final String checkShapeCommand = "oci lb load-balancer get --load-balancer-id "
+        + lbOCID + " | jq '.data[\"shape-name\"], .data[\"shape-details\"]'";
+    result = assertDoesNotThrow(() -> exec(checkShapeCommand, true));
     logger.info("The command returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
 
     if (result == null || result.exitValue() != 0 || result.stdout() == null) {
       return false;
+    }
+    if (!result.stdout().contains("flexibale")) {
+
+
+      final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
+          + lbOCID + "  --shape-name flexible  --shape-details"
+          + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
+
+
+      result = assertDoesNotThrow(() -> exec(command2, true));
+      logger.info("The command returned exit value: " + result.exitValue()
+          + " command output: " + result.stderr() + "\n" + result.stdout());
+
+      if (result == null || result.exitValue() != 0 || result.stdout() == null) {
+        return false;
+      }
     }
 
     //check health status
