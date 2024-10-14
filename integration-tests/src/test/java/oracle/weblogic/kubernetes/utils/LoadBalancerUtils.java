@@ -420,7 +420,7 @@ public class LoadBalancerUtils {
     if (result == null || result.exitValue() != 0 || result.stdout() == null) {
       return false;
     }
-    if (!result.stdout().contains("flexibale")) {
+    if (!result.stdout().contains("flexible")) {
 
 
       final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
