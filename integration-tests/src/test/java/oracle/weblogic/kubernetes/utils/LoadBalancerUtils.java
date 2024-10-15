@@ -474,7 +474,7 @@ public class LoadBalancerUtils {
     logger.info("The command " + command + " returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
     logger.info("result.stderr: \n{0}", result.stderr());
-    if (result == null || result.exitValue() != 0 || result.stdout() == null || !result.stderr().isEmpty()) {
+    if (result == null || result.exitValue() != 0 || result.stdout() == null || !result.stderr().contains("ERROR")) {
       return false;
     }
     return true;
