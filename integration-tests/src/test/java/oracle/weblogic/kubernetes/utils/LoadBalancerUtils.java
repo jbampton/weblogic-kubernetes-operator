@@ -421,12 +421,11 @@ public class LoadBalancerUtils {
       return false;
     }
     if (!result.stdout().contains("flexible")) {
-
+      logger.info("Updating load balancer shape to flexible");
 
       final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
           + lbOCID + "  --shape-name flexible  --shape-details"
           + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
-
 
       result = assertDoesNotThrow(() -> exec(command2, true));
       logger.info("The command returned exit value: " + result.exitValue()
@@ -435,6 +434,11 @@ public class LoadBalancerUtils {
       if (result == null || result.exitValue() != 0 || result.stdout() == null) {
         return false;
       }
+      testUntil(
+          assertDoesNotThrow(() -> checkWorkRequestUpdateShapeSucceeded(
+              lbOCID), "isOCILoadBalancer work request to update shape is not ready"),
+          logger,
+          "load balancer shape is updating ");
     }
 
     //check health status
@@ -452,6 +456,38 @@ public class LoadBalancerUtils {
 
   }
 
+  /**
+   * Check work request status for load balancer.
+   * @param loadBalancerOCID - load balancer OCID
+   * @return true if succeeded , false over vise.
+   */
+  public static boolean isWorkRequestUpdateShapeSucceeded(String loadBalancerOCID) {
+
+    LoggingFacade logger = getLogger();
+    final String command = "oci lb work-request list --load-balancer-id "
+        +  loadBalancerOCID
+        + "--query 'data[?type == `UpdateShape`].{id:id, lifecycleState:\"lifecycle-state\", "
+        + "message:message, timeFinished:\"time-finished\"}' "
+        + "| jq '.[] | select(.lifecycleState == \"SUCCEEDED\")'";
+    ExecResult result = assertDoesNotThrow(() -> exec(command, true));
+    logger.info("The command returned exit value: " + result.exitValue()
+        + " command output: " + result.stderr() + "\n" + result.stdout());
+
+    if (result == null || result.exitValue() != 0 || result.stdout() == null) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Check if lb work request status is succeeded.
+   *
+   * @param loadBalancerOCID lb ocid
+   * @return true if succeeded, false otherwise
+   */
+  public static Callable<Boolean> checkWorkRequestUpdateShapeSucceeded(String loadBalancerOCID) {
+    return () -> isWorkRequestUpdateShapeSucceeded(loadBalancerOCID);
+  }
 
   /** Upgrade Traefik and wait for up to five minutes for the Traefik pod to be ready.
    *
