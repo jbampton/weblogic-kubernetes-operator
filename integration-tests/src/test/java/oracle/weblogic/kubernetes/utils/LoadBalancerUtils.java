@@ -414,9 +414,9 @@ public class LoadBalancerUtils {
     final String checkShapeCommand = "oci lb load-balancer get --load-balancer-id "
         + lbOCID + " | jq '.data[\"shape-name\"], .data[\"shape-details\"]'";
     result = assertDoesNotThrow(() -> exec(checkShapeCommand, true));
-    logger.info("The command returned exit value: " + result.exitValue()
+    logger.info("The command " + checkShapeCommand + " returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
-
+    logger.info("result.stderr: \n{0}", result.stderr());
     if (result == null || result.exitValue() != 0 || result.stdout() == null) {
       return false;
     }
@@ -428,8 +428,9 @@ public class LoadBalancerUtils {
           + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
 
       result = assertDoesNotThrow(() -> exec(command2, true));
-      logger.info("The command returned exit value: " + result.exitValue()
+      logger.info("The command " + command2 + " returned exit value: " + result.exitValue()
           + " command output: " + result.stderr() + "\n" + result.stdout());
+      logger.info("result.stderr: \n{0}", result.stderr());
 
       if (result == null || result.exitValue() != 0 || result.stdout() == null) {
         return false;
@@ -447,7 +448,7 @@ public class LoadBalancerUtils {
     result = assertDoesNotThrow(() -> exec(command1, true));
     logger.info("The command returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
-
+    logger.info("result.stderr: \n{0}", result.stderr());
     if (result == null || result.exitValue() != 0 || result.stdout() == null) {
       return false;
     }
@@ -472,7 +473,7 @@ public class LoadBalancerUtils {
     ExecResult result = assertDoesNotThrow(() -> exec(command, true));
     logger.info("The command " + command + " returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
-
+    logger.info("result.stderr: \n{0}", result.stderr());
     if (result == null || result.exitValue() != 0 || result.stdout() == null || !result.stderr().isEmpty()) {
       return false;
     }
