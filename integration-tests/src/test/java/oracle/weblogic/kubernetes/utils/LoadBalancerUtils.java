@@ -466,14 +466,14 @@ public class LoadBalancerUtils {
     LoggingFacade logger = getLogger();
     final String command = "oci lb work-request list --load-balancer-id "
         +  loadBalancerOCID
-        + "--query 'data[?type == `UpdateShape`].{id:id, lifecycleState:\"lifecycle-state\", "
+        + "  --query 'data[?type == `UpdateShape`].{id:id, lifecycleState:\"lifecycle-state\", "
         + "message:message, timeFinished:\"time-finished\"}' "
         + "| jq '.[] | select(.lifecycleState == \"SUCCEEDED\")'";
     ExecResult result = assertDoesNotThrow(() -> exec(command, true));
-    logger.info("The command returned exit value: " + result.exitValue()
+    logger.info("The command " + command + " returned exit value: " + result.exitValue()
         + " command output: " + result.stderr() + "\n" + result.stdout());
 
-    if (result == null || result.exitValue() != 0 || result.stdout() == null) {
+    if (result == null || result.exitValue() != 0 || result.stdout() == null || !result.stderr().isEmpty()) {
       return false;
     }
     return true;
