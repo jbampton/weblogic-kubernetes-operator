@@ -99,7 +99,7 @@ checkClusterRunning () {
         clusterPublicIP=${clusterIP:1:-6}
         echo " clusterPublicIP : ${clusterPublicIP}"
         echo "NO_PROXY before : ${NO_PROXY}"
-        export NO_PROXY=${clusterPublicIP}
+        export NO_PROXY=${NO_PROXY},localhost,127.0.0.1,.example.com,.us.oracle.com,.oraclecorp.com,.oraclevcn.com,10.196.1.0/24,10.244.0.0/16,10.101.0.0/16,192.168.0.0/16,${clusterPublicIP}
         echo "NO_PROXY:" $NO_PROXY
         myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
         if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then

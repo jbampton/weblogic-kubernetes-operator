@@ -95,7 +95,7 @@ pipeline {
                 )
         string(name: 'KUBECTL_VERSION',
                        description: 'kubectl version',
-                       defaultValue: '1.26.2'
+                       defaultValue: '1.30.0'
                 )
         string(name: 'HELM_VERSION',
                description: 'Helm version',
