@@ -9,7 +9,7 @@ CRON_SETTINGS_42 = '''H 5 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq4
 CRON_SETTINGS = "${env.JOB_NAME == 'wko-oke-arm' ? CRON_SETTINGS_42 : CRON_SETTINGS_MAIN}"
 pipeline {
     //agent { label 'large-arm' }
-    agent { label 'large' }
+    agent { label 'large-arm-iad' }
     options {
         timeout(time: 1800, unit: 'MINUTES')
     }
@@ -21,8 +21,7 @@ pipeline {
     }
     tools {
         maven 'maven-3.8.7'
-        jdk 'jdk21'
-        //jdk 'jdk21-arm'
+        jdk 'jdk21-arm'
     }
 
     environment {
@@ -149,8 +148,8 @@ pipeline {
         )
         string(name: 'WEBLOGIC_IMAGE_TAG',
                description: '12.2.1.4, 12.2.1.4-generic-jdk8-ol7, 12.2.1.4-dev(12.2.1.4-dev-ol7) , 12.2.1.4-slim(12.2.1.4-slim-ol7), 12.2.1.4-ol8, 12.2.1.4-dev-ol8, 12.2.1.4-slim-ol8, 14.1.1.0-11-ol7, 14.1.1.0-dev-11-ol7, 14.1.1.0-slim-11-ol7, 14.1.1.0-8-ol7, 14.1.1.0-dev-8-ol7, 14.1.1.0-slim-8-ol7, 14.1.1.0-11-ol8, 14.1.1.0-dev-11-ol8, 14.1.1.0-slim-11-ol8, 14.1.1.0-8-ol8, 14.1.1.0-dev-8-ol8, 14.1.1.0-slim-8-ol8',
-               //defaultValue: '12.2.1.4-generic-jdk8-ol8-241008.161513-arm64'
-               defaultValue: '14.1.1.0-generic-jdk8-ol8-241009.121334-arm64'
+               defaultValue: '12.2.1.4-generic-jdk8-ol8-241008.161513-arm64'
+               //defaultValue: '14.1.1.0-generic-jdk8-ol8-241009.121334-arm64'
         )
         string(name: 'FMWINFRA_IMAGE_NAME',
                description: 'FWM Infra image name. Default is the image name in OCIR. Use middleware/fmw-infrastructure for OCR.',
@@ -217,7 +216,7 @@ pipeline {
                             export PATH=${runtime_path}
                             env|sort
                             echo $PATH
-                            #ls /tmp/tools/hudson.model.JDK/jdk21-arm
+                            ls /tmp/tools/hudson.model.JDK/jdk21-arm
                             java -version
                             mvn --version
                             echo $OSTYPE
@@ -253,17 +252,14 @@ pipeline {
                     steps {
                         sh '''
                             export PATH=${runtime_path}
+
                             oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                               --name=helm/helm-v${HELM_VERSION}.tar.gz --file=helm.tar.gz \
-                               --auth=instance_principal
-                            #oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                            #    --name=helm/helm-v${HELM_VERSION}-linux-arm.tar.gz --file=helm.tar.gz \
-                            #    --auth=instance_principal
+                                --name=helm/helm-v${HELM_VERSION}-linux-arm.tar.gz --file=helm.tar.gz \
+                                --auth=instance_principal
                             tar zxf helm.tar.gz
-                            mv linux-amd64/helm ${WORKSPACE}/bin/helm
-                            rm -rf linux-amd64
-                            #mv linux-arm/helm ${WORKSPACE}/bin/helm
-                            #rm -rf linux-arm
+
+                            mv linux-arm/helm ${WORKSPACE}/bin/helm
+                            rm -rf linux-arm
                             helm version
                         '''
                     }
@@ -276,13 +272,10 @@ pipeline {
                     steps {
                         sh '''
                             export PATH=${runtime_path}
-                            oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                                --name=kubectl/kubectl-v${KUBECTL_VERSION} --file=${WORKSPACE}/bin/kubectl \
-                                --auth=instance_principal
 
-                            #oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                            #--name=kubectl/kubectl-v${KUBECTL_VERSION}-arm --file=${WORKSPACE}/bin/kubectl \
-                            #--auth=instance_principal
+                            oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
+                            --name=kubectl/kubectl-v${KUBECTL_VERSION}-arm --file=${WORKSPACE}/bin/kubectl \
+                            --auth=instance_principal
                             chmod +x ${WORKSPACE}/bin/kubectl
                             ls -al ${WORKSPACE}/bin/kubectl
                             kubectl version --client=true
@@ -443,8 +436,8 @@ EOF
                             chmod 777 ${WORKSPACE}/terraform/*.sh
                             mkdir -p ${WORKSPACE}/terraform/terraforminstall
 
-                            #sh ${WORKSPACE}/terraform/oke.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform arm
-                            sh ${WORKSPACE}/terraform/oke.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform
+                            sh ${WORKSPACE}/terraform/oke.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform arm
+
 
                             #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == '\"$CLUSTER_NAME}\"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
                             clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
