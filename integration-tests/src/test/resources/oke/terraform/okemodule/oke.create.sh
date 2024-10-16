@@ -80,7 +80,7 @@ createRoleBindings () {
     ${KUBERNETES_CLI:-kubectl} config set-credentials $okeclustername-sa --token=$TOKEN
     ${KUBERNETES_CLI:-kubectl} config set-context --current --user=$okeclustername-sa
 }
-checkKubectlConnection() {
+checkKubernetesCliConnection() {
     echo "Confirming ${KUBERNETES_CLI:-kubectl} can connect to the server..."
     local clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
     # Check if clusterPublicIP is empty or not
@@ -93,7 +93,6 @@ checkKubectlConnection() {
     export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,${clusterPublicIP}
     echo "set NO_PROXY=:$NO_PROXY"
 
-    local privateIP=${vcn_cidr_prefix}
     local myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
 
     if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then
@@ -128,7 +127,7 @@ checkKubectlConnection() {
 }
 
 checkClusterRunning() {
-    checkKubectlConnection
+    checkKubernetesCliConnection
 
     local privateIP=${vcn_cidr_prefix}
     declare -a myline=($(${KUBERNETES_CLI:-kubectl} get nodes -o wide | grep "${privateIP}" | awk '{print $2}'))
