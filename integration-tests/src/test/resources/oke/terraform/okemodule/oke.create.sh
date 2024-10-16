@@ -82,18 +82,18 @@ createRoleBindings () {
 }
 checkKubernetesCliConnection() {
     echo "Confirming ${KUBERNETES_CLI:-kubectl} can connect to the server..."
-    #clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r --arg cluster_name "${okeclustername}" '.data[] | select(.name == $cluster_name and .lifecycle_state == "ACTIVE") | .endpoints.public-endpoint[0] | split(":")[0]')
+
     # Get the cluster public IP
     clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
-    #local clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
+
     # Check if clusterPublicIP is empty or not
     if [ -z "$clusterPublicIP" ]; then
         echo "[ERROR] No active cluster found with name ${okeclustername}."
         exit 1
     fi
-    echo "clusterPublicIP: ###${clusterPublicIP}###"
+    echo "clusterPublicIP: ###$clusterPublicIP###"
     unset NO_PROXY
-    export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,${clusterPublicIP}
+    export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,$clusterPublicIP
     echo "set NO_PROXY=:$NO_PROXY"
 
     local myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
@@ -104,28 +104,7 @@ checkKubernetesCliConnection() {
 
         cd "${terraformVarDir}"
         terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
-
-        # Retry logic
-        echo "Retrying to execute KUBERNETES_CLI..."
-        local clusterIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq '.data[] | select(."name" == '"${okeclustername}"' and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint"')
-        local clusterPublicIP=${clusterIP:1:-6}
-
-        echo "clusterIP: $clusterIP"
-        echo "clusterPublicIP: ${clusterPublicIP}"
-
-        echo "NO_PROXY before: ${NO_PROXY}"
-        export NO_PROXY=${clusterPublicIP}
-        echo "NO_PROXY: $NO_PROXY"
-
-        myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
-
-        if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then
-            echo "[ERROR] Unable to connect to the server: net/http: TLS handshake timeout"
-            echo '- could not talk to OKE cluster, aborting'
-            cd "${terraformVarDir}"
-            terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
-            exit 1
-        fi
+        exit 1
     fi
 }
 
@@ -222,7 +201,7 @@ createCluster
 export KUBECONFIG=${terraformVarDir}/${okeclustername}_kubeconfig
 
 
-export okeclustername=\"${okeclustername}\"
+#export okeclustername=\"${okeclustername}\"
 
 
 #echo " oci ce cluster list --compartment-id=${compartment_ocid} | jq '.data[]  | select(."name" == '"${okeclustername}"' and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"'"
