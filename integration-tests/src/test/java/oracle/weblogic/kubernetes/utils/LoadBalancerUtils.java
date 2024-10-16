@@ -419,7 +419,7 @@ public class LoadBalancerUtils {
 
       final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
           + lbOCID + "  --shape-name flexible  --shape-details"
-          + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
+          + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 400}'   --force";
 
       result = assertDoesNotThrow(() -> exec(command2, true));
       logger.info("Command: {}, Exit value: {}, Stdout: {}, Stderr: {}",
