@@ -274,6 +274,7 @@ pipeline {
                                                             --auth=instance_principal
                             chmod +x ${WORKSPACE}/bin/kubectl
                             kubectl version --client=true
+
                         '''
                     }
                 }
@@ -322,6 +323,17 @@ pipeline {
                         chmod 600 ${wkotest_ssh_pk}
 
                         COMPARTMENT_OCID=${compartment_id}
+
+                        #remove after
+                        okeclustername=marcluster
+                        clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_id}" | jq -r --arg cluster_name "${okeclustername}" '
+                            .data[] |
+                            select(.name == $cluster_name and .lifecycle_state == "ACTIVE") |
+                            (.endpoints.public-endpoint | if type == "array" then .[0] else . end) |
+                            split(":")[0]
+                            ')
+                        echo '${clusterPublicIP} clusterPublicIP ...'
+
                         export OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING=True
 
                         echo 'Set env vars needed for integration tests...'

@@ -82,7 +82,15 @@ createRoleBindings () {
 }
 checkKubernetesCliConnection() {
     echo "Confirming ${KUBERNETES_CLI:-kubectl} can connect to the server..."
-    local clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
+    #clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r --arg cluster_name "${okeclustername}" '.data[] | select(.name == $cluster_name and .lifecycle_state == "ACTIVE") | .endpoints.public-endpoint[0] | split(":")[0]')
+    # Get the cluster public IP
+    clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r --arg cluster_name "${okeclustername}" '
+    .data[] |
+    select(.name == $cluster_name and .lifecycle_state == "ACTIVE") |
+    (.endpoints.public-endpoint | if type == "array" then .[0] else . end) |
+    split(":")[0]
+    ')
+    #local clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
     # Check if clusterPublicIP is empty or not
     if [ -z "$clusterPublicIP" ]; then
         echo "[ERROR] No active cluster found with name ${okeclustername}."
