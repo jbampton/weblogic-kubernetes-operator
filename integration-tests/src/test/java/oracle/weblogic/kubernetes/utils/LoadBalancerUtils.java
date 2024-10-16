@@ -386,7 +386,7 @@ public class LoadBalancerUtils {
     return null;
   }
 
-  private static boolean checkLoadBalancerHealthy(String namespace, String lbServiceName)  {
+  private static boolean checkLoadBalancerHealthy(String namespace, String lbServiceName) {
 
     String lbPublicIP = assertDoesNotThrow(() -> getLoadBalancerIP(namespace, lbServiceName));
     InitializationTasks.registerLoadBalancerExternalIP(lbPublicIP);
@@ -412,7 +412,7 @@ public class LoadBalancerUtils {
     // Clean up the string to extract the Load Balancer ID
     String lbOCID = result.stdout().trim();
 
-    boolean isFlexible = isLoadBalancerShape(lbOCID);
+    boolean isFlexible = isLoadBalancerShapeFlexible(lbOCID);
 
     if (!isFlexible) {
       logger.info("Updating load balancer shape to flexible");
@@ -422,20 +422,22 @@ public class LoadBalancerUtils {
           + " '{\"minimumBandwidthInMbps\": 10, \"maximumBandwidthInMbps\": 100}'   --force";
 
       result = assertDoesNotThrow(() -> exec(command2, true));
-      logger.info("The command " + command2 + " returned exit value: " + result.exitValue()
-          + " command output: " + result.stderr() + "\n" + result.stdout());
-      logger.info("result.stderr: \n{0}", result.stderr());
+      logger.info("Command: {}, Exit value: {}, Stdout: {}, Stderr: {}",
+          command2, result.exitValue(), result.stdout(), result.stderr());
 
-      if (result == null || result.exitValue() != 0 || result.stdout() == null) {
+      if (result == null || result.stdout() == null) {
+        return false;
+      } else if (result.exitValue() != 0 && !result.stdout().contains("is currently being modified")) {
         return false;
       }
+
       testUntil(
           assertDoesNotThrow(() -> checkWorkRequestUpdateShapeSucceeded(
               lbOCID), "isOCILoadBalancer work request to update shape is not ready"),
           logger,
           "load balancer shape is updating ");
       testUntil(
-          assertDoesNotThrow(() -> checkLoadBalancerShape(
+          assertDoesNotThrow(() -> checkLoadBalancerShapeFlexible(
               lbOCID), "checkLoadBalancerShape is not flexible "),
           logger,
           "load balancer shape can't be checked, retrying ");
@@ -457,7 +459,7 @@ public class LoadBalancerUtils {
   }
 
   @Nullable
-  private static boolean isLoadBalancerShape(String lbOCID) {
+  private static boolean isLoadBalancerShapeFlexible(String lbOCID) {
     LoggingFacade logger = getLogger();
 
     final String checkShapeCommand = "oci lb load-balancer get --load-balancer-id "
@@ -472,8 +474,8 @@ public class LoadBalancerUtils {
     return true;
   }
 
-  private static Callable<Boolean> checkLoadBalancerShape(String loadBalancerOCID) {
-    return () -> isLoadBalancerShape(loadBalancerOCID);
+  private static Callable<Boolean> checkLoadBalancerShapeFlexible(String loadBalancerOCID) {
+    return () -> isLoadBalancerShapeFlexible(loadBalancerOCID);
   }
 
   /**
