@@ -35,6 +35,7 @@ import oracle.weblogic.kubernetes.actions.impl.primitive.Command;
 import oracle.weblogic.kubernetes.actions.impl.primitive.HelmParams;
 import oracle.weblogic.kubernetes.extensions.InitializationTasks;
 import oracle.weblogic.kubernetes.logging.LoggingFacade;
+import org.jetbrains.annotations.Nullable;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.COMPARTMENT_OCID;
@@ -411,16 +412,9 @@ public class LoadBalancerUtils {
     // Clean up the string to extract the Load Balancer ID
     String lbOCID = result.stdout().trim();
 
-    final String checkShapeCommand = "oci lb load-balancer get --load-balancer-id "
-        + lbOCID + " | jq '.data[\"shape-name\"], .data[\"shape-details\"]'";
-    result = assertDoesNotThrow(() -> exec(checkShapeCommand, true));
-    logger.info("The command " + checkShapeCommand + " returned exit value: " + result.exitValue()
-        + " command output: " + result.stderr() + "\n" + result.stdout());
-    logger.info("result.stderr: \n{0}", result.stderr());
-    if (result == null || result.exitValue() != 0 || result.stdout() == null) {
-      return false;
-    }
-    if (!result.stdout().contains("flexible")) {
+    boolean isFlexible = isLoadBalancerShape(lbOCID);
+
+    if (!isFlexible) {
       logger.info("Updating load balancer shape to flexible");
 
       final String command2 = "oci lb load-balancer update-load-balancer-shape --load-balancer-id "
@@ -440,6 +434,11 @@ public class LoadBalancerUtils {
               lbOCID), "isOCILoadBalancer work request to update shape is not ready"),
           logger,
           "load balancer shape is updating ");
+      testUntil(
+          assertDoesNotThrow(() -> checkLoadBalancerShape(
+              lbOCID), "checkLoadBalancerShape is not flexible "),
+          logger,
+          "load balancer shape can't be checked, retrying ");
     }
 
     //check health status
@@ -455,6 +454,26 @@ public class LoadBalancerUtils {
 
     return result.stdout().contains("OK");
 
+  }
+
+  @Nullable
+  private static boolean isLoadBalancerShape(String lbOCID) {
+    LoggingFacade logger = getLogger();
+
+    final String checkShapeCommand = "oci lb load-balancer get --load-balancer-id "
+        + lbOCID + " | jq '.data[\"shape-name\"], .data[\"shape-details\"]'";
+    ExecResult result = assertDoesNotThrow(() -> exec(checkShapeCommand, true));
+    logger.info("The command " + checkShapeCommand + " returned exit value: " + result.exitValue()
+        + " command output: " + result.stderr() + "\n" + result.stdout());
+    logger.info("result.stderr: \n{0}", result.stderr());
+    if (result == null || result.exitValue() != 0 || result.stdout() == null || !result.stdout().contains("flexible")) {
+      return false;
+    }
+    return true;
+  }
+
+  private static Callable<Boolean> checkLoadBalancerShape(String loadBalancerOCID) {
+    return () -> isLoadBalancerShape(loadBalancerOCID);
   }
 
   /**
