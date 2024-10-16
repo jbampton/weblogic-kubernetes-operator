@@ -60,6 +60,7 @@ import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.CLUSTER_VERSION;
+import static oracle.weblogic.kubernetes.TestConstants.CRIO;
 import static oracle.weblogic.kubernetes.TestConstants.HTTPS_PROXY;
 import static oracle.weblogic.kubernetes.TestConstants.HTTP_PROXY;
 import static oracle.weblogic.kubernetes.TestConstants.INGRESS_CLASS_FILE_NAME;
@@ -67,6 +68,7 @@ import static oracle.weblogic.kubernetes.TestConstants.K8S_NODEPORT_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.NODE_IP;
 import static oracle.weblogic.kubernetes.TestConstants.NO_PROXY;
+import static oracle.weblogic.kubernetes.TestConstants.OCNE;
 import static oracle.weblogic.kubernetes.TestConstants.OKD;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER_PRIVATEIP;
@@ -1327,16 +1329,21 @@ public class CommonTestUtils {
 
     try {
       String host;
-      if (TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
-        host = K8S_NODEPORT_HOST;
+      String hostAndPort;
+      if (OCNE || CRIO) {
+        hostAndPort = K8S_NODEPORT_HOST + ":" + servicePort;
       } else {
-        if (servicePort >= 30500 && servicePort <= 30600) {
-          servicePort -= 29000;
+        if (TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
+          host = K8S_NODEPORT_HOST;
+        } else {
+          if (servicePort >= 30500 && servicePort <= 30600) {
+            servicePort -= 29000;
+          }
+          host = InetAddress.getLocalHost().getHostAddress();
         }
-        host = InetAddress.getLocalHost().getHostAddress();
+        host = formatIPv6Host(host);
+        hostAndPort = ((OKD) ? hostName : host + ":" + servicePort);
       }
-      host = formatIPv6Host(host);
-      String hostAndPort = ((OKD) ? hostName : host + ":" + servicePort);
       logger.info("hostAndPort = {0} ", hostAndPort);
       if (OKE_CLUSTER_PRIVATEIP) {
         hostAndPort = hostName;
