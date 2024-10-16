@@ -28,7 +28,8 @@ pipeline {
         ocir_host = "${env.WKT_OCIR_HOST}"
         wko_tenancy = "${env.WKT_TENANCY}"
         wko_images_rep = '${wko_tenancy}/wkt/infra'
-        wko_region = "${env.WKT_REGION}"
+        //wko_region = "${env.WKT_REGION}"
+        wko_region = "us-phoenix-1"
         compartment_id = "${env.WKT_TEST_COMPARTMENT_ID}"
         ocir_creds = 'wkt-ocir-creds'
         wko_files_bucket_token = 'wko-system-test-files-bucket-par-token'
@@ -255,7 +256,7 @@ pipeline {
 
                             oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
                                 --name=helm/helm-v${HELM_VERSION}-linux-arm.tar.gz --file=helm.tar.gz \
-                                --auth=instance_principal
+                                --auth=instance_principal --region=us-phoenix-1
                             tar zxf helm.tar.gz
 
                             mv linux-arm/helm ${WORKSPACE}/bin/helm
@@ -275,7 +276,7 @@ pipeline {
 
                             oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
                             --name=kubectl/kubectl-v${KUBECTL_VERSION}-arm --file=${WORKSPACE}/bin/kubectl \
-                            --auth=instance_principal
+                            --auth=instance_principal --region=us-phoenix-1
                             chmod +x ${WORKSPACE}/bin/kubectl
                             ls -al ${WORKSPACE}/bin/kubectl
                             kubectl version --client=true
