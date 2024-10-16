@@ -326,7 +326,7 @@ pipeline {
 
                         #remove after
                         okeclustername=marcluster
-                        clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_ocid}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
+                        clusterPublicIP=$(oci ce cluster list --compartment-id="${compartment_id}" | jq -r '.data[] | select(."name" == "'"${okeclustername}"'" and (."lifecycle-state" == "ACTIVE")) | ."endpoints" | ."public-endpoint" | split(":")[0]')
                         echo '${clusterPublicIP} clusterPublicIP ...'
 
                         export OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING=True
