@@ -208,8 +208,9 @@ clusterIP=$(oci ce cluster list --compartment-id=${compartment_ocid} | jq '.data
 echo "clusterIp : $clusterIP"
 clusterPublicIP=${clusterIP:1:-6}
 echo " clusterPublicIP : ${clusterPublicIP}"
+export NO_PROXY=${NO_PROXY},localhost,127.0.0.1,.example.com,.us.oracle.com,.oraclecorp.com,.oraclevcn.com,10.196.1.0/24,10.244.0.0/16,10.101.0.0/16,192.168.0.0/16
 echo "NO_PROXY before : ${NO_PROXY}"
-export NO_PROXY=${clusterPublicIP}
+export NO_PROXY=${NO_PROXY},${clusterPublicIP}
 echo "NO_PROXY:" $NO_PROXY
 
 checkClusterRunning
