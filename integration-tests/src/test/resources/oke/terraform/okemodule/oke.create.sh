@@ -94,17 +94,21 @@ checkKubernetesCliConnection() {
     echo "clusterPublicIP: ###$clusterPublicIP###"
     unset NO_PROXY
     export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,$clusterPublicIP
-    echo "set NO_PROXY=:$NO_PROXY"
+    echo "export NO_PROXY=:$NO_PROXY"
 
     local myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
 
     if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then
         echo "[ERROR] Unable to connect to the server: net/http: TLS handshake timeout"
         echo '- could not talk to OKE cluster, aborting'
-
-        cd "${terraformVarDir}"
-        terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
-        exit 1
+        unset http_proxy
+        unset https_proxy
+        myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
+        if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then
+          cd "${terraformVarDir}"
+          terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
+          exit 1
+        fi
     fi
     if echo "$myline_output" | grep -q "couldn't get current server API group"; then
             echo "[ERROR] Unable to connect to the server: couldn't get current server API group, connection refused"
