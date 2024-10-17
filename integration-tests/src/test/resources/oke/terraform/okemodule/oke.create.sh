@@ -32,6 +32,7 @@ generateTFVarFile() {
     sed -i -e "s:@NODEPOOLSSHPK@:${nodepool_ssh_pkpath}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@REGION@:${region}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@MOUNTTARGETOCID@:${mount_target_ocid}:g" ${tfVarsFiletfVarsFile}
+    sed -i -e "s:@REGION@:${region_short}:g" ${tfVarsFiletfVarsFile}
     echo "Generated TFVars file [${tfVarsFiletfVarsFile}]"
 }
 
@@ -177,6 +178,7 @@ nodepool_ssh_pkpath=$(prop 'nodepool.ssh.pkpath')
 region=$(prop 'region')
 terraformDir=$(prop 'terraform.installdir')
 mount_target_ocid=$(prop 'mounttarget.ocid')
+region_short=$(echo "$region" | sed 's/.*-\([a-z]*\)-.*/\1/')
 
 # generate terraform configuration file with name $(clusterTFVarsFile).tfvar
 #generateTFVarFile
