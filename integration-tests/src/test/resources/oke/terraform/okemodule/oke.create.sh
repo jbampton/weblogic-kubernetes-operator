@@ -106,6 +106,16 @@ checkKubernetesCliConnection() {
         terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
         exit 1
     fi
+    if echo "$myline_output" | grep -q "couldn't get current server API group"; then
+            echo "[ERROR] Unable to connect to the server: couldn't get current server API group, connection refused"
+            echo '- check errors during OKE cluster creation'
+            echo '- could not talk to OKE cluster, aborting'
+
+            cd "${terraformVarDir}"
+            terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
+            exit 1
+    fi
+
 }
 
 checkClusterRunning() {
