@@ -30,7 +30,6 @@ generateTFVarFile() {
     sed -i -e "s:@NODEPOOLIMAGENAME@:${nodepool_imagename}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@NODEPOOLSSHPUBKEY@:${nodepool_ssh_pubkeypath}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@NODEPOOLSSHPK@:${nodepool_ssh_pkpath}:g" ${tfVarsFiletfVarsFile}
-    sed -i -e "s:@REGION@:${region}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@MOUNTTARGETOCID@:${mount_target_ocid}:g" ${tfVarsFiletfVarsFile}
     sed -i -e "s:@REGION@:${region_short}:g" ${tfVarsFiletfVarsFile}
     echo "Generated TFVars file [${tfVarsFiletfVarsFile}]"
