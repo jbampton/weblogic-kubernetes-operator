@@ -4,7 +4,8 @@
 
 CRON_SETTINGS_MAIN = '''H 3 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=okearm;PARALLEL_RUN=false'''
 
-CRON_SETTINGS_42 = '''H 5 * * 0-4 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq42arm;PARALLEL_RUN=false'''
+CRON_SETTINGS_42 = '''H 5 * * 6 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq42armwls12;PARALLEL_RUN=false
+                    H 21 * * 5 % MAVEN_PROFILE_NAME=oke-arm;CLUSTER_NAME=seq42armwls14;PARALLEL_RUN=false;WEBLOGIC_IMAGE_TAG=14.1.1.0-generic-jdk8-ol8-241009.121334-arm64'''
 
 CRON_SETTINGS = "${env.JOB_NAME == 'wko-oke-arm' ? CRON_SETTINGS_42 : CRON_SETTINGS_MAIN}"
 pipeline {
@@ -27,8 +28,10 @@ pipeline {
         ocir_host = "${env.WKT_OCIR_HOST}"
         wko_tenancy = "${env.WKT_TENANCY}"
         wko_images_rep = '${wko_tenancy}/wkt/infra'
-        wko_region = "${env.WKT_REGION}"
-        //wko_region = "us-phoenix-1"
+        //wko_region = "${env.WKT_REGION}"
+        wko_region = "us-ashburn-1"
+        wko_region_bucket = "us-phoenix-1"
+
         compartment_id = "${env.WKT_TEST_COMPARTMENT_ID}"
         ocir_creds = 'wkt-ocir-creds'
         wko_files_bucket_token = 'wko-system-test-files-bucket-par-token'
@@ -306,6 +309,7 @@ pipeline {
                                                         file(credentialsId: "${oci_signing_key_creds}", variable: 'OCI_SIGNING_KEY')]) {
                                            sh "mkdir -p ${jenkins_home_directory}/.oci"
                                            sh "sed -e \"s:__jenkins_home__:${jenkins_home_directory}:g\" \"\$OCI_CONFIG_FILE\" > ${jenkins_home_directory}/.oci/config"
+                                           sh "sed -e \"s:us-phoenix-1:us-ashburn-1:g\" \"\$OCI_CONFIG_FILE\" > ${jenkins_home_directory}/.oci/config"
                                            sh "cp \"\$OCI_SIGNING_KEY\" ${jenkins_home_directory}/.oci/oci-signing-key.pem"
                                        }
 
@@ -533,7 +537,6 @@ EOF
                              string(credentialsId: "${wko_files_bucket_token}", variable: 'WKO_BUCKET_TOKEN')
                         ]) {
                             sh '''
-                                wko_region_bucket = "us-phoenix-1"
                                 if [ -z $WIT_DOWNLOAD_URL ]; then
                                     WIT_DOWNLOAD_URL="https://objectstorage.${wko_region_bucket}.oraclecloud.com/p/${WKO_BUCKET_TOKEN}/n/${wko_tenancy}/b/wko-system-test-files/o/imagetool-main.zip"
                                 fi
