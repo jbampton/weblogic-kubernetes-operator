@@ -28,8 +28,8 @@ pipeline {
         ocir_host = "${env.WKT_OCIR_HOST}"
         wko_tenancy = "${env.WKT_TENANCY}"
         wko_images_rep = '${wko_tenancy}/wkt/infra'
-        //wko_region = "${env.WKT_REGION}"
-        wko_region = "us-ashburn-1"
+        wko_region = "${env.WKT_REGION}"
+        
         wko_region_bucket = "us-phoenix-1"
 
         compartment_id = "${env.WKT_TEST_COMPARTMENT_ID}"
@@ -309,7 +309,6 @@ pipeline {
                                                         file(credentialsId: "${oci_signing_key_creds}", variable: 'OCI_SIGNING_KEY')]) {
                                            sh "mkdir -p ${jenkins_home_directory}/.oci"
                                            sh "sed -e \"s:__jenkins_home__:${jenkins_home_directory}:g\" \"\$OCI_CONFIG_FILE\" > ${jenkins_home_directory}/.oci/config"
-                                           sh "sed -e \"s:us-phoenix-1:us-ashburn-1:g\" \"\$OCI_CONFIG_FILE\" > ${jenkins_home_directory}/.oci/config"
                                            sh "cp \"\$OCI_SIGNING_KEY\" ${jenkins_home_directory}/.oci/oci-signing-key.pem"
                                        }
 
