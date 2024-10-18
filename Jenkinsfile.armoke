@@ -29,7 +29,7 @@ pipeline {
         wko_tenancy = "${env.WKT_TENANCY}"
         wko_images_rep = '${wko_tenancy}/wkt/infra'
         wko_region = "${env.WKT_REGION}"
-        
+
         wko_region_bucket = "us-phoenix-1"
 
         compartment_id = "${env.WKT_TEST_COMPARTMENT_ID}"
