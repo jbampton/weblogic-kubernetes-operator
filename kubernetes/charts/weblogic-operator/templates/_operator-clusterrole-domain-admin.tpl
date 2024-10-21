@@ -1,20 +1,20 @@
-# Copyright (c) 2018, 2022, Oracle and/or its affiliates.
+# Copyright (c) 2018, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 {{- define "operator.operatorClusterRoleDomainAdmin" }}
 ---
-{{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
-kind: "Role"
-{{- else }}
+{{- if $useClusterRole }}
 kind: "ClusterRole"
+{{- else }}
+kind: "Role"
 {{- end }}
 apiVersion: "rbac.authorization.k8s.io/v1"
 metadata:
-  {{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
+  {{- if $useClusterRole }}
+  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-domain-admin" | join "-" | quote }}
+  {{- else }}
   name: "weblogic-operator-role-domain-admin"
   namespace: {{ .Release.Namespace | quote }}
-  {{- else }}
-  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-domain-admin" | join "-" | quote }}
   {{- end }}
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}
