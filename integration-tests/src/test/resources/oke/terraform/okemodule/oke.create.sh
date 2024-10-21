@@ -97,6 +97,34 @@ checkKubernetesCliConnection() {
     export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,$clusterPublicIP
     echo "export NO_PROXY=:$NO_PROXY"
 
+    # Maximum number of retries
+    max_retries=20
+
+    # Initial retry count
+    retry_count=0
+
+    # Command to get cluster info
+    while [[ $retry_count -lt $max_retries ]]; do
+      echo "Attempt $((retry_count+1)) of $max_retries to connect to Kubernetes cluster..."
+
+      # Try to execute kubectl cluster-info
+      kubectl cluster-info
+      if [[ $? -eq 0 ]]; then
+        echo "Connected to Kubernetes cluster successfully!"
+        break
+      else
+        echo "Connection refused or failed, retrying..."
+        retry_count=$((retry_count + 1))
+        sleep 5  # Wait 5 seconds before retrying
+      fi
+    done
+
+    # Check if retries were exhausted
+    if [[ $retry_count -eq $max_retries ]]; then
+      echo "Failed to connect to Kubernetes cluster after $max_retries attempts."
+      exit 1
+    fi
+
     local myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
 
     if echo "$myline_output" | grep -q "Unable to connect to the server: net/http: TLS handshake timeout"; then
@@ -124,6 +152,22 @@ checkKubernetesCliConnection() {
 }
 
 checkClusterRunning() {
+    kubeconfig_file=${terraformVarDir}/${okeclustername}_kubeconfig
+    if [ -f "$kubeconfig_file" ] && [ -s "$kubeconfig_file" ]; then
+      echo "Kubeconfig file exists and is not empty."
+    else
+      if [ ! -f "$kubeconfig_file" ]; then
+        echo "Kubeconfig file does not exist."
+        cd "${terraformVarDir}"
+        terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
+        createCluster
+      else
+        echo "Kubeconfig file exists but is empty."
+        cd "${terraformVarDir}"
+        terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
+        createCluster
+      fi
+    fi
     checkKubernetesCliConnection
 
     local privateIP=${vcn_cidr_prefix}
