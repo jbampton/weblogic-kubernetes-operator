@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
@@ -117,6 +118,38 @@ class ItOperatorUpgradeWithIstio {
   }
 
   /**
+   * Upgrade from Operator 3.4.3 to current with Istio enabled domain.
+   */
+  @Test
+  @DisplayName("Upgrade 3.4.3 Istio Domain(v8) with Istio to current")
+  void testOperatorWlsIstioDomainUpgradeFrom343ToCurrent() {
+    logger.info("Starting testOperatorWlsIstioDomainUpgradeFrom343ToCurrent" 
+         + " to upgrade Istio Image Domain with Istio with v8 schema to current");
+    upgradeWlsIstioDomain("3.4.3");
+  }
+
+  /**
+   * Upgrade from Operator 3.4.4 to current with Istio enabled domain.
+   */
+  @Test
+  @DisplayName("Upgrade 3.4.4 Istio Domain(v8) with Istio to current")
+  void testOperatorWlsIstioDomainUpgradeFrom344ToCurrent() {
+    logger.info("Starting testOperatorWlsIstioDomainUpgradeFrom344ToCurrent"
+         + " to upgrade Istio Image Domain with Istio with v8 schema to current");
+    upgradeWlsIstioDomain("3.4.4");
+  }
+
+  /**
+   * Upgrade from Operator v3.3.8 to current with Istio enabled domain.
+   */
+  @Test
+  @DisplayName("Upgrade 3.3.8 Istio Domain(v8) with Istio to current")
+  void testOperatorWlsIstioDomainUpgradeFrom338ToCurrent() {
+    logger.info("Starting test to upgrade Istio Image Domain with Istio with v8 schema to current");
+    upgradeWlsIstioDomain("3.3.8");
+  }
+
+  /**
    * Cleanup Kubernetes artifacts in the namespaces used by the test and
    * delete CRD.
    */
@@ -181,6 +214,8 @@ class ItOperatorUpgradeWithIstio {
     // before upgrading to Latest
     verifyDomainStatusConditionTypeDoesNotExist(domainUid, domainNamespace,
         DOMAIN_STATUS_CONDITION_COMPLETED_TYPE, OLD_DOMAIN_VERSION);
+    istioIngressPort = 
+       createIstioService(domainUid,clusterName,adminServerPodName,domainNamespace);
     istioIngressPort
         = createIstioService(domainUid, clusterName, adminServerPodName, domainNamespace);
     String istioHost = null;
@@ -196,10 +231,10 @@ class ItOperatorUpgradeWithIstio {
     }
     checkIstioService(istioHost, istioIngressPort, domainNamespace);
     upgradeOperatorToCurrent(opNamespace);
-    checkDomainStatus(domainNamespace, domainUid);
+    checkDomainStatus(domainNamespace,domainUid);
     verifyPodsNotRolled(domainNamespace, pods);
     // Re check the istio Service After Upgrade
-    checkIstioService(istioHost, istioIngressPort, domainNamespace);
+    checkIstioService(istioHost, istioIngressPort,domainNamespace);
   }
 
   private void createSecrets() {
