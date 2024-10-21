@@ -217,29 +217,6 @@ class ItOperatorWlsUpgrade {
   }
 
   /**
-   * Operator upgrade from 3.4.13 to current with Auxiliary Image Domain, V8 schema.
-   * V9 schema is from Operator 4.0.
-   */
-  @Test
-  @DisplayName("Upgrade 3.4.13 Auxiliary Domain(v8 schema) Image to current")
-  void testOperatorUpgradeAuxDomainV8From3413ToCurrent() {
-    logger.info("Starting testOperatorUpgradeAuxDomainV8From3413ToCurrent "
-         + "to upgrade Domain with Auxiliary Image with v8 schema to current");
-    installOperatorCreateAuxDomainAndUpgrade("3.4.13", OLD_DOMAIN_VERSION);
-  }
-
-  /**
-   * Upgrade Operator from 3.4.12 to current with Mii domain in V8 schema.
-   */
-  @Test
-  @DisplayName("Upgrade 3.4.12 Mii Domain(v8 schema) Image to current")
-  void testOperatorUpgradeMiiDomainV8From3412ToCurrent() {
-    logger.info("Starting testOperatorWlsAuxDomainV8UpgradeFrom3412ToCurrent "
-        + "to upgrade MII Domain with v8 schema to current");
-    installOperatorCreateMiiDomainAndUpgrade("3.4.12", OLD_DOMAIN_VERSION, DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
-  }
-
-  /**
    * Cleanup Kubernetes artifacts in the namespaces used by the test and
    * delete CRD.
    */

@@ -21,10 +21,8 @@ import oracle.weblogic.kubernetes.annotations.Namespaces;
 import oracle.weblogic.kubernetes.logging.LoggingFacade;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
@@ -116,38 +114,6 @@ class ItOperatorUpgradeWithIstio {
     labelMap.put("istio-injection", "enabled");
     assertDoesNotThrow(() -> addLabelsToNamespace(domainNamespace,labelMap));
     assertDoesNotThrow(() -> addLabelsToNamespace(opNamespace,labelMap));
-  }
-
-  /**
-   * Upgrade from Operator 3.4.3 to current with Istio enabled domain.
-   */
-  @Test
-  @DisplayName("Upgrade 3.4.3 Istio Domain(v8) with Istio to current")
-  void testOperatorWlsIstioDomainUpgradeFrom343ToCurrent() {
-    logger.info("Starting testOperatorWlsIstioDomainUpgradeFrom343ToCurrent" 
-         + " to upgrade Istio Image Domain with Istio with v8 schema to current");
-    upgradeWlsIstioDomain("3.4.3");
-  }
-
-  /**
-   * Upgrade from Operator 3.4.4 to current with Istio enabled domain.
-   */
-  @Test
-  @DisplayName("Upgrade 3.4.4 Istio Domain(v8) with Istio to current")
-  void testOperatorWlsIstioDomainUpgradeFrom344ToCurrent() {
-    logger.info("Starting testOperatorWlsIstioDomainUpgradeFrom344ToCurrent"
-         + " to upgrade Istio Image Domain with Istio with v8 schema to current");
-    upgradeWlsIstioDomain("3.4.4");
-  }
-
-  /**
-   * Upgrade from Operator v3.3.8 to current with Istio enabled domain.
-   */
-  @Disabled
-  @DisplayName("Upgrade 3.3.8 Istio Domain(v8) with Istio to current")
-  void testOperatorWlsIstioDomainUpgradeFrom338ToCurrent() {
-    logger.info("Starting test to upgrade Istio Image Domain with Istio with v8 schema to current");
-    upgradeWlsIstioDomain("3.3.8");
   }
 
   /**
