@@ -392,7 +392,6 @@ class ItOperatorWlsUpgrade {
     final String pvName = getUniqueName(domainUid + "-pv-");
     final String pvcName = getUniqueName(domainUid + "-pvc-");
     final int t3ChannelPort = getNextFreePort();
-    final String wlSecretName = domainUid + "-weblogic-credentials";
     final String wlsModelFile = "model-wlsdomain-onpv-simplified.yaml";
 
     logger.info("Upgrade version/{0} Auxiliary Domain(v9) to current", operatorVersion);
@@ -439,7 +438,7 @@ class ItOperatorWlsUpgrade {
         .domainType(DomainOnPVType.WLS));
     DomainResource domain = createDomainResourceOnPv(domainUid,
         domainNamespace,
-        wlSecretName,
+        adminSecretName,
         clusterName,
         pvName,
         pvcName,
