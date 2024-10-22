@@ -96,6 +96,8 @@ checkKubernetesCliConnection() {
     unset NO_PROXY
     export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,$clusterPublicIP
     echo "export NO_PROXY=:$NO_PROXY"
+    nc -zv 144.33.198.182 6443
+    sudo yum reinstall ca-certificates -y
     sudo iptables -A OUTPUT -p tcp --dport 6443 -j ACCEPT
     # Maximum number of retries
     max_retries=20
