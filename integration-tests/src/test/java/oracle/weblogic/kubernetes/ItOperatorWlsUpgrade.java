@@ -469,7 +469,7 @@ class ItOperatorWlsUpgrade {
     upgradeOperatorToCurrent(opNamespace);
     checkDomainStatus(domainNamespace, domainUid);
     verifyPodsNotRolled(domainNamespace, pods);
-    scaleClusterUpAndDown(DOMAIN_VERSION);
+    scaleClusterUpAndDown(clusterName);
   }
   
   // After upgrade scale up/down the cluster
