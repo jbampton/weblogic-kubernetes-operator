@@ -93,8 +93,8 @@ checkKubernetesCliConnection() {
         exit 1
     fi
     echo "clusterPublicIP: ###$clusterPublicIP###"
-    unset NO_PROXY
-    export NO_PROXY=localhost,127.0.0.1,10.244.0.0/16,10.101.0.0/16,10.196.0.0/16,$clusterPublicIP
+    echo " NO_PROXY=#$NO_PROXY# "
+    export NO_PROXY=$NO_PROXY,localhost,127.0.0.1,$clusterPublicIP
     echo "export NO_PROXY=:$NO_PROXY"
     nc -zv $clusterPublicIP 6443
     sudo yum reinstall ca-certificates -y
