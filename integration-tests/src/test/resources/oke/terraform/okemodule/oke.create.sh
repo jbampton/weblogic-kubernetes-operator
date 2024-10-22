@@ -108,7 +108,7 @@ checkKubernetesCliConnection() {
       echo "Attempt $((retry_count+1)) of $max_retries to connect to Kubernetes cluster..."
 
       # Try to execute kubectl cluster-info
-      kubectl cluster-info
+      ${KUBERNETES_CLI:-kubectl} cluster-info
       if [[ $? -eq 0 ]]; then
         echo "Connected to Kubernetes cluster successfully!"
         break
