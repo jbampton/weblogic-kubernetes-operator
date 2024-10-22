@@ -29,7 +29,6 @@ import oracle.weblogic.kubernetes.utils.DomainUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static java.nio.file.Paths.get;
@@ -86,7 +85,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @DisplayName("Verify scaling the clusters in the domain with different domain types after operator upgrade")
 @IntegrationTest
-@Tag("kind-upgrade")
 class ItMultiDomainModelsUpgradeAndScale {
 
   // domain constants
