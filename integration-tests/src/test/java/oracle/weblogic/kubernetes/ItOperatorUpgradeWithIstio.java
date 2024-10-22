@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
@@ -79,6 +80,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @DisplayName("Operator upgrade tests with Istio")
 @IntegrationTest
+@Tag("kind-upgrade")
 class ItOperatorUpgradeWithIstio {
 
   private final String clusterName = "cluster-1"; // do not modify
