@@ -155,6 +155,7 @@ checkKubernetesCliConnection() {
 
 checkClusterRunning() {
     kubeconfig_file=${terraformVarDir}/${okeclustername}_kubeconfig
+    export KUBECONFIG=$kubeconfig_file
     if [ -f "$kubeconfig_file" ] && [ -s "$kubeconfig_file" ]; then
       echo "Kubeconfig file exists and is not empty."
     else
