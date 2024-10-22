@@ -96,9 +96,7 @@ checkKubernetesCliConnection() {
     echo " NO_PROXY=#$NO_PROXY# "
     export NO_PROXY=$NO_PROXY,localhost,127.0.0.1,$clusterPublicIP
     echo "export NO_PROXY=:$NO_PROXY"
-    nc -zv $clusterPublicIP 6443
-    sudo yum reinstall ca-certificates -y
-    sudo iptables -A OUTPUT -p tcp --dport 6443 -j ACCEPT
+
     # Maximum number of retries
     max_retries=20
 
@@ -259,7 +257,8 @@ setupTerraform
 deleteOlderVersionTerraformOCIProvider
 
 chmod 600 ${ocipk_path}
-
+sudo yum reinstall ca-certificates -y
+sudo iptables -A OUTPUT -p tcp --dport 6443 -j ACCEPT
 # run terraform init,plan,apply to create OKE cluster based on the provided tfvar file ${clusterTFVarsFile).tfvar
 createCluster
 #check status of OKE cluster nodes, destroy if can not access them
