@@ -98,7 +98,7 @@ checkKubernetesCliConnection() {
     echo "export NO_PROXY=:$NO_PROXY"
 
     # Maximum number of retries
-    max_retries=20
+    max_retries=10
 
     # Initial retry count
     retry_count=0
@@ -122,7 +122,9 @@ checkKubernetesCliConnection() {
     # Check if retries were exhausted
     if [[ $retry_count -eq $max_retries ]]; then
       echo "Failed to connect to Kubernetes cluster after $max_retries attempts."
-      exit 1
+      cd "${terraformVarDir}"
+      terraform destroy -auto-approve -var-file="${terraformVarDir}/${clusterTFVarsFile}.tfvars"
+      createCluster
     fi
 
     local myline_output=$(${KUBERNETES_CLI:-kubectl} get nodes -o wide 2>&1)
