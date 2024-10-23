@@ -158,6 +158,7 @@ checkClusterRunning() {
     export KUBECONFIG=${terraformVarDir}/${okeclustername}_kubeconfig
     echo "Kubeconfig file : $KUBECONFIG"
     ls -al $KUBECONFIG
+
     if [ -f "$kubeconfig_file" ] && [ -s "$kubeconfig_file" ]; then
       echo "Kubeconfig file exists and is not empty."
     else
