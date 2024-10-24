@@ -1346,11 +1346,11 @@ public class CommonTestUtils {
         host = formatIPv6Host(host);
         hostAndPort = ((OKD) ? hostName : host + ":" + servicePort);
       }
-      host = formatIPv6Host(host);
-      String hostAndPort = ((OKD) ? hostName : host + ":" + servicePort);
+
       if (OKE_CLUSTER_PRIVATEIP) {
         hostAndPort = hostName;
       }
+
       logger.info("hostAndPort = {0} ", hostAndPort);
       return hostAndPort;
     } catch (UnknownHostException e) {
