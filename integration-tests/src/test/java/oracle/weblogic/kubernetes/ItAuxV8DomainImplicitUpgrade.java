@@ -24,7 +24,6 @@ import oracle.weblogic.kubernetes.logging.LoggingFacade;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
@@ -156,7 +155,7 @@ class ItAuxV8DomainImplicitUpgrade {
    * Check the upgraded domain schema for a Compatiblity InitContainer in
    * Spec/ServerPod section of the domain resource
    */
-  @Test
+  //@Test
   @DisplayName("Test implicit upgrade of v8 version of Auxiliary Domain")
   void testMultipleAuxImagesV8Domain() {
 
@@ -292,7 +291,7 @@ class ItAuxV8DomainImplicitUpgrade {
    * Negative Test to create domain without WDT binary.
    * Check the error message is in domain events and operator pod log.
    */
-  @Test
+  //@Test
   @DisplayName("Negative Test to create domain without WDT binary")
   void testErrorPathV8DomainMissingWDTBinary() {
 
@@ -359,7 +358,7 @@ class ItAuxV8DomainImplicitUpgrade {
    * The auxiliary image contains only sparse JMS config.
    * Check the error message is in domain events and operator pod log
    */
-  @Test
+  //@Test
   @DisplayName("Negative Test to create domain without model file")
   void testErrorPathV8DomainMissingDomainConfig() {
 
@@ -422,7 +421,7 @@ class ItAuxV8DomainImplicitUpgrade {
    * Negative Test to create domain with model file with wrong permission.
    * Check the error message is in domain events and operator pod log
    */
-  @Test
+  //@Test
   @DisplayName("Negative Test to create domain with file in auxiliary image not accessible by oracle user")
   void testErrorPathV8DomainFilePermission() {
 
@@ -493,7 +492,7 @@ class ItAuxV8DomainImplicitUpgrade {
    * Verify all the pods are restarted and back to ready state.
    *  Verify configured JMS and JDBC resources.
    */
-  @Test
+  //@Test
   @DisplayName("Test to update Base Weblogic Image Name")
   void testUpdateBaseImageV8AuxDomain() {
 

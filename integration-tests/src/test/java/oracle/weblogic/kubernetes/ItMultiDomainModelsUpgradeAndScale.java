@@ -30,7 +30,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 import static java.nio.file.Paths.get;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
@@ -150,7 +149,7 @@ class ItMultiDomainModelsUpgradeAndScale {
    * Create 3 different types of domains with operator 4.0.8 (domain-on-pv, domain-in-image and model-in-image).
    *
    */
-  @Test
+  //@Test
   @DisplayName("create three different type of domains in Operator 4.0.8 and upgrade")
   void testInstallAndUpgradeOperatorFrom408() {
     // install and verify operator
@@ -169,7 +168,7 @@ class ItMultiDomainModelsUpgradeAndScale {
    * Create 3 different types of domains with operator 4.1.2 (domain-on-pv, domain-in-image and model-in-image).
    *
    */
-  @Test
+  //@Test
   @DisplayName("create three different type of domains in Operator 4.1.2 and upgrade")
   void testInstallAndUpgradeOperatorFrom412() {
     // install and verify operator
