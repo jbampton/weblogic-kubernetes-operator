@@ -28,18 +28,24 @@ spec:
         cpu: "250m"
         memory: "768Mi"
   adminServer:
-    serverStartState: RUNNING
+    serverStartPolicy: IfNeeded
   replicas: 2
   clusters:
-  - clusterName: cluster-1
-    replicas: 2
+  - name: cluster-1
   configuration:
-    istio:
-       enabled: true
-       localhostBindingsEnabled: false
     introspectorJobActiveDeadlineSeconds: 600
     model:
       configMap: istio-upgrade-configmap
       domainType: WLS
       runtimeEncryptionSecret: encryptionsecret
 
+---
+
+apiVersion: "weblogic.oracle/v1"
+kind: Cluster
+metadata:
+  name: cluster-1
+  namespace: DOMAIN_NS
+spec:
+  clusterName: cluster-1
+  replicas: 2
