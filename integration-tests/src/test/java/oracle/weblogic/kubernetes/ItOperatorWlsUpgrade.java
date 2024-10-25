@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -177,7 +178,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.0.9 to current with Mii domain in V8 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.0.9 to current")
   void testOperatorUpgradeMiiDomainV8From409ToCurrent() {
     logger.info("Starting test testOperatorUpgradeMiiDomainV8From409ToCurrent with Mii domain v8 schema");
@@ -187,7 +188,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.2.9 to current with DPV domain in V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.2.9 to current")
   void testOperatorUpgradeDomainOnPVV9From429ToCurrent() {
     logger.info("Starting test testOperatorUpgradeDomainOnPVV9From429ToCurrent, domain v9 schema");
@@ -197,7 +198,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.2.8 to current with DPV domain in V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.2.8 to current")
   void testOperatorUpgradeDomainOnPVV9From428ToCurrent() {
     logger.info("Starting test testOperatorUpgradeDomainOnPVV9From428ToCurrent, domain v9 schema");
@@ -207,7 +208,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.1.8 to current with DPV domain in V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.8 to current")
   void testOperatorUpgradeDomainOnPVV9From418ToCurrent() {
     logger.info("Starting test testOperatorUpgradeDomainOnPVV9From418ToCurrent, domain v9 schema");
@@ -217,7 +218,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.1.7 to current with DPV domain in V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.7 to current")
   void testOperatorUpgradeDomainOnPVV9From417ToCurrent() {
     logger.info("Starting test testOperatorUpgradeDomainOnPVV9From417ToCurrent, domain v9 schema");
@@ -227,7 +228,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Upgrade Operator from 4.0.10 to current with Auxiliary image domain, V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.0.10 to current")
   void testOperatorUpgradeAuxDomainV9From4010ToCurrent() {
     logger.info("Starting test testOperatorUpgradeAuxDomainV9From4010ToCurrent with Auxiliary domain v9 schema");
@@ -237,7 +238,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Upgrade Operator from 4.1.7 to current with Mii domain in V8 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.7 to current")
   void testOperatorUpgradeMiiDomainV8From417ToCurrent() {
     logger.info("Starting test testOperatorUpgradeMiiDomainV8From417ToCurrent with Mii domain v8 schema");
@@ -247,7 +248,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.1.8 to current with Auxiliary Image Domain, V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.8 to current")
   void testOperatorUpgradeAuxDomainV9From418ToCurrent() {
     logger.info("Starting test testOperatorUpgradeAuxDomainV9From418ToCurrent to upgrade Auxiliary Domain "
@@ -258,7 +259,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.2.7 to current with Auxiliary Image Domain, V9 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.2.7 to current")
   void testOperatorUpgradeAuxDomainV9From427ToCurrent() {
     logger.info("Starting test testOperatorUpgradeAuxDomainV9From427ToCurrent to upgrade Domain with "
@@ -269,7 +270,7 @@ class ItOperatorWlsUpgrade {
   /**
    * Operator upgrade from 4.2.6 to current with Model in Image Domain, V8 schema.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.2.6 to current")
   void testOperatorUpgradeMiiDomainV8From426ToCurrent() {
     logger.info("Starting test testOperatorUpgradeMiiDomainV8From426ToCurrent to upgrade Domain with "

@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
@@ -203,7 +204,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 3.4.5 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 3.4.5 to current")
   void testOperatorFmwUpgradeFrom345ToCurrent() {
     installAndUpgradeOperator("3.4.5", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
@@ -212,7 +213,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 3.4.6 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 3.4.6 to current")
   void testOperatorFmwUpgradeFrom346ToCurrent() {
     installAndUpgradeOperator("3.4.6", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
@@ -221,7 +222,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 4.0.7 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.0.7 to current")
   void testOperatorFmwUpgradeFrom407ToCurrent() {
     installAndUpgradeOperator("4.0.7", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
@@ -230,7 +231,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 4.0.8 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.0.8 to current")
   void testOperatorFmwUpgradeFrom408ToCurrent() {
     installAndUpgradeOperator("4.0.8", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
@@ -239,7 +240,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 4.1.0 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.0 to current")
   void testOperatorFmwUpgradeFrom410ToCurrent() {
     installAndUpgradeOperator("4.1.0", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
@@ -248,7 +249,7 @@ class ItOperatorFmwUpgrade {
   /**
    * Operator upgrade from 4.1.1 to current with a FMW Domain.
    */
-  //@Test
+  @Test
   @DisplayName("Upgrade Operator from 4.1.1 to current")
   void testOperatorFmwUpgradeFrom411ToCurrent() {
     installAndUpgradeOperator("4.1.1", "v8", DEFAULT_EXTERNAL_SERVICE_NAME_SUFFIX);
