@@ -3,6 +3,7 @@
 
 {{- define "operator.operatorClusterRoleDomainAdmin" }}
 ---
+{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (ne .domainNamespaceSelectionStrategy "Dedicated") }}
 {{- if $useClusterRole }}
 kind: "ClusterRole"
 {{- else }}
