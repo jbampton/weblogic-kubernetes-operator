@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2024 Oracle and/or its affiliates. All rights reserved.
 # Licensed under the GNU General Public License Version 3 as shown at https://www.gnu.org/licenses/gpl-3.0.txt.
 
 set -e
