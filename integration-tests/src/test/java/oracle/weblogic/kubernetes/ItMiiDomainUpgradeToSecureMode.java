@@ -1020,7 +1020,7 @@ class ItMiiDomainUpgradeToSecureMode {
         "running in production mode");
 
     //create ingress resources to route traffic to various service endpoints
-    createNginxIngressHostRouting(domainUid, 7001, 7002, 7001, nginxParams.getIngressClassName(), false);
+    createNginxIngressHostRouting(domainUid, 7001, 7002, 11000, nginxParams.getIngressClassName(), false);
 
     //verify the number of channels available in the domain resource match with the count and name
     verifyChannel(domainNamespace, domainUid, List.of(channelName));

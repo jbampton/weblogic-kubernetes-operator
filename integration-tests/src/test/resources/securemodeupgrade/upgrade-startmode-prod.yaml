@@ -11,6 +11,7 @@ topology:
     ServerTemplate:
         myserver-template:
             Cluster: mycluster
+            ListenPort: 11000
     Cluster:
         mycluster:
             DynamicServers:
