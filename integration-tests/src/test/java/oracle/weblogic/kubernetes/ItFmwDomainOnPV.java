@@ -95,7 +95,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Test to create a FMW domain in persistent volume with new simplified feature")
 @IntegrationTest
 @Tag("kind-sequential")
-@Tag("oke-gate")
+@Tag("oke-weekly-sequential")
 @Tag("okd-fmw-cert")
 @Tag("olcne-sequential")
 class ItFmwDomainOnPV {
@@ -183,7 +183,6 @@ class ItFmwDomainOnPV {
   @Test
   @DisabledIfEnvironmentVariable(named = "OKD", matches = "true")
   @DisplayName("Create a FMW domain on PV using simplified feature, Operator creates PV/PVC/RCU/Domain")
-  @Tag("gate")
   void testOperatorCreatesPvPvcRcuDomain() {
     String domainUid = "jrfonpv-simplified";
     final String pvName = getUniqueName(domainUid + "-pv-");
