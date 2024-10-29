@@ -990,7 +990,7 @@ class ItMiiDomainUpgradeToSecureMode {
    */
   @Test
   @DisplayName("Test upgrade from 12214 to 1412 with serverStartMode prod")
-  void testUpgrade12214to1412ServerStartModeProd() throws UnknownHostException {
+  void test1Upgrade12214to1412ServerStartModeProd() throws UnknownHostException {
     domainNamespace = namespaces.get(3);
     domainUid = "testdomain9";
     adminServerPodName = domainUid + "-" + adminServerName;
