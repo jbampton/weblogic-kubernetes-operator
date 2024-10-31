@@ -413,7 +413,7 @@ public class LoadBalancerUtils {
     getLogger().info("Updated NO_PROXY: " + System.getenv("NO_PROXY"));
   }
 
-  private static boolean checkLoadBalancerHealthy(String namespace, String lbServiceName) {
+  private synchronized static boolean checkLoadBalancerHealthy(String namespace, String lbServiceName) {
 
     String lbPublicIP = assertDoesNotThrow(() -> getLoadBalancerIP(namespace, lbServiceName));
     InitializationTasks.registerLoadBalancerExternalIP(lbPublicIP);
