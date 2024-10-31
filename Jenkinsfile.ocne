@@ -70,7 +70,7 @@ pipeline {
 
         string(name: 'BRANCH',
                description: 'The branch for weblogic-kubernetes-operator project',
-               defaultValue: "main"
+               defaultValue: "release/4.2"
         )
 
         choice(name: 'MAVEN_PROFILE_NAME',
