@@ -3,7 +3,6 @@
 
 package oracle.weblogic.kubernetes.utils;
 
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -393,24 +392,16 @@ public class LoadBalancerUtils {
    * @param newEntry value to add for NO_PROXY
    * @throws Exception throws exception if failed to update
    */
-  public static void addNoProxyEntry(String newEntry) throws Exception {
-    // Get current NO_PROXY value
+  public static void addNoProxyEntry(String newEntry) {
     String currentNoProxy = System.getenv("NO_PROXY");
     getLogger().info("Current NO_PROXY value is :" + currentNoProxy);
-    // If NO_PROXY is set, append new entry with a comma; otherwise, just set new entry
+
     String updatedNoProxy = (currentNoProxy == null || currentNoProxy.isEmpty())
         ? newEntry
         : currentNoProxy + "," + newEntry;
 
-    // Update NO_PROXY in environment variables (reflection hack)
-    Map<String, String> env = System.getenv();
-    Field field = env.getClass().getDeclaredField("m");
-    field.setAccessible(true);
-    @SuppressWarnings("unchecked")
-    Map<String, String> modifiableEnv = (Map<String, String>) field.get(env);
-    modifiableEnv.put("NO_PROXY", updatedNoProxy);
-
-    getLogger().info("Updated NO_PROXY: " + System.getenv("NO_PROXY"));
+    System.setProperty("NO_PROXY", updatedNoProxy);
+    getLogger().info("Updated NO_PROXY: " + System.getProperty("NO_PROXY"));
   }
 
   private static synchronized boolean checkLoadBalancerHealthy(String namespace, String lbServiceName) {
