@@ -412,8 +412,10 @@ EOF
                             sh ${WORKSPACE}/terraform/ocne.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform/terraform/1.9
 
                             # DEBUG: print out kubeconfig file
+                            echo "############# kubeconfig file ##############"
                             cat $KUBECONFIG
-
+                            echo "############################################"
+                            
                             #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
 
                             #echo "clusterIp : $clusterIP"
