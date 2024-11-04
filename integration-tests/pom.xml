@@ -770,6 +770,40 @@
                 <skipITs>false</skipITs>
                 <groups>v8o</groups>
             </properties>
-        </profile>        
+        </profile>
+               <!-- Profile for integration test environment -->
+        <profile>
+          <id>integration-test-env</id>
+          <!-- This profile is activated only if 'env.integration' property is set to 'true' -->
+          <activation>
+            <property>
+              <name>install.weblogic</name>
+              <value>true</value>
+            </property>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <id>run-silent-install-script</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                      <executable>bash</executable>
+                      <arguments>
+                        <argument>${project.basedir}/src/test/resources/bash-scripts/install-wls.sh</argument>
+                      </arguments>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </profile>
     </profiles>
 </project>
