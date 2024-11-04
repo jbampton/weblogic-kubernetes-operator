@@ -90,7 +90,7 @@ pipeline {
 
         string(name: 'OCNE_KUBE_VERSION',
                description: 'kube version for OCNE cluster',
-               defaultValue: '1.26.2'
+               defaultValue: '1.29.3'
         )
         string(name: 'IMAGE_ID',
                description: 'oci image id for node pool, find image OCID for your region from https://docs.oracle.com/iaas/images/',
@@ -100,7 +100,7 @@ pipeline {
         )
         string(name: 'KUBECTL_VERSION',
                description: 'kubectl version',
-               defaultValue: '1.26.2'
+               defaultValue: '1.29.3'
         )
         string(name: 'HELM_VERSION',
                description: 'Helm version',
@@ -109,6 +109,7 @@ pipeline {
         choice(name: 'ISTIO_VERSION',
                description: 'Istio version',
                choices: [
+                   '1.23.0'
                    '1.17.2',
                    '1.16.1',
                    '1.13.2',
