@@ -411,30 +411,33 @@ EOF
                             mkdir -p ${WORKSPACE}/terraform/terraforminstall
                             sh ${WORKSPACE}/terraform/ocne.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform/terraform/1.9
 
-                            //clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
+                            # DEBUG: print out kubeconfig file
+                            cat $KUBECONFIG
 
-                            //echo "clusterIp : $clusterIP"
-                            //clusterPublicIP=${clusterIP:1:-6}
-                            // Get the OCNE cluster control node private IP
-                            //echo "command to get k8s_master_instance_id: oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'"
-                            //k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
-                            //echo "command to get k8s_master_instance_private_ip: oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'"
-                            //k8s_master_instance_private_ips=`oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'`
+                            #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
 
-                            //echo " clusterPublicIP : ${clusterPublicIP}"
-                            //export NO_PROXY=$NO_PROXY,${clusterPublicIP}
-                            //echo "NO_PROXY:" $NO_PROXY
+                            #echo "clusterIp : $clusterIP"
+                            #clusterPublicIP=${clusterIP:1:-6}
+                            # Get the OCNE cluster control node private IP
+                            #echo "command to get k8s_master_instance_id: oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'"
+                            #k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
+                            #echo "command to get k8s_master_instance_private_ip: oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'"
+                            #k8s_master_instance_private_ips=`oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'`
+
+                            #echo " clusterPublicIP : ${clusterPublicIP}"
+                            #export NO_PROXY=$NO_PROXY,${clusterPublicIP}
+                            #echo "NO_PROXY:" $NO_PROXY
 
 
-                            //export SERVICE_ACCOUNT_NAME=${CLUSTER_NAME}-sa
-                            //${KUBERNETES_CLI:-kubectl} -n kube-system create serviceaccount ${SERVICE_ACCOUNT_NAME}
-                            //${KUBERNETES_CLI:-kubectl} create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:${SERVICE_ACCOUNT_NAME}
-                            //sed -i 's@%SERVICE_ACCOUNT_NAME%@'"${SERVICE_ACCOUNT_NAME}"'@' ${WORKSPACE}/integration-tests/src/test/resources/oke/secret.yaml
-                            //${KUBERNETES_CLI:-kubectl} apply -f ${WORKSPACE}/integration-tests/src/test/resources/oke/secret.yaml
+                            #export SERVICE_ACCOUNT_NAME=${CLUSTER_NAME}-sa
+                            #${KUBERNETES_CLI:-kubectl} -n kube-system create serviceaccount ${SERVICE_ACCOUNT_NAME}
+                            #${KUBERNETES_CLI:-kubectl} create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:${SERVICE_ACCOUNT_NAME}
+                            #sed -i 's@%SERVICE_ACCOUNT_NAME%@'"${SERVICE_ACCOUNT_NAME}"'@' ${WORKSPACE}/integration-tests/src/test/resources/oke/secret.yaml
+                            #${KUBERNETES_CLI:-kubectl} apply -f ${WORKSPACE}/integration-tests/src/test/resources/oke/secret.yaml
 
-                            //TOKEN=`${KUBERNETES_CLI:-kubectl} -n kube-system get secret secret-${SERVICE_ACCOUNT_NAME} -o jsonpath='{.data.token}'| base64 --decode`
-                            //${KUBERNETES_CLI:-kubectl} config set-credentials ${SERVICE_ACCOUNT_NAME} --token=$TOKEN
-                            //${KUBERNETES_CLI:-kubectl} config set-context --current --user=${SERVICE_ACCOUNT_NAME}
+                            #TOKEN=`${KUBERNETES_CLI:-kubectl} -n kube-system get secret secret-${SERVICE_ACCOUNT_NAME} -o jsonpath='{.data.token}'| base64 --decode`
+                            #${KUBERNETES_CLI:-kubectl} config set-credentials ${SERVICE_ACCOUNT_NAME} --token=$TOKEN
+                            #${KUBERNETES_CLI:-kubectl} config set-context --current --user=${SERVICE_ACCOUNT_NAME}
                         '''
                     }
                 }
@@ -508,12 +511,12 @@ EOF
                                 touch ${WORKSPACE}/.mvn/maven.config
                                 export KUBECONFIG=${kubeconfig_file}
 
-                                //k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=ocne-new2 |jq -r '.data[]."id"'`
-                                //k8s_master_instance_private_ip=`oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'`
-                                // Get the OCNE cluster control node private IP
-                                //echo "command to get k8s_master_instance_id: oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'"
+                                #k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=ocne-new2 |jq -r '.data[]."id"'`
+                                #k8s_master_instance_private_ip=`oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'`
+                                # Get the OCNE cluster control node private IP
+                                #echo "command to get k8s_master_instance_id: oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'"
                                 k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
-                                //echo "command to get k8s_master_instance_private_ip: oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'"
+                                #echo "command to get k8s_master_instance_private_ip: oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[]."private-ip"'"
                                 k8s_master_instance_private_ip=`oci compute instance list-vnics --compartment-id=${compartment_id} --instance-id=${k8s_master_instance_id} |jq -r '.data[] | select(."hostname-label" == null) | ."private-ip"'`
 
                                 export NO_PROXY=$NO_PROXY,${k8s_master_instance_private_ip}
@@ -627,6 +630,7 @@ EOF
                     sh '''
                         export PATH="${WORKSPACE}/bin:${PATH}"
                         export KUBECONFIG=${kubeconfig_file}
+                        export OCI_PROP_FILE="${WORKSPACE}/terraform/oci.prop"
 
                         if [ -f "$OCI_PROP_FILE" ] && [ -f "${WORKSPACE}/terraform/ocne.delete.sh" ]; then
                             ${WORKSPACE}/terraform/ocne.delete.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform/terraform/1.9
