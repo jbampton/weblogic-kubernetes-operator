@@ -415,7 +415,7 @@ EOF
                             echo "############# kubeconfig file ##############"
                             cat $KUBECONFIG
                             echo "############################################"
-                            
+
                             #clusterIP=$(oci ce cluster list --compartment-id=${compartment_id} | jq '.data[]  | select(."name" == "'"${CLUSTER_NAME}"'" and (."lifecycle-state" == "ACTIVE"))' | jq ' ."endpoints" | ."public-endpoint"')
 
                             #echo "clusterIp : $clusterIP"
