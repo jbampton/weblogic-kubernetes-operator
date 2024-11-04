@@ -309,7 +309,7 @@ pipeline {
                         USER_OCID=$(grep -Po '(?<=user=).*' ${jenkins_home_directory}/.oci/config)
                         FINGERPRINT=$(grep -Po '(?<=fingerprint=).*' ${jenkins_home_directory}/.oci/config)
                         networkcompname="Networks"
-                        network_compartment_ocid=$(oci iam compartment list --compartment-id-in-subtree true --all | jq --arg compname "$networkcompname" '.data[] | select(."name"=="$networkcompname")' | jq -r ."id")
+                        network_compartment_ocid=$(oci iam compartment list --compartment-id-in-subtree true --all | jq --arg compname "$networkcompname" '.data[] | select(."name"==$networkcompname)' | jq -r ."id")
                         vcn_ocid=$(oci network vcn list --compartment-id=${network_compartment_ocid} | jq -r '.data[] | select(."display-name" == "CorpDev2-phx.vcn")' | jq -r ."id")
                         private_subnet_ocid=$(oci network subnet list --compartment-id=${network_compartment_ocid} | jq '.data[] | select(."display-name" == "VCN2-Subnet1-Regional")' | jq -r ."id")
                         export WKT_TENANCY_OCID=${TENANCY_OCID}
