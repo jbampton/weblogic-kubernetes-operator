@@ -279,6 +279,7 @@ pipeline {
                             }
                         sh '''
                             cat ${jenkins_home_directory}/.oci/config
+                            chmod 600 ${jenkins_home_directory}/.oci/config
                         '''
                     }
                 }
@@ -308,8 +309,8 @@ pipeline {
                         TENANCY_OCID=$(grep -Po '(?<=tenancy=).*' ${jenkins_home_directory}/.oci/config)
                         USER_OCID=$(grep -Po '(?<=user=).*' ${jenkins_home_directory}/.oci/config)
                         FINGERPRINT=$(grep -Po '(?<=fingerprint=).*' ${jenkins_home_directory}/.oci/config)
-                        networkcompname="Networks"
-                        network_compartment_ocid=$(oci iam compartment list --compartment-id-in-subtree true --all | jq --arg compname "$networkcompname" '.data[] | select(."name"==$networkcompname)' | jq -r ."id")
+                        //networkcompname="Networks"
+                        network_compartment_ocid=$(oci iam compartment list --compartment-id-in-subtree true --all | jq --arg compname Networks '.data[] | select(."name"=="Networks")' | jq -r ."id")
                         vcn_ocid=$(oci network vcn list --compartment-id=${network_compartment_ocid} | jq -r '.data[] | select(."display-name" == "CorpDev2-phx.vcn")' | jq -r ."id")
                         private_subnet_ocid=$(oci network subnet list --compartment-id=${network_compartment_ocid} | jq '.data[] | select(."display-name" == "VCN2-Subnet1-Regional")' | jq -r ."id")
                         export WKT_TENANCY_OCID=${TENANCY_OCID}
@@ -356,7 +357,7 @@ fingerprint=${FINGERPRINT}
 api_private_key_path=${jenkins_home_directory}/.oci/oci-signing-key.pem
 region=${wko_region}
 availability_domain_id=${availability_domain}
-prefix=ocne-tf-jenkin-${start_time}
+prefix=ocne-tf-jenkin-${BUILD_ID}
 
 deploy_networking=false
 subnet_id=${private_subnet_ocid}
@@ -371,8 +372,8 @@ virtual_ip=true
 
 control_plane_node_count=1
 worker_node_count=2
-environment_name=tfenvironment${start_time}
-kubernetes_name=tfcluster${start_time}
+environment_name=tfenvironment${BUILD_ID}
+kubernetes_name=tfcluster${BUILD_ID}
 
 ocne_version=1.9
 http_proxy=http://www-proxy-hqdc.us.oracle.com:80
