@@ -107,7 +107,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Verify istio enabled WebLogic domain in domainhome-on-pv model")
 @IntegrationTest
 @Tag("kind-parallel")
-@Tag("olcne-mrg")
 @Tag("oke-arm")
 @Tag("oke-parallel")
 class ItIstioDomainInPV  {
