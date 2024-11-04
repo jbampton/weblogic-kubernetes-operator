@@ -98,9 +98,8 @@ pipeline {
                defaultValue: 'ocid1.image.oc1.phx.aaaaaaaaaizmtmozeudeeuq7o5ir7dkl2bkxbbb3tgomshqbqn6jpomrsjza'
                        
         )
-        string(name: 'KUBECTL_VERSION',
+        choice(name: 'KUBECTL_VERSION',
                description: 'kubectl version',
-               //defaultValue: '1.29.4'
                choices: [
                    '1.29.2',
                    '1.29.4',
