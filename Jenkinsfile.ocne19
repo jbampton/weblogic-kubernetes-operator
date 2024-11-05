@@ -59,7 +59,6 @@ pipeline {
         start_time = sh(script: 'date +"%Y-%m-%d %H:%M:%S"', returnStdout: true).trim()
         wle_download_url="https://github.com/oracle/weblogic-logging-exporter/releases/latest"
 
-        //CLUSTER_NAME = "${env.JOB_NAME == 'wko-ocne-main-nightly' ? 'mycluster1' : 'mycluster1'}"
         kubeconfig_file = "${WORKSPACE}/terraform/terraform/1.9/kubeconfig"
         availability_domain = "${env.JOB_NAME == 'wko-ocne-main-nightly' ? 'mFEn:PHX-AD-1' : 'mFEn:PHX-AD-1'}"
         PARALLEL_RUN = "${env.JOB_NAME == 'wko-ocne-main-nightly' ? true : false}"
@@ -87,16 +86,6 @@ pipeline {
                defaultValue: ''
         )
 
-        //string(name: 'OCNE_KUBE_VERSION',
-        //       description: 'kube version for OCNE cluster',
-        //       defaultValue: '1.29.3'
-        //)
-        //string(name: 'IMAGE_ID',
-        //       description: 'oci image id for node pool, find image OCID for your region from https://docs.oracle.com/iaas/images/',
-        //       //defaultValue7.6: 'ocid1.image.oc1.phx.aaaaaaaancucg25pze6m52agxwxmmfszvsdnhp3kvim53pts2tw6mik4xtha'
-        //       defaultValue: 'ocid1.image.oc1.phx.aaaaaaaaaizmtmozeudeeuq7o5ir7dkl2bkxbbb3tgomshqbqn6jpomrsjza'
-                       
-        //)
         choice(name: 'KUBECTL_VERSION',
                description: 'kubectl version',
                choices: [
@@ -140,10 +129,6 @@ pipeline {
                description: '',
                defaultValue: "${env.WKT_OCIR_HOST}"
         )
-        //string(name: 'NODE_SHAPE',
-        //       description: '',
-        //       defaultValue: "VM.Standard.E4.Flex"
-        //)
         choice(name: 'BASE_IMAGES_REPO',
                choices: ["${env.WKT_OCIR_HOST}", 'container-registry.oracle.com'],
                description: 'Repository to pull the base images. Make sure to modify the image names if you are modifying this parameter value.'
@@ -315,14 +300,8 @@ pipeline {
 
                         export OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING=True
 
-                        echo 'Set env vars needed for integration tests...'
-
-                        #export IMAGE_ID=${IMAGE_ID}
-
                         export OCI_PROP_FILE=${OCI_PROP_FILE}
 
-                        #export IMAGE_TAG_WEBLOGIC="12.2.1.4"
-                        #export IMAGE_TAG_FMWINFRA="12.2.1.4"
                         ssh_pubkey=`cat ${wkotest_ssh_pubcert}`
                         ssh_pk=`cat ${wkotest_ssh_pk}`
 
