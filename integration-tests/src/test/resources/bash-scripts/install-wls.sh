@@ -46,6 +46,8 @@ echo "Running java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FIL
 install_log=$(java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FILE -invPtrLoc $ORAINVENTORYPOINTER_LOC)
 if [[ "$install_log" =~ $SUCCESS ]]; then
   echo "The installation of WebLogic completed successfully."
+  . $MW_HOME/wlserver/server/bin/setWLSEnv.sh
+  java weblogic.version
 else
   echo "The installation of WebLogic failed."
 fi
