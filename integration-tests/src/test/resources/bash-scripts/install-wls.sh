@@ -10,6 +10,7 @@ SILENT_RESPONSE_FILE=$result_root/silent.response
 ORAINVENTORYPOINTER_LOC=$result_root/oraInv.loc
 ORAINVENTORY_LOC=$result_root/oraInventory
 WLS_SHIPHOME=$result_root/fmw_wls_generic.jar
+DOWNLOAD_URL="http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src122140psu/fmw_12.2.1.4.0_wls_generic.jar"
 
 echo "creating $SILENT_RESPONSE_FILE file with contents"
 
@@ -32,24 +33,9 @@ EOF
 
 cat $ORAINVENTORYPOINTER_LOC
 
-mkdir -p $MW_HOME
-
-# Check if the variable WEBLOGIC_IMAGE_TAG is set
-if [[ -z "$WEBLOGIC_IMAGE_TAG" ]]; then
-  echo "WEBLOGIC_IMAGE_TAG is not set."
-  echo "Not proceeding with installation of WebLogic shiphome"
-  exit 0
-fi
-
 #download WebLogic shiphome installer
-if [[ "$WEBLOGIC_IMAGE_TAG" == *"12.2.1.4"* ]]; then
-  DOWNLOAD_URL = http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src122140psu/fmw_12.2.1.4.0_wls_generic.jar  
-elif [[ "$WEBLOGIC_IMAGE_TAG" == *"14.1.2"* ]]; then
-  DOWNLOAD_URL = http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src141200/fmw_14.1.2.0.0_wls_generic.jar
-else
-  echo "WEBLOGIC_IMAGE_TAG does not contain the required version."
-  echo "Not proceeding with installation of WebLogic shiphome"
-  exit 0
+if [[ "$WEBLOGIC_IMAGE_TAG" == *"14.1.2"* ]]; then
+  DOWNLOAD_URL="http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src141200/fmw_14.1.2.0.0_wls_generic.jar"
 fi
 curl -Lo $WLS_SHIPHOME $DOWNLOAD_URL
 
