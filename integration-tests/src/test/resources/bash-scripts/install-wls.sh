@@ -11,7 +11,7 @@ MW_HOME="$result_root/mwhome"
 SILENT_RESPONSE_FILE=$result_root/silent.response
 ORAINVENTORYPOINTER_LOC=$result_root/oraInv.loc
 ORAINVENTORY_LOC=$result_root/oraInventory
-WLS_SHIPHOME=$result_root/fmw_wls_generic.jar
+WLS_SHIPHOME=$result_root/fmw_12.2.1.4.0_wls_generic.jar
 DOWNLOAD_URL="http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src122140psu/fmw_12.2.1.4.0_wls_generic.jar"
 
 echo "creating $SILENT_RESPONSE_FILE file with contents"
@@ -40,8 +40,16 @@ if [[ "$WEBLOGIC_IMAGE_TAG" == *"14.1.2"* ]]; then
   DOWNLOAD_URL="http://$SHIPHOME_DOWNLOAD_SERVER/results/release/src141200/fmw_14.1.2.0.0_wls_generic.jar"
 fi
 curl -Lo $WLS_SHIPHOME $DOWNLOAD_URL
+ls -l $WLS_SHIPHOME
+md5sum $WLS_SHIPHOME
 
 #install WebLogic
 mkdir -p $MW_HOME
+mkdir -p $ORAINVENTORY_LOC
+
 echo "Running java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FILE -invPtrLoc $ORAINVENTORYPOINTER_LOC"
 java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FILE -invPtrLoc $ORAINVENTORYPOINTER_LOC
+echo $?
+
+ls -l $MW_HOME
+cat /tmp/OraInstall2024*
