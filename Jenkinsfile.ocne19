@@ -395,9 +395,8 @@ EOF
                     }
                 }
 
-                stage('Preparing Integration Test Environment') {
+                stage('Preparing Integration Test Environment - mount PV root in Jenkins agent') {
                     steps {
-                        echo 'create and mount pv_root in Jenkins agent'
                         sh '''
 
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
@@ -414,8 +413,10 @@ EOF
                             sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}
                         '''
                     }
+                }
+
+                stage('Preparing Integration Test Environment - mount PV root in OCNE cluster control node') {
                     steps {
-                        echo 'create and mount pv_root in OCNE cluster control node'
                         sh '''
                             # Get the OCNE cluster control node private IP
                             k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
@@ -427,8 +428,10 @@ EOF
                             ssh -i ${wkotest_ssh_pk} opc@${k8s_master_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
+                }
+
+                stage('Preparing Integration Test Environment - mount PV root in OCNE cluster worker1 node') {
                     steps {
-                        echo 'create and mount pv_root in OCNE cluster worker node1'
                         sh '''
                             # Get the OCNE cluster control node private IP
                             k8s_worker1_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-worker-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
@@ -440,8 +443,10 @@ EOF
                             ssh -i ${wkotest_ssh_pk} opc@${k8s_worker1_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
+                }
+
+                stage('Preparing Integration Test Environment - mount PV root in OCNE cluster worker2 node') {
                     steps {
-                        echo 'create and mount pv_root in OCNE cluster worker node2'
                         sh '''
                             # Get the OCNE cluster control node private IP
                             k8s_worker2_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-worker-002 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
