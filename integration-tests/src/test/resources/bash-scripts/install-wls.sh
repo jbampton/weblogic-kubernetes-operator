@@ -2,6 +2,8 @@
 # Copyright (c) 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+id
+whoami
 env
 echo $JAVA_HOME
 echo $result_root
@@ -41,4 +43,5 @@ curl -Lo $WLS_SHIPHOME $DOWNLOAD_URL
 
 #install WebLogic
 mkdir -p $MW_HOME
+echo "Running java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FILE -invPtrLoc $ORAINVENTORYPOINTER_LOC"
 java -jar $WLS_SHIPHOME -silent -responseFile $SILENT_RESPONSE_FILE -invPtrLoc $ORAINVENTORYPOINTER_LOC
