@@ -12,11 +12,11 @@ pipeline {
         timeout(time: 1800, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
-    triggers {
+    //triggers {
         // timer trigger for "nightly build"
-        parameterizedCron(env.JOB_NAME == 'wko-ocne-main-nightly' ?
-        CRON_SETTINGS : '')
-    }
+    //    parameterizedCron(env.JOB_NAME == 'wko-ocne19-release42-nightly' ?
+    //    CRON_SETTINGS : '')
+    //}
 
     tools {
         maven 'maven-3.8.7'
@@ -53,15 +53,15 @@ pipeline {
         outdir = "${WORKSPACE}/staging"
         result_root = "${outdir}/wl_k8s_test_results"
         pv_root_parent = "${outdir}/k8s-pvroot"
-        pv_root = "${pv_root_parent}/newpvroot"
+        pv_root = "${pv_root_parent}/pvroot${BUILD_ID}"
         pv_root_for_sampletest = "/shared"
 
         start_time = sh(script: 'date +"%Y-%m-%d %H:%M:%S"', returnStdout: true).trim()
         wle_download_url="https://github.com/oracle/weblogic-logging-exporter/releases/latest"
 
         kubeconfig_file = "${WORKSPACE}/terraform/terraform/1.9/kubeconfig"
-        availability_domain = "${env.JOB_NAME == 'wko-ocne-main-nightly' ? 'mFEn:PHX-AD-1' : 'mFEn:PHX-AD-1'}"
-        PARALLEL_RUN = "${env.JOB_NAME == 'wko-ocne-main-nightly' ? true : false}"
+        availability_domain = "${env.JOB_NAME == 'wko-ocne19-release42-nightly' ? 'mFEn:PHX-AD-1' : 'mFEn:PHX-AD-1'}"
+        PARALLEL_RUN = "${env.JOB_NAME == 'wko-ocne19-release42-nightly' ? true : false}"
     }
 
     parameters {
@@ -89,8 +89,8 @@ pipeline {
         choice(name: 'KUBECTL_VERSION',
                description: 'kubectl version',
                choices: [
-                   '1.29.2',
                    '1.29.4',
+                   '1.29.2',
                    '1.29.8',
                    '1.30.0',
                    '1.31.0'
@@ -377,7 +377,7 @@ EOF
                             mkdir -p ${WORKSPACE}/terraform/terraforminstall
                             sh ${WORKSPACE}/terraform/ocne.create.sh ${OCI_PROP_FILE} ${WORKSPACE}/terraform/terraform/1.9
 
-                            # DEBUG: print out kubeconfig file
+                            # print out kubeconfig file
                             echo '############# kubeconfig file ##############'
                             cat $KUBECONFIG
                             echo '############################################'
@@ -398,7 +398,6 @@ EOF
                 stage('Preparing Integration Test Environment - mount PV root in Jenkins agent') {
                     steps {
                         sh '''
-
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
@@ -418,7 +417,6 @@ EOF
                 stage('Preparing Integration Test Environment - mount PV root in OCNE cluster control node') {
                     steps {
                         sh '''
-
                             prefix=ocne-tf-jenkin-${BUILD_ID}
                             # Get the OCNE cluster control node private IP
                             k8s_master_instance_id=`oci compute instance list --compartment-id=${compartment_id} --display-name=${prefix}-control-plane-001 |jq -r '.data[] | select(."lifecycle-state" == "RUNNING") | ."id"'`
@@ -427,6 +425,7 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
+                            sed -i "/${k8s_master_node_ip}/d" ~/.ssh/known_hosts
                             ssh -i ${wkotest_ssh_pk} opc@${k8s_master_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
@@ -443,6 +442,7 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
+                            sed -i "/${k8s_worker1_node_ip}/d" ~/.ssh/known_hosts
                             ssh -i ${wkotest_ssh_pk} opc@${k8s_worker1_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
@@ -459,6 +459,7 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
+                            sed -i "/${k8s_worker2_node_ip}/d" ~/.ssh/known_hosts
                             ssh -i ${wkotest_ssh_pk} opc@${k8s_worker2_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
