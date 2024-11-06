@@ -147,8 +147,7 @@ class ItMultiDomainModels {
   @ParameterizedTest
   @DisplayName("scale cluster by patching domain resource with four different type of domains and "
       + "verify admin server is accessible via REST interface.")
-  //@ValueSource(strings = {"modelInImage", "domainInImage", "domainOnPV", "auxiliaryImageDomain"})
-  @ValueSource(strings = { "domainOnPV" })
+  @ValueSource(strings = {"modelInImage", "domainInImage", "domainOnPV", "auxiliaryImageDomain"})
   void testScaleClustersAndAdminRESTAccess(String domainType) {
     // workaround OWLS-122679
     if (!(OCNE && domainType.equals("domainInImage"))) {
