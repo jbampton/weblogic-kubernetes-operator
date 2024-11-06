@@ -251,6 +251,12 @@ pipeline {
                     }
                 }
 
+                stage('Delete known_hosts') {
+                    steps {
+                        sh "rm -f ~/.ssh/known_hosts"
+                    }
+                }
+
                 stage('Setup OCI config file  ') {
 
                     steps {
@@ -411,7 +417,6 @@ EOF
                             sudo mkdir -m777 -p ${pv_root_for_sampletest}
                             sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}
 
-                            rm ~/.ssh/known_hosts
                         '''
                     }
                 }
@@ -428,7 +433,7 @@ EOF
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
                             #sed -i "/${k8s_master_node_ip}/d" ~/.ssh/known_hosts
-                            ssh -i ${wkotest_ssh_pk} opc@${k8s_master_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
+                            ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_master_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
                 }
@@ -445,7 +450,7 @@ EOF
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
                             #sed -i "/${k8s_worker1_node_ip}/d" ~/.ssh/known_hosts
-                            ssh -i ${wkotest_ssh_pk} opc@${k8s_worker1_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
+                            ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_worker1_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
                 }
@@ -462,7 +467,7 @@ EOF
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
                             #sed -i "/${k8s_worker2_node_ip}/d" ~/.ssh/known_hosts
-                            ssh -i ${wkotest_ssh_pk} opc@${k8s_worker2_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
+                            ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_worker2_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
 
