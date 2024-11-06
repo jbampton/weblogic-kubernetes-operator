@@ -432,7 +432,6 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
-                            #sed -i "/${k8s_master_node_ip}/d" ~/.ssh/known_hosts
                             ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_master_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
@@ -449,7 +448,6 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
-                            #sed -i "/${k8s_worker1_node_ip}/d" ~/.ssh/known_hosts
                             ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_worker1_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
@@ -466,7 +464,6 @@ EOF
                             mt_privateip_id=`oci fs mount-target list --compartment-id=${compartment_id} --display-name="mt-ocne-test" --availability-domain=${availability_domain} | jq -r '.data[] | ."private-ip-ids"[]'`
                             mt_private_ip=`oci network private-ip get --private-ip-id "${mt_privateip_id}" | jq -r '.data | ."ip-address"'`
 
-                            #sed -i "/${k8s_worker2_node_ip}/d" ~/.ssh/known_hosts
                             ssh -o "StrictHostKeyChecking no" -i ${wkotest_ssh_pk} opc@${k8s_worker2_node_ip} "sudo mkdir -m777 -p ${pv_root_parent}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_parent}; sudo mkdir -m777 -p ${pv_root}; sudo mkdir -m777 -p ${pv_root_for_sampletest}; sudo mount ${mt_private_ip}:/fs-ocne-test ${pv_root_for_sampletest}"
                         '''
                     }
