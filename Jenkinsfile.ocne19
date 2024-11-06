@@ -10,7 +10,7 @@ pipeline {
     agent { label 'large' }
     options {
         timeout(time: 1800, unit: 'MINUTES')
-        disableConcurrentBuilds()
+        //disableConcurrentBuilds()
     }
     //triggers {
         // timer trigger for "nightly build"
@@ -641,7 +641,6 @@ EOF
                         sudo rm -rf ${pv_root_for_sampletest}/domains
                         sudo rm -rf ${pv_root_for_sampletest}/logs
                         sudo umount ${pv_root_for_sampletest}
-                        kubectl delete pod $(kubectl get pod |grep recycler-for|awk '{print $1}') || true
                     '''
                 }
             }
