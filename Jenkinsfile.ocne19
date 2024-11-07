@@ -12,11 +12,11 @@ pipeline {
         timeout(time: 1800, unit: 'MINUTES')
         //disableConcurrentBuilds()
     }
-    //triggers {
+    triggers {
         // timer trigger for "nightly build"
-    //    parameterizedCron(env.JOB_NAME == 'wko-ocne19-release42-nightly' ?
-    //    CRON_SETTINGS : '')
-    //}
+        parameterizedCron(env.JOB_NAME == 'wko-ocne19-release42-nightly' ?
+        CRON_SETTINGS : '')
+    }
 
     tools {
         maven 'maven-3.8.7'

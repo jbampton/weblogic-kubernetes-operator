@@ -37,5 +37,5 @@ kubernetes_name = "@OCNE_K8S_CLUSTER_NAME@"
 ocne_version = "@OCNE_VERSION@"
 
 // proxy
-proxy = "http://www-proxy-hqdc.us.oracle.com:80"
+proxy = "@HTTP_PROXY@"
 no_proxy = "@NO_PROXY@"
