@@ -325,7 +325,8 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
         // set initialization success to true, not counting the istio installation as not all tests use istio
         isInitializationSuccessful = true;
-        if (!OKD && !OCNE && !CRIO) {
+        //if (!OKD && !OCNE && !CRIO) {
+        if (!OKD && !CRIO) {
           logger.info("Installing istio before any test suites are run");
           installIstio();
         }
@@ -378,11 +379,13 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
     if (SKIP_CLEANUP) {
       logger.info("Skipping RESULTS_ROOT clean up after test execution");
     } else {
-      if (!OKD && !OCNE && !CRIO) {
+      //if (!OKD && !OCNE && !CRIO) {
+      if (!OKD && !CRIO) {
         logger.info("Uninstall istio after all test suites are run");
         uninstallIstio();
       }
-      if (!OKD && !OKE_CLUSTER && !OCNE && !CRIO) {
+      //if (!OKD && !OKE_CLUSTER && !OCNE && !CRIO) {
+      if (!OKD && !OKE_CLUSTER && !CRIO) {
         logger.info("Delete istio-system namespace after all test suites are run");
         deleteNamespace("istio-system");
         deleteNamespace(ORACLE_OPERATOR_NS);

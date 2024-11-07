@@ -87,6 +87,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Test istio enabled WebLogic Domain in mii model")
 @IntegrationTest
 @Tag("kind-parallel")
+@Tag("olcne-srg")
 @Tag("oke-parallel")
 class ItIstioMiiDomain {
 
