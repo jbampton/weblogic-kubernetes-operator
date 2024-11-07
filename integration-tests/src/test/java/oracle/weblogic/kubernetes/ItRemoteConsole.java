@@ -98,7 +98,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisabledOnSlimImage
 @Tag("olcne-mrg")
 @Tag("kind-parallel")
-@Tag("oke-sequential")
+@Tag("oke-weekly-sequential")
 class ItRemoteConsole {
 
   private static String domainNamespace = null;
