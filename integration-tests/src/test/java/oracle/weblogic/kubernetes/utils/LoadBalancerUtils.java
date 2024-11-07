@@ -398,7 +398,7 @@ public class LoadBalancerUtils {
 
     String updatedNoProxy = (currentNoProxy == null || currentNoProxy.isEmpty())
         ? newEntry
-        : currentNoProxy + "," + newEntry;
+        : currentNoProxy + ",10.196.0.0/24," + newEntry;
 
     System.setProperty("NO_PROXY", updatedNoProxy);
     getLogger().info("Updated NO_PROXY: " + System.getProperty("NO_PROXY"));
