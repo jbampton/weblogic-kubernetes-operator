@@ -44,6 +44,7 @@ generateTFVarFile() {
     sed -i -e "s:@NO_PROXY@:${no_proxy}:g" ${tfVarsFile}
 
     echo "Generated TFVars file [${tfVarsFile}]"
+    cat "${tfVarsFile}"
 }
 
 setupTerraform() {
@@ -85,10 +86,11 @@ createCluster () {
     cd ${terraformVarDir}
     echo "terraform init -var-file=${terraformVarDir}/terraform.tfvars"
     terraform init -var-file=${terraformVarDir}/terraform.tfvars
+    echo "terraform plan -var-file=${terraformVarDir}/terraform.tfvars"
     terraform plan -var-file=${terraformVarDir}/terraform.tfvars
+    echo "terraform apply -auto-approve -var-file=${terraformVarDir}/terraform.tfvars"
     terraform apply -auto-approve -var-file=${terraformVarDir}/terraform.tfvars
 }
-
 
 checkKubernetesCliConnection() {
     echo "Confirming ${KUBERNETES_CLI:-kubectl} can connect to the server..."
