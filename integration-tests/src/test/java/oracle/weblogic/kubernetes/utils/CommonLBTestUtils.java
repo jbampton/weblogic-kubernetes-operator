@@ -689,7 +689,6 @@ public class CommonLBTestUtils {
                                        String... ingressExtIP) {
     String host = ingressExtIP.length != 0 ? ingressExtIP[0] : K8S_NODEPORT_HOST;
     String hostAndPort;
-    String noproxy = OKE_CLUSTER_PRIVATEIP ? "--noproxy " + host : "--noproxy '*'";
     if (isTLS) {
       hostAndPort = getHostAndPort(host, httpsNodeport);
     } else {
@@ -702,20 +701,20 @@ public class CommonLBTestUtils {
       String curlCmd;
       if (isHostRouting) {
         if (isTLS) {
-          curlCmd = "curl -g -k --silent --show-error " + noproxy + " -H 'host: " + ingressHost
+          curlCmd = "curl -g -k --silent --show-error --noproxy '*' -H 'host: " + ingressHost
               + "' https://" + hostAndPort
               + "/weblogic/ready --write-out %{http_code} -o /dev/null";
         } else {
-          curlCmd = "curl -g --silent --show-error " + noproxy + " -H 'host: " + ingressHost
+          curlCmd = "curl -g --silent --show-error --noproxy '*' -H 'host: " + ingressHost
               + "' http://" + hostAndPort
               + "/weblogic/ready --write-out %{http_code} -o /dev/null";
         }
       } else {
         if (isTLS) {
-          curlCmd = "curl -g -k --silent --show-error " + noproxy + " https://" + hostAndPort
+          curlCmd = "curl -g -k --silent --show-error --noproxy '*' https://" + hostAndPort
               + "/" + pathString + "/weblogic/ready --write-out %{http_code} -o /dev/null";
         } else {
-          curlCmd = "curl -g --silent --show-error " + noproxy + " http://" + hostAndPort
+          curlCmd = "curl -g --silent --show-error --noproxy '*' http://" + hostAndPort
               + "/" + pathString + "/weblogic/ready --write-out %{http_code} -o /dev/null";
         }
       }
@@ -785,13 +784,13 @@ public class CommonLBTestUtils {
         + "&password=" + ADMIN_PASSWORD_DEFAULT
         + ((host != null) && host.contains(":") ? "&ipv6=true" : "&ipv6=false") + "\"";
     if (hostRouting) {
-      curlRequest = OKE_CLUSTER_PRIVATEIP ? String.format("curl -g --show-error -ks --noproxy %s "
-          + "-H 'host: %s' %s://%s/" +  uri, host, ingressHostName, protocol, host)
+      curlRequest = OKE_CLUSTER_PRIVATEIP ? String.format("curl -g --show-error -ks --noproxy '*' "
+          + "-H 'host: %s' %s://%s/" + uri, ingressHostName, protocol, host)
         : String.format("curl -g --show-error -ks --noproxy '*' "
           + "-H 'host: %s' %s://%s/" + uri, ingressHostName, protocol, getHostAndPort(host, lbPort));
     } else {
-      curlRequest = OKE_CLUSTER_PRIVATEIP ? String.format("curl -g --show-error -ks --noproxy %s "
-          + "%s://%s" + locationString + "/" +  uri, host, protocol, host)
+      curlRequest = OKE_CLUSTER_PRIVATEIP ? String.format("curl -g --show-error -ks --noproxy '*' "
+          + "%s://%s" + locationString + "/" + uri, protocol, host)
         : String.format("curl -g --show-error -ks --noproxy '*' "
           + "%s://%s" + locationString + "/" + uri, protocol, getHostAndPort(host, lbPort));
     }
@@ -843,7 +842,7 @@ public class CommonLBTestUtils {
                                              String hostName) {
     StringBuffer readyAppUrl = new StringBuffer();
     String hostAndPort = OKE_CLUSTER_PRIVATEIP ? hostName : getHostAndPort(hostName, lbNodePort);
-    String noproxy = OKE_CLUSTER_PRIVATEIP ? "--noproxy " + hostName : "--noproxy '*'";
+
     if (isTLS) {
       readyAppUrl.append("https://");
     } else {
@@ -857,15 +856,14 @@ public class CommonLBTestUtils {
     readyAppUrl.append("/management/tenant-monitoring/servers/");
     String curlCmd;
     if (isHostRouting) {
-      curlCmd = String.format("curl -g --user %s:%s -ks --show-error " + noproxy + " -H 'host: %s' %s",
+      curlCmd = String.format("curl -g --user %s:%s -ks --show-error --noproxy '*' -H 'host: %s' %s",
           ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT, ingressHostName, readyAppUrl.toString());
     } else {
       if (isTLS) {
-        curlCmd = String.format("curl -g --user %s:%s -ks --show-error " + noproxy
-            + " -H 'WL-Proxy-Client-IP: 1.2.3.4' "
+        curlCmd = String.format("curl -g --user %s:%s -ks --show-error --noproxy '*' -H 'WL-Proxy-Client-IP: 1.2.3.4' "
             + "-H 'WL-Proxy-SSL: false' %s", ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT, readyAppUrl.toString());
       } else {
-        curlCmd = String.format("curl -g --user %s:%s -ks --show-error " + noproxy + " %s",
+        curlCmd = String.format("curl -g --user %s:%s -ks --show-error --noproxy '*' %s",
             ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT, readyAppUrl.toString());
       }
     }
