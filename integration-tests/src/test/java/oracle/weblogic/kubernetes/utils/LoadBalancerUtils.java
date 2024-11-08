@@ -694,7 +694,8 @@ public class LoadBalancerUtils {
         if (host.contains(":")) {
           host = "[" + host + "]";
         }
-        String curlCmd = "curl -g --silent --show-error --noproxy '*' -H 'host: " + ingressHost
+        String curlCmd = "curl -g --silent --show-error --noproxy '*' "
+            + " -v --max-time 60 -H 'host: " + ingressHost
             + "' http://" + getHostAndPort(host, nodeport)
             + "/weblogic/ready --write-out %{http_code} -o /dev/null";
 
@@ -758,7 +759,8 @@ public class LoadBalancerUtils {
     logger.info("ingress {0} was created in namespace {1}", ingressName, domainNamespace);
 
     // check the ingress is ready to route the app to the server pod
-    String curlCmd = "curl -g --silent --show-error --noproxy '*' http://" + hostAndPort
+    String curlCmd = "curl -g --silent --show-error --noproxy '*' "
+        + " -v --max-time 60 http://" + hostAndPort
         + "/weblogic/ready --write-out %{http_code} -o /dev/null";
 
     logger.info("Executing curl command {0}", curlCmd);
@@ -822,7 +824,8 @@ public class LoadBalancerUtils {
         if (host.contains(":")) {
           host = "[" + host + "]";
         }
-        String curlCmd = "curl -g --silent --show-error --noproxy '*' -H 'host: " + ingressHost
+        String curlCmd = "curl -g --silent --show-error --noproxy '*' "
+            + " -v --max-time 60 -H 'host: " + ingressHost
             + "' http://" + host + ":" + nodeport
             + "/weblogic/ready --write-out %{http_code} -o /dev/null";
 
