@@ -774,7 +774,7 @@
                <!-- Profile for integration test environment -->
         <profile>
           <id>integration-test-env</id>
-          <!-- This profile is activated only if 'env.integration' property is set to 'true' -->
+          <!-- This profile is activated only if 'install.weblogic' property is set to 'true' -->
           <activation>
             <property>
               <name>install.weblogic</name>
