@@ -32,6 +32,7 @@ import io.kubernetes.client.openapi.models.V1IngressServiceBackend;
 import io.kubernetes.client.openapi.models.V1LocalObjectReference;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1ServiceBackendPort;
+import java.util.concurrent.TimeUnit;
 import oracle.weblogic.domain.AdminServer;
 import oracle.weblogic.domain.AdminService;
 import oracle.weblogic.domain.Channel;
@@ -683,6 +684,11 @@ class ItOnPremCrossDomainTransaction {
     });
 
     serverThread.start();
+    try {
+      TimeUnit.SECONDS.sleep(15);
+    } catch (InterruptedException ex) {
+      logger.warning("failed to wait");
+    }
     return processRef.get();
   }
  
@@ -690,7 +696,7 @@ class ItOnPremCrossDomainTransaction {
     AtomicReference<Process> processRef = new AtomicReference<>();
     Thread serverThread = new Thread(() -> {
       ProcessBuilder processBuilder = new ProcessBuilder(domainHome
-          + "/bin/startWebLogic.sh " + msName + " " + adminUrl);
+          + "/bin/startManagedWebLogic.sh " + msName + " " + adminUrl);
       try {
         Process process = processBuilder.start();
         processRef.set(process);
