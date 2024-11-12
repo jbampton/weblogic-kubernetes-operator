@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -190,20 +191,21 @@ class ItOnPremCrossDomainTransaction {
     assertNotNull(namespaces.get(3), "Namespace list is null");
     nginxNamespace = namespaces.get(3);
 
-    final int dbListenerPort = getNextFreePort();
-    ORACLEDBSUFFIX = ".svc.cluster.local:" + dbListenerPort + "/devpdb.k8s";
-    dbUrl = ORACLEDBURLPREFIX + domain2Namespace + ORACLEDBSUFFIX;
-    createBaseRepoSecret(domain2Namespace);
-
-    logger.info("Create Oracle DB in namespace: {0} ", domain2Namespace);
-    dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, SYSPASSWORD, domain2Namespace));
-
     // Now that we got the namespaces for both the domains, we need to update the model properties
     // file with the namespaces. For a cross-domain transaction to work, we need to have the externalDNSName
     // set in the config file. Cannot set this after the domain is up since a server restart is
     // required for this to take effect. So, copying the property file to RESULT_ROOT and updating the
     // property file
     updatePropertyFile();
+    createOnPremDomain();    
+
+    final int dbListenerPort = getNextFreePort();
+    ORACLEDBSUFFIX = ".svc.cluster.local:" + dbListenerPort + "/devpdb.k8s";
+    dbUrl = ORACLEDBURLPREFIX + domain2Namespace + ORACLEDBSUFFIX;
+    createBaseRepoSecret(domain2Namespace);
+
+    logger.info("Create Oracle DB in namespace: {0} ", domain2Namespace);
+    dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, SYSPASSWORD, domain2Namespace));    
 
     // install and verify operator
     installAndVerifyOperator(opNamespace, domain1Namespace, domain2Namespace);
@@ -213,7 +215,6 @@ class ItOnPremCrossDomainTransaction {
       // install and verify Nginx
       nginxHelmParams = installAndVerifyNginx(nginxNamespace, 0, 0);
     }
-    createOnPremDomain();
     buildApplicationsAndDomains();
   }
 
@@ -601,11 +602,14 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void createOnPremDomain() throws IOException {
+    logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
     Path mwHome = Path.of(RESULTS_ROOT, "mwhome");
     String modelFileList = RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_DOMAIN2 + ","
         + RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_JMS2;
     Path domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "domain2");
+    logger.info("creating on premise domain home {0}", domainHome);
+    Files.createDirectories(domainHome);
     Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
     Files.createDirectories(domainHome);
     List<String> command = List.of(
@@ -617,6 +621,13 @@ class ItOnPremCrossDomainTransaction {
         "-variable_file", modelProperties.toString()
     );
     runWDTandCreateDomain(command.stream().collect(Collectors.joining(" ")));
+    createBootProperties(domainHome.toString());
+    Process adminProcess = startAdminWebLogicServer(domainHome.toString());
+    Process ms1Process = startManagedWebLogicServer(domainHome.toString(),
+        "manahed-server1", "t3://" + getExternalDNSName() + ":7001");
+    Process ms2Process = startManagedWebLogicServer(domainHome.toString(),
+        "manahed-server2", "t3://" + getExternalDNSName() + ":7001");
+
   }
 
   private static Path downloadAndInstallWDT() throws IOException {
@@ -625,7 +636,7 @@ class ItOnPremCrossDomainTransaction {
     Files.createDirectories(destLocation.getParent());
     OracleHttpClient.downloadFile(wdtUrl, destLocation.toString(), null, null, 3);
 
-    String cmd = "cd " + destLocation.getParent() + "unzip " + destLocation;
+    String cmd = "cd " + destLocation.getParent() + ";unzip " + destLocation;
     assertTrue(Command.withParams(new CommandParams().command(cmd)).execute(), "unzip command failed");
     Path createDomainScript = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy", "bin", "createDomain.sh");
     assertTrue(Files.exists(createDomainScript), "could not find createDomain.sh script");
@@ -633,11 +644,24 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void runWDTandCreateDomain(String command) {
+    logger.info("running {0}", command);
     assertTrue(Command.withParams(new CommandParams().command(command)).execute(), "create domain failed");
   }
   
   private static String getExternalDNSName() throws UnknownHostException {
     return InetAddress.getByName(InetAddress.getLocalHost().getHostAddress()).getHostName();
+  }
+  
+  private static void createBootProperties(String domainHome) throws IOException {
+    List<String> servers = List.of("admin-server", "managed-server1", "managed-server2");
+    for (String server : servers) {
+      Path securityDir = Files.createDirectories(Path.of(domainHome, "servers", server, "security"));
+      Path bootFile = Files.createFile(Path.of(securityDir.toString(), "boot.properties"));
+      logger.info("creating boot.properties {0}", bootFile);
+      Files.writeString(bootFile, "username=weblogic", StandardOpenOption.TRUNCATE_EXISTING);
+      Files.writeString(bootFile, "password=welcome1", StandardOpenOption.APPEND);
+      assertTrue(Files.exists(bootFile), "failed to create boot.properties file");
+    }
   }
   
   private static Process startAdminWebLogicServer(String domainHome) {
@@ -659,14 +683,14 @@ class ItOnPremCrossDomainTransaction {
     return processRef.get();
   }
  
-  private static Process startManagedWebLogicServer(String domainHome, String adminUrl, String msName) {
+  private static Process startManagedWebLogicServer(String domainHome, String msName, String adminUrl) {
     AtomicReference<Process> processRef = new AtomicReference<>();
     Thread serverThread = new Thread(() -> {
-      ProcessBuilder processBuilder = new ProcessBuilder(domainHome + "/bin/startWebLogic.sh");
+      ProcessBuilder processBuilder = new ProcessBuilder(domainHome + "/bin/startWebLogic.sh " + msName + " " + adminUrl);
       try {
         Process process = processBuilder.start();
         processRef.set(process);
-        System.out.println("Admin Server is starting...");
+        System.out.println("managed server Server is starting...");
         process.waitFor(); // This will wait for the process to complete in the thread
         System.out.println("Admin Server has shut down.");
       } catch (IOException | InterruptedException e) {
