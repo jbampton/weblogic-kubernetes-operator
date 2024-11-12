@@ -65,6 +65,7 @@ import static oracle.weblogic.kubernetes.TestConstants.K8S_NODEPORT_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.OKD;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
+import static oracle.weblogic.kubernetes.TestConstants.RESULTS_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.RESULTS_ROOT;
 import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
@@ -604,10 +605,10 @@ class ItOnPremCrossDomainTransaction {
   private static void createOnPremDomain() throws IOException {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
-    Path mwHome = Path.of(RESULTS_ROOT, "mwhome");
+    Path mwHome = Path.of(RESULTS_BASE, "mwhome");
     String modelFileList = RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_DOMAIN2 + ","
         + RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_JMS2;
-    Path domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "domain2");
+    Path domainHome = Path.of(RESULTS_BASE, "mwhome", "domains", "domain2");
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);
     Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
