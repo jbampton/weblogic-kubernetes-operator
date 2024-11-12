@@ -686,7 +686,8 @@ class ItOnPremCrossDomainTransaction {
   private static Process startManagedWebLogicServer(String domainHome, String msName, String adminUrl) {
     AtomicReference<Process> processRef = new AtomicReference<>();
     Thread serverThread = new Thread(() -> {
-      ProcessBuilder processBuilder = new ProcessBuilder(domainHome + "/bin/startWebLogic.sh " + msName + " " + adminUrl);
+      ProcessBuilder processBuilder = new ProcessBuilder(domainHome
+          + "/bin/startWebLogic.sh " + msName + " " + adminUrl);
       try {
         Process process = processBuilder.start();
         processRef.set(process);
