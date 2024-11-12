@@ -625,9 +625,9 @@ class ItOnPremCrossDomainTransaction {
     createBootProperties(domainHome.toString());
     Process adminProcess = startAdminWebLogicServer(domainHome.toString());
     Process ms1Process = startManagedWebLogicServer(domainHome.toString(),
-        "manahed-server1", "t3://" + getExternalDNSName() + ":7001");
+        "managed-server1", "t3://" + getExternalDNSName() + ":7001");
     Process ms2Process = startManagedWebLogicServer(domainHome.toString(),
-        "manahed-server2", "t3://" + getExternalDNSName() + ":7001");
+        "managed-server2", "t3://" + getExternalDNSName() + ":7001");
 
   }
 
@@ -661,8 +661,8 @@ class ItOnPremCrossDomainTransaction {
       Path securityDir = Files.createDirectories(Path.of(domainHome, "servers", server, "security"));
       Path bootFile = Files.createFile(Path.of(securityDir.toString(), "boot.properties"));
       logger.info("creating boot.properties {0}", bootFile);
-      Files.writeString(bootFile, "username=weblogic", StandardOpenOption.TRUNCATE_EXISTING);
-      Files.writeString(bootFile, "password=welcome1", StandardOpenOption.APPEND);
+      Files.writeString(bootFile, "username=weblogic\n", StandardOpenOption.TRUNCATE_EXISTING);
+      Files.writeString(bootFile, "password=welcome1\n", StandardOpenOption.APPEND);
       assertTrue(Files.exists(bootFile), "failed to create boot.properties file");
     }
   }
