@@ -606,8 +606,8 @@ class ItOnPremCrossDomainTransaction {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
     Path mwHome = Path.of(RESULTS_BASE, "mwhome");
-    String modelFileList = RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_DOMAIN2 + ","
-        + RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_JMS2;
+    String modelFileList = RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2 + ","
+        + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2;
     Path domainHome = Path.of(RESULTS_BASE, "mwhome", "domains", "domain2");
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);
