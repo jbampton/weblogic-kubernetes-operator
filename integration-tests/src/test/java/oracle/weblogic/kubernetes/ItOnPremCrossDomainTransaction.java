@@ -634,12 +634,14 @@ class ItOnPremCrossDomainTransaction {
   private static Path downloadAndInstallWDT() throws IOException {
     String wdtUrl = WDT_DOWNLOAD_URL + "/download/weblogic-deploy.zip";
     Path destLocation = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy.zip");
-    Files.createDirectories(destLocation.getParent());
-    OracleHttpClient.downloadFile(wdtUrl, destLocation.toString(), null, null, 3);
-
-    String cmd = "cd " + destLocation.getParent() + ";unzip " + destLocation;
-    assertTrue(Command.withParams(new CommandParams().command(cmd)).execute(), "unzip command failed");
     Path createDomainScript = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy", "bin", "createDomain.sh");
+    if (!Files.exists(destLocation) && !Files.exists(createDomainScript)) {
+      Files.createDirectories(destLocation.getParent());
+      OracleHttpClient.downloadFile(wdtUrl, destLocation.toString(), null, null, 3);
+      String cmd = "cd " + destLocation.getParent() + ";unzip " + destLocation;
+      assertTrue(Command.withParams(new CommandParams().command(cmd)).execute(), "unzip command failed");
+    }
+
     assertTrue(Files.exists(createDomainScript), "could not find createDomain.sh script");
     return createDomainScript;
   }
