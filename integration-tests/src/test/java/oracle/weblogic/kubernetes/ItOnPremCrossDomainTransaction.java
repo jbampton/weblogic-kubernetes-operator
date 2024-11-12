@@ -190,6 +190,11 @@ class ItOnPremCrossDomainTransaction {
     logger.info("Assign a unique namespace for Nginx");
     assertNotNull(namespaces.get(3), "Namespace list is null");
     nginxNamespace = namespaces.get(3);
+    
+    final int dbListenerPort = getNextFreePort();
+    ORACLEDBSUFFIX = ".svc.cluster.local:" + dbListenerPort + "/devpdb.k8s";
+    dbUrl = ORACLEDBURLPREFIX + domain2Namespace + ORACLEDBSUFFIX;
+    createBaseRepoSecret(domain2Namespace);    
 
     // Now that we got the namespaces for both the domains, we need to update the model properties
     // file with the namespaces. For a cross-domain transaction to work, we need to have the externalDNSName
@@ -198,11 +203,6 @@ class ItOnPremCrossDomainTransaction {
     // property file
     updatePropertyFile();
     createOnPremDomain();    
-
-    final int dbListenerPort = getNextFreePort();
-    ORACLEDBSUFFIX = ".svc.cluster.local:" + dbListenerPort + "/devpdb.k8s";
-    dbUrl = ORACLEDBURLPREFIX + domain2Namespace + ORACLEDBSUFFIX;
-    createBaseRepoSecret(domain2Namespace);
 
     logger.info("Create Oracle DB in namespace: {0} ", domain2Namespace);
     dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, SYSPASSWORD, domain2Namespace));    
