@@ -80,6 +80,7 @@
         <wko.it.image.tag.operator>${env.IMAGE_TAG_OPERATOR}</wko.it.image.tag.operator>
         <wko.it.release.image.name.operator>${env.RELEASE_IMAGE_OPERATOR}</wko.it.release.image.name.operator>
         <wko.it.crio.pipeline.image>${env.DOCKER_IMAGE}</wko.it.crio.pipeline.image>
+        <wko.it.shiphome.download.server>${env.SHIPHOME_DOWNLOAD_SERVER}</wko.it.shiphome.download.server>
         <includes-failsafe>**/It*</includes-failsafe>
     </properties>
 
@@ -797,6 +798,8 @@
                       <executable>bash</executable>
                       <arguments>
                         <argument>${project.basedir}/src/test/resources/bash-scripts/install-wls.sh</argument>
+                        <argument>${wko.it.result.root}</argument>
+                        <argument>${wko.it.shiphome.download.server}</argument>
                       </arguments>
                     </configuration>
                   </execution>

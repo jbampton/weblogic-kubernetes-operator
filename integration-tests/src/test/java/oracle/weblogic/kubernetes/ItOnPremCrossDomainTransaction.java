@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import io.kubernetes.client.openapi.models.V1EnvVar;
@@ -212,7 +213,7 @@ class ItOnPremCrossDomainTransaction {
       // install and verify Nginx
       nginxHelmParams = installAndVerifyNginx(nginxNamespace, 0, 0);
     }
-
+    createOnPremDomain();
     buildApplicationsAndDomains();
   }
 
@@ -262,6 +263,7 @@ class ItOnPremCrossDomainTransaction {
     FileOutputStream out = new FileOutputStream(PROPS_TEMP_DIR + "/" + propFileName);
     props.setProperty("NAMESPACE", domainNamespace);
     props.setProperty("PDBCONNECTSTRING", dbUrl);
+    props.setProperty("DNS_NAME", getExternalDNSName());
     props.store(out, null);
     out.close();
   }
@@ -333,8 +335,6 @@ class ItOnPremCrossDomainTransaction {
 
     // repo login and push image to registry if necessary
     imageRepoLoginAndPushImageToRegistry(domain1Image);
-
-    createOnPremDomain();
 
     //create domain1
     createDomain(domainUid1, domain1Namespace, domain1AdminSecretName, domain1Image);
@@ -606,7 +606,7 @@ class ItOnPremCrossDomainTransaction {
     String modelFileList = RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_DOMAIN2 + ","
         + RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_JMS2;
     Path domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "domain2");
-    Path modelProperties = Path.of(RESOURCE_DIR, "/onpremcrtx", WDT_MODEL_DOMAIN2_PROPS);
+    Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
     Files.createDirectories(domainHome);
     List<String> command = List.of(
         createDomainScript.toString(),
@@ -639,6 +639,43 @@ class ItOnPremCrossDomainTransaction {
   private static String getExternalDNSName() throws UnknownHostException {
     return InetAddress.getByName(InetAddress.getLocalHost().getHostAddress()).getHostName();
   }
+  
+  private static Process startAdminWebLogicServer(String domainHome) {
+    AtomicReference<Process> processRef = new AtomicReference<>();
+    Thread serverThread = new Thread(() -> {
+      ProcessBuilder processBuilder = new ProcessBuilder(domainHome + "/bin/startWebLogic.sh");
+      try {
+        Process process = processBuilder.start();
+        processRef.set(process);
+        System.out.println("Admin Server is starting...");
+        process.waitFor(); // This will wait for the process to complete in the thread
+        System.out.println("Admin Server has shut down.");
+      } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+      }
+    });
+
+    serverThread.start();
+    return processRef.get();
+  }
  
+  private static Process startManagedWebLogicServer(String domainHome, String adminUrl, String msName) {
+    AtomicReference<Process> processRef = new AtomicReference<>();
+    Thread serverThread = new Thread(() -> {
+      ProcessBuilder processBuilder = new ProcessBuilder(domainHome + "/bin/startWebLogic.sh");
+      try {
+        Process process = processBuilder.start();
+        processRef.set(process);
+        System.out.println("Admin Server is starting...");
+        process.waitFor(); // This will wait for the process to complete in the thread
+        System.out.println("Admin Server has shut down.");
+      } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+      }
+    });
+
+    serverThread.start();
+    return processRef.get();
+  }
   
 }
