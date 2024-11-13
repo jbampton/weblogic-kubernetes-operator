@@ -46,6 +46,7 @@ import static oracle.weblogic.kubernetes.actions.impl.primitive.Installer.defaul
 import static oracle.weblogic.kubernetes.assertions.impl.Kubernetes.isPodReady;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.checkServiceExists;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
+import static oracle.weblogic.kubernetes.utils.CommonTestUtils.withLongRetryPolicy;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.withStandardRetryPolicy;
 import static oracle.weblogic.kubernetes.utils.ThreadSafeLogger.getLogger;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -103,6 +104,7 @@ public class LoggingExporter {
     logger.info("Check if Elasticsearch deployment {0} is ready in namespace {1}",
         elasticsearchName, namespace);
     testUntil(
+        withLongRetryPolicy,
         Deployment.isReady(elasticsearchName, labels, namespace),
         logger,
         "Elasticsearch deployment {0} to be completed in {1} namespace",
