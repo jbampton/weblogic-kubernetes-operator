@@ -390,7 +390,7 @@ class ItOnPremCrossDomainTransaction {
     logger.info("MDB application is activated on domain1/cluster");
 
     String url = String.format("http://%s/jmsservlet/jmstest?"
-        + "url=t3://%s:8001&"
+        + "url=t3://%s:8002&"
         + "cf=jms.ClusterConnectionFactory&"
         + "action=send&"
         + "dest=jms/testCdtUniformTopic",
