@@ -303,7 +303,8 @@ class ItOnPremCrossDomainTransaction {
     // Add the domain2 namespace decorated URL to the providerURL of MDB
     // so that it can communicate with remote destination on domain2
     assertDoesNotThrow(() -> replaceStringInFile(
-        template.toString(), "domain2-cluster-cluster-1.domain2-namespace", getExternalDNSName()),
+        template.toString(), "t3://domain2-cluster-cluster-1.domain2-namespace:8001",
+        "t3://" + getExternalDNSName() + ":8002,t3://" + getExternalDNSName() + ":8003"),
         "Could not modify the domain2Namespace in MDB Template file");
 
     //build application archive for MDB
@@ -327,8 +328,8 @@ class ItOnPremCrossDomainTransaction {
 
     // build the model file list for domain1
     final List<String> modelListDomain1 = Arrays.asList(
-        MODEL_DIR + "/" + WDT_MODEL_FILE_DOMAIN1,
-        MODEL_DIR + "/" + WDT_MODEL_FILE_JMS);
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
 
     final List<String> appSrcDirList1 = Arrays.asList(appSource2, appSource3);
 
