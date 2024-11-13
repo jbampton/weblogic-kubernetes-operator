@@ -298,7 +298,7 @@ class ItOnPremCrossDomainTransaction {
     // so that it can communicate with remote destination on domain2
     assertDoesNotThrow(() -> replaceStringInFile(
         template.toString(), "t3://domain2-cluster-cluster-1.domain2-namespace:8001",
-        "t3://" + getExternalDNSName() + ":8002,t3://" + getExternalDNSName() + ":8003"),
+        "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003"),
         "Could not modify the domain2Namespace in MDB Template file");
 
     //build application archive for MDB
