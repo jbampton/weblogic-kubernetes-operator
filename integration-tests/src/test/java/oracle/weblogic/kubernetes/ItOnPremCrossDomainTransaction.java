@@ -603,7 +603,7 @@ class ItOnPremCrossDomainTransaction {
     assertTrue(callWebAppAndWaitTillReady(curlCmd, 20));
   }
 
-  private static void createOnPremDomain() throws IOException {
+  private static void createOnPremDomain() throws IOException, InterruptedException {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
     Path mwHome = Path.of(RESULTS_BASE, "mwhome");
@@ -624,11 +624,19 @@ class ItOnPremCrossDomainTransaction {
     );
     runWDTandCreateDomain(command.stream().collect(Collectors.joining(" ")));
     createBootProperties(domainHome.toString());
+    /*
     Process adminProcess = startAdminWebLogicServer(domainHome.toString());
     Process ms1Process = startManagedWebLogicServer(domainHome.toString(),
         "managed-server1", "t3://" + getExternalDNSName() + ":7001");
     Process ms2Process = startManagedWebLogicServer(domainHome.toString(),
         "managed-server2", "t3://" + getExternalDNSName() + ":7001");
+     */
+    Process adminProcess = startWebLogicServer(domainHome.toString() + "/bin/startWebLogic.sh");
+    TimeUnit.SECONDS.sleep(15);
+    Process ms1Process = startWebLogicServer(domainHome.toString() + "/bin/startManagedWebLogic.sh",
+        "managed-server1", "t3://" + getExternalDNSName() + ":7001");
+    Process ms2Process = startWebLogicServer(domainHome.toString() + "/bin/startManagedWebLogic.sh",
+        "managed-server2", "t3://" + getExternalDNSName() + ":7001");    
 
   }
 
@@ -675,9 +683,9 @@ class ItOnPremCrossDomainTransaction {
       try {
         Process process = processBuilder.start();
         processRef.set(process);
-        System.out.println("Admin Server is starting...");
+        logger.info("Admin Server is starting...");
         process.waitFor(); // This will wait for the process to complete in the thread
-        System.out.println("Admin Server has shut down.");
+        logger.info("Admin Server has shut down.");
       } catch (IOException | InterruptedException e) {
         e.printStackTrace();
       }
@@ -696,13 +704,13 @@ class ItOnPremCrossDomainTransaction {
     AtomicReference<Process> processRef = new AtomicReference<>();
     Thread serverThread = new Thread(() -> {
       ProcessBuilder processBuilder = new ProcessBuilder(domainHome
-          + "/bin/startManagedWebLogic.sh " + msName + " " + adminUrl);
+          + "/bin/startManagedWebLogic.sh", msName, adminUrl);
       try {
         Process process = processBuilder.start();
         processRef.set(process);
-        System.out.println("managed server Server is starting...");
+        logger.info("managed server Server is starting...");
         process.waitFor(); // This will wait for the process to complete in the thread
-        System.out.println("Admin Server has shut down.");
+        logger.info("Admin Server has shut down.");
       } catch (IOException | InterruptedException e) {
         e.printStackTrace();
       }
@@ -712,4 +720,22 @@ class ItOnPremCrossDomainTransaction {
     return processRef.get();
   }
   
+  private static Process startWebLogicServer(String...command) {
+    AtomicReference<Process> processRef = new AtomicReference<>();
+    Thread serverThread = new Thread(() -> {
+      ProcessBuilder processBuilder = new ProcessBuilder(command);
+      try {
+        Process process = processBuilder.start();
+        processRef.set(process);
+        logger.info("Server is starting...");
+        process.waitFor(); // This will wait for the process to complete in the thread
+        logger.info("Server has shut down.");
+      } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+      }
+    });
+
+    serverThread.start();
+    return processRef.get();
+  }  
 }
