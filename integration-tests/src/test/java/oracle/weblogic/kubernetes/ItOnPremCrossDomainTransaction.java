@@ -90,7 +90,6 @@ import static oracle.weblogic.kubernetes.utils.CommonTestUtils.getHostAndPort;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.getNextFreePort;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.getServiceExtIPAddrtOke;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
-import static oracle.weblogic.kubernetes.utils.DbUtils.createOracleDBUsingOperator;
 import static oracle.weblogic.kubernetes.utils.ExecCommand.exec;
 import static oracle.weblogic.kubernetes.utils.FileUtils.copyFolder;
 import static oracle.weblogic.kubernetes.utils.FileUtils.replaceStringInFile;
@@ -207,7 +206,7 @@ class ItOnPremCrossDomainTransaction {
     createOnPremDomain();    
 
     logger.info("Create Oracle DB in namespace: {0} ", domain2Namespace);
-    dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, SYSPASSWORD, domain2Namespace));    
+    //dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, SYSPASSWORD, domain2Namespace));    
 
     // install and verify operator
     installAndVerifyOperator(opNamespace, domain1Namespace, domain2Namespace);
@@ -323,8 +322,8 @@ class ItOnPremCrossDomainTransaction {
 
     // build the model file list for domain1
     final List<String> modelListDomain1 = Arrays.asList(
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1);
+    //,RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
 
     final List<String> appSrcDirList1 = Arrays.asList(appSource2, appSource3);
 
