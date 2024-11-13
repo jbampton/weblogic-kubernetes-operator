@@ -728,22 +728,23 @@ class ItOnPremCrossDomainTransaction {
     return processRef.get();
   }
   
-  private static Process startWebLogicServer(String...command) {
+  private static Process startWebLogicServer(String... command) {
     AtomicReference<Process> processRef = new AtomicReference<>();
     Thread serverThread = new Thread(() -> {
       ProcessBuilder processBuilder = new ProcessBuilder(command);
       try {
+        logger.info("Starting server with command :{0}", String.join(" ", command));
         Process process = processBuilder.start();
         processRef.set(process);
         logger.info("Server is starting...");
         process.waitFor(); // This will wait for the process to complete in the thread
         logger.info("Server has shut down.");
       } catch (IOException | InterruptedException e) {
-        e.printStackTrace();
+        logger.warning(e.getLocalizedMessage());
       }
     });
 
     serverThread.start();
     return processRef.get();
-  }  
+  }
 }
