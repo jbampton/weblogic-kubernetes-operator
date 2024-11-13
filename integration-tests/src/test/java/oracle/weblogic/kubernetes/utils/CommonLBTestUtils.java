@@ -56,6 +56,7 @@ import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_PORT_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
+import static oracle.weblogic.kubernetes.TestConstants.CRIO;
 import static oracle.weblogic.kubernetes.TestConstants.DOMAIN_API_VERSION;
 import static oracle.weblogic.kubernetes.TestConstants.FAILURE_RETRY_INTERVAL_SECONDS;
 import static oracle.weblogic.kubernetes.TestConstants.FAILURE_RETRY_LIMIT_MINUTES;
@@ -64,6 +65,8 @@ import static oracle.weblogic.kubernetes.TestConstants.K8S_NODEPORT_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.KIND_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.MANAGED_SERVER_NAME_BASE;
+import static oracle.weblogic.kubernetes.TestConstants.OCNE;
+import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER_PRIVATEIP;
 import static oracle.weblogic.kubernetes.TestConstants.PV_ROOT;
 import static oracle.weblogic.kubernetes.TestConstants.RESULTS_ROOT;
@@ -95,6 +98,7 @@ import static oracle.weblogic.kubernetes.utils.ImageUtils.createBaseRepoSecret;
 import static oracle.weblogic.kubernetes.utils.JobUtils.createJobAndWaitUntilComplete;
 import static oracle.weblogic.kubernetes.utils.PersistentVolumeUtils.createPVPVCAndVerify;
 import static oracle.weblogic.kubernetes.utils.PersistentVolumeUtils.createfixPVCOwnerContainer;
+import static oracle.weblogic.kubernetes.utils.PodUtils.checkPodReady;
 import static oracle.weblogic.kubernetes.utils.PodUtils.getExternalServicePodName;
 import static oracle.weblogic.kubernetes.utils.PodUtils.setPodAntiAffinity;
 import static oracle.weblogic.kubernetes.utils.SecretUtils.createSecretWithUsernamePassword;
@@ -213,7 +217,7 @@ public class CommonLBTestUtils {
       getLogger().info("Getting admin service node port: {0}", serviceNodePort);
 
       getLogger().info("Validating WebLogic admin server access by login to console");
-      if (OKE_CLUSTER_PRIVATEIP) {
+      if (OKE_CLUSTER_PRIVATEIP || OCNE || CRIO) {
         assertTrue(assertDoesNotThrow(
             () -> adminLoginPageAccessible(adminServerPodName, "7001", domainNamespace,
                 ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
@@ -880,6 +884,38 @@ public class CommonLBTestUtils {
         }
       } catch (IOException | InterruptedException ex) {
         getLogger().severe(ex.getMessage());
+      }
+    }
+    if (OKE_CLUSTER) {
+      LoggingFacade logger = getLogger();
+      try {
+        if (!consoleAccessible) {
+          ExecResult result = ExecCommand.exec(KUBERNETES_CLI + " get all -A");
+          logger.info(result.stdout());
+          //restart core-dns service
+          result = ExecCommand.exec(KUBERNETES_CLI + " rollout restart deployment coredns -n kube-system");
+          logger.info(result.stdout());
+          checkPodReady("coredns", null, "kube-system");
+        }
+      } catch (Exception ex) {
+        logger.warning(ex.getLocalizedMessage());
+      }
+      for (int i = 0; i < 10; i++) {
+        assertDoesNotThrow(() -> TimeUnit.SECONDS.sleep(1));
+        ExecResult result;
+        try {
+          getLogger().info("Accessing app on admin server using curl request, iteration {0}: {1}", i, curlCmd);
+          result = ExecCommand.exec(curlCmd, true);
+          String response = result.stdout().trim();
+          getLogger().info("exitCode: {0}, \nstdout: {1}, \nstderr: {2}",
+              result.exitValue(), response, result.stderr());
+          if (response.contains("RUNNING")) {
+            consoleAccessible = true;
+            break;
+          }
+        } catch (IOException | InterruptedException ex) {
+          getLogger().severe(ex.getMessage());
+        }
       }
     }
     assertTrue(consoleAccessible, "Couldn't access admin server app");

@@ -31,10 +31,13 @@ import org.junit.jupiter.api.TestMethodOrder;
 import static oracle.weblogic.kubernetes.TestConstants.K8S_NODEPORT_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.KIND_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
+import static oracle.weblogic.kubernetes.TestConstants.OCNE;
 import static oracle.weblogic.kubernetes.TestConstants.RESULTS_TEMPFILE_DIR;
 import static oracle.weblogic.kubernetes.TestConstants.SKIP_CLEANUP;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTPS_HOSTPORT;
+import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTPS_NODEPORT;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
+import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_NODEPORT;
 import static oracle.weblogic.kubernetes.TestConstants.WLSIMG_BUILDER;
 import static oracle.weblogic.kubernetes.TestConstants.WLSIMG_BUILDER_DEFAULT;
 import static oracle.weblogic.kubernetes.actions.TestActions.deletePersistentVolume;
@@ -62,7 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @IntegrationTest
 @Tag("olcne-mrg")
 @Tag("kind-parallel")
-@Tag("oke-gate")
+@Tag("oke-sequential")
 class ItLBTwoDomainsTraefik {
 
   private static final int numberOfDomains = 2;
@@ -276,6 +279,8 @@ class ItLBTwoDomainsTraefik {
   private int getTraefikLbNodePort(boolean isHttps) {
     if (KIND_CLUSTER && !WLSIMG_BUILDER.equals(WLSIMG_BUILDER_DEFAULT)) {
       return isHttps ? TRAEFIK_INGRESS_HTTPS_HOSTPORT : TRAEFIK_INGRESS_HTTP_HOSTPORT;
+    } else if (OCNE && !WLSIMG_BUILDER.equals(WLSIMG_BUILDER_DEFAULT)) {
+      return isHttps ? TRAEFIK_INGRESS_HTTPS_NODEPORT : TRAEFIK_INGRESS_HTTP_NODEPORT;
     } else if (traefikHelmParams != null) {
       logger.info("Getting web node port for Traefik loadbalancer {0}", traefikHelmParams.getReleaseName());
       return assertDoesNotThrow(() ->
