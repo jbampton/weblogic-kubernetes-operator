@@ -172,7 +172,8 @@ class ItOnPremCrossDomainTransaction {
    * @param namespaces list of namespaces
    */
   @BeforeAll
-  public static void initAll(@Namespaces(4) List<String> namespaces) throws UnknownHostException, IOException {
+  public static void initAll(@Namespaces(4) List<String> namespaces)
+      throws UnknownHostException, IOException, InterruptedException {
     logger = getLogger();
 
     // get a new unique opNamespace
