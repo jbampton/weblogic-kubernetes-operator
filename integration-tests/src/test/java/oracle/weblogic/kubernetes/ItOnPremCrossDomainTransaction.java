@@ -239,7 +239,7 @@ class ItOnPremCrossDomainTransaction {
   private static void updatePropertyFile() {
     //create a temporary directory to copy and update the properties file
     Path target = Paths.get(PROPS_TEMP_DIR);
-    Path source1 = Paths.get(RESOURCE_DIR, WDT_MODEL_DOMAIN1_PROPS);
+    Path source1 = Paths.get(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_DOMAIN1_PROPS);
     Path source2 = Paths.get(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_DOMAIN2_PROPS);
     logger.info("Copy the properties file to the above area so that we can add namespace property");
     assertDoesNotThrow(() -> {
