@@ -227,10 +227,6 @@ class ItOnPremCrossDomainTransaction {
   public void beforeEach() {
     int replicaCount = 2;
     for (int i = 1; i <= replicaCount; i++) {
-      checkPodReadyAndServiceExists(domain2ManagedServerPrefix + i,
-          domainUid2, domain2Namespace);
-    }
-    for (int i = 1; i <= replicaCount; i++) {
       checkPodReadyAndServiceExists(domain1ManagedServerPrefix + i,
           domainUid1, domain1Namespace);
     }
