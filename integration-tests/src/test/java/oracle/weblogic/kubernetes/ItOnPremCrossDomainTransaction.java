@@ -72,7 +72,6 @@ import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_N
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.DOWNLOAD_DIR;
-import static oracle.weblogic.kubernetes.actions.ActionConstants.MODEL_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.RESOURCE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WDT_DOWNLOAD_URL;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WORK_DIR;
@@ -240,7 +239,7 @@ class ItOnPremCrossDomainTransaction {
   private static void updatePropertyFile() {
     //create a temporary directory to copy and update the properties file
     Path target = Paths.get(PROPS_TEMP_DIR);
-    Path source1 = Paths.get(MODEL_DIR, WDT_MODEL_DOMAIN1_PROPS);
+    Path source1 = Paths.get(RESOURCE_DIR, WDT_MODEL_DOMAIN1_PROPS);
     Path source2 = Paths.get(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_DOMAIN2_PROPS);
     logger.info("Copy the properties file to the above area so that we can add namespace property");
     assertDoesNotThrow(() -> {
