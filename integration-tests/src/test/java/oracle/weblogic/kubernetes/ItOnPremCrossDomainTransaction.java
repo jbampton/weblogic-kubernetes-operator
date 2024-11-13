@@ -322,8 +322,8 @@ class ItOnPremCrossDomainTransaction {
 
     // build the model file list for domain1
     final List<String> modelListDomain1 = Arrays.asList(
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1);
-    //,RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
+         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
 
     final List<String> appSrcDirList1 = Arrays.asList(appSource2, appSource3);
 
@@ -626,13 +626,25 @@ class ItOnPremCrossDomainTransaction {
         "managed-server1", "t3://" + getExternalDNSName() + ":7001");
     Process ms2Process = startManagedWebLogicServer(domainHome.toString(),
         "managed-server2", "t3://" + getExternalDNSName() + ":7001");
-     */
+     
     Process adminProcess = startWebLogicServer(domainHome.toString() + "/bin/startWebLogic.sh");
     TimeUnit.SECONDS.sleep(15);
     Process ms1Process = startWebLogicServer(domainHome.toString() + "/bin/startManagedWebLogic.sh",
         "managed-server1", "t3://" + getExternalDNSName() + ":7001");
     Process ms2Process = startWebLogicServer(domainHome.toString() + "/bin/startManagedWebLogic.sh",
-        "managed-server2", "t3://" + getExternalDNSName() + ":7001");    
+        "managed-server2", "t3://" + getExternalDNSName() + ":7001");
+    */
+    Process adminProcess = startWebLogicServer("/bin/bash", "-c", domainHome.toString()
+        + "/bin/startWebLogic.sh &");
+    TimeUnit.SECONDS.sleep(15);
+    Process ms1Process = startWebLogicServer("/bin/bash", "-c", domainHome.toString()
+        + "/bin/startManagedWebLogic.sh",
+        "managed-server1",
+        "t3://" + getExternalDNSName() + ":7001 &");
+    Process ms2Process = startWebLogicServer("/bin/bash", "-c", domainHome.toString()
+        + "/bin/startManagedWebLogic.sh",
+        "managed-server2",
+        "t3://" + getExternalDNSName() + ":7001 &");
 
   }
 
