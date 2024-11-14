@@ -481,9 +481,9 @@ public class LoadBalancerUtils {
   private static boolean isBackendHealthy(String jsonResponse) {
     LoggingFacade logger = getLogger();
     // Check for any non-empty backend set names indicating a failure
-    if (jsonResponse.contains("\"critical-state-backend-set-names\": [ ]")
-        && jsonResponse.contains("\"unknown-state-backend-set-names\": [ ]")
-        && jsonResponse.contains("\"warning-state-backend-set-names\": [ ]")) {
+    if (jsonResponse.contains("\"critical-state-backend-set-names\": []")
+        && jsonResponse.contains("\"unknown-state-backend-set-names\": []")
+        && jsonResponse.contains("\"warning-state-backend-set-names\": []")) {
       logger.info("All backends are healthy.");
       return true;  // Healthy
     } else {
