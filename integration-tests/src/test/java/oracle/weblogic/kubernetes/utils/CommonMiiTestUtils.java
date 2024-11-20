@@ -1114,12 +1114,7 @@ public class CommonMiiTestUtils {
         e.printStackTrace();
       }
     } else {
-<<<<<<< HEAD
-      if (OKE_CLUSTER_PRIVATEIP) {
-=======
-      String curlString;
       if (OKE_CLUSTER_PRIVATEIP || OCNE) {
->>>>>>> 9bc7e4c... Merge branch 'xc-123421-42' into 'release/4.2'
         String protocol = "http";
         String port = "7001";
 
