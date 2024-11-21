@@ -158,7 +158,7 @@ pipeline {
         )
         string(name: 'FMWINFRA_IMAGE_NAME',
                description: 'FWM Infra image name. Default is the image name in BASE_IMAGES_REPO. Use middleware/fmw-infrastructure for OCR.',
-               defaultValue: "test-images/fmw-infrastructure"
+               defaultValue: "oracle/fmw-infrastructure"
         )
         string(name: 'FMWINFRA_IMAGE_TAG',
                description: 'FWM Infra image tag',
