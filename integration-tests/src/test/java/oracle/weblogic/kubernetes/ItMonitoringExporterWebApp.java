@@ -108,7 +108,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @IntegrationTest
 @Tag("olcne-mrg")
 @Tag("oke-weekly-sequential")
-@Tag("kind-sequential")
 @Tag("okd-wls-mrg")
 @Tag("gate")
 class ItMonitoringExporterWebApp {

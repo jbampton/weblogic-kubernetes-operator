@@ -99,7 +99,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Test for initializeDomainOnPV when user per-creates RCU")
 @IntegrationTest
-@Tag("kind-sequential")
 @Tag("oke-weekly-sequential")
 public class ItFmwDomainInPvUserCreateRcu {
 

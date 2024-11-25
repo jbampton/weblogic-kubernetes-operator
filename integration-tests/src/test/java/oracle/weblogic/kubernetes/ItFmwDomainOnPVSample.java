@@ -70,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("test domain on pv sample for FMW domain")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @IntegrationTest
-@Tag("kind-sequential")
 @Tag("olcne-sequential")
 @DisabledIfEnvironmentVariable(named = "SKIP_WLS_SAMPLES", matches = "true")
 class ItFmwDomainOnPVSample {

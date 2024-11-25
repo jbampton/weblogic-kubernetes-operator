@@ -765,19 +765,6 @@
                 <groups>toolkits-srg</groups>
             </properties>
         </profile>
-        <profile>
-          <id>v8o</id>
-          <activation>
-            <property>
-              <name>activate.v8o</name> <!-- Custom activation property -->
-              <value>true</value>
-            </property>
-          </activation>            
-          <properties>
-            <skipITs>false</skipITs>
-            <groups>v8o</groups>
-          </properties>
-        </profile>
         <!-- Profile for integration test environment -->
         <profile>
           <id>integration-test-env</id>
