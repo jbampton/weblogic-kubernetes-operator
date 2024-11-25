@@ -636,7 +636,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
       if (!image.startsWith("phx")) {
         kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + BASE_IMAGES_TENANCY.length() + 2);
       } else {
-        kindRepoImage = image.replace("phx.ocir.io/devweblogic", "localhost");
+        kindRepoImage = image.replace("phx.ocir.io/devweblogic", "localhost:5000");
       }
       return imagePull(image) && imageTag(image, kindRepoImage) && imagePush(kindRepoImage);
     });
