@@ -266,7 +266,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
         logger.info(WLSIMG_BUILDER + " login");
         testUntil(withVeryLongRetryPolicy,
-              () -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+              () -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
               logger,
               WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
 
