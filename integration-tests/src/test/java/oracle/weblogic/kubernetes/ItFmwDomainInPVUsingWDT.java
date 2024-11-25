@@ -63,6 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("Test to creat a FMW domain in persistent volume using WDT")
 @IntegrationTest
 @Tag("oke-weekly-sequential")
+@Tag("kind-sequential")
 @Tag("okd-fmw-cert")
 class ItFmwDomainInPVUsingWDT {
 

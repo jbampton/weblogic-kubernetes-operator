@@ -70,6 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Tests to create JRF domain in persistent volume using WLST.
  */
 @DisplayName("Verify the WebLogic server pods can run with domain created in persistent volume")
+@Tag("kind-sequential")
 @Tag("okd-fmw-cert")
 @IntegrationTest
 @Tag("olcne-sequential")

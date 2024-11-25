@@ -71,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("test domain on pv sample")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @IntegrationTest
+@Tag("kind-sequential")
 @Tag("olcne-sequential")
 @DisabledIfEnvironmentVariable(named = "SKIP_WLS_SAMPLES", matches = "true")
 class ItWlsDomainOnPVSample {

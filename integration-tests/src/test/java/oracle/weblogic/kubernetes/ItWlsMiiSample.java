@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
@@ -64,6 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("test model in image WLS domain sample")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @IntegrationTest
+@Tag("kind-sequential")
 @DisabledIfEnvironmentVariable(named = "SKIP_WLS_SAMPLES", matches = "true")
 class ItWlsMiiSample {
 

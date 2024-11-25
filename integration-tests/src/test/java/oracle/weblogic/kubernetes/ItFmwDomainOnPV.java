@@ -94,6 +94,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @DisplayName("Test to create a FMW domain in persistent volume with new simplified feature")
 @IntegrationTest
+@Tag("kind-sequential")
 @Tag("oke-sequential")
 @Tag("okd-fmw-cert")
 class ItFmwDomainOnPV {
