@@ -188,10 +188,10 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
         // login to BASE_IMAGES_REPO 
         logger.info(WLSIMG_BUILDER + " login to BASE_IMAGES_REPO {0}", BASE_IMAGES_REPO);
-        // testUntil(withVeryLongRetryPolicy,
-        //        () -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
-        //       logger,
-        //       WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
+        testUntil(withVeryLongRetryPolicy,
+                () -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+               logger,
+               WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
         // The following code is for pulling WLS images if running tests in Kind cluster
         if (KIND_REPO != null) {
           // The kind clusters can't pull images from BASE_IMAGES_REPO using the image pull secret.
@@ -635,6 +635,8 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
       String kindRepoImage = "";
       if (!image.startsWith("phx")) {
         kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + BASE_IMAGES_TENANCY.length() + 2);
+      } else {
+        kindRepoImage = image.replace("phx.ocir.io/devweblogic", "localhost");
       }
       return imagePull(image) && imageTag(image, kindRepoImage) && imagePush(kindRepoImage);
     });
