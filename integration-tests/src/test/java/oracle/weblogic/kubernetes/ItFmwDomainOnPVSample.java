@@ -60,7 +60,7 @@ import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.withLongRetryPolicy;
 import static oracle.weblogic.kubernetes.utils.ImageUtils.createBaseRepoSecret;
 import static oracle.weblogic.kubernetes.utils.ImageUtils.createTestRepoSecret;
-//import static oracle.weblogic.kubernetes.utils.SampleUtils.createPVHostPathAndChangePermissionInKindCluster;
+import static oracle.weblogic.kubernetes.utils.SampleUtils.createPVHostPathAndChangePermissionInKindCluster;
 import static oracle.weblogic.kubernetes.utils.ThreadSafeLogger.getLogger;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -255,14 +255,14 @@ class ItFmwDomainOnPVSample {
     if (KIND_REPO != null) {
       logger.info("loading image {0} to kind", FMWINFRA_IMAGE_TO_USE_IN_SPEC);
       imagePush(FMWINFRA_IMAGE_TO_USE_IN_SPEC);
-      //createPVHostPathAndChangePermissionInKindCluster("/shared", envMap);
+      createPVHostPathAndChangePermissionInKindCluster("/shared", envMap);
     }
 
     testUntil(
         withLongRetryPolicy,
         checkTestScriptAndAssertSuccess("-initial-main", "Failed to run -initial-main"),
         logger,
-        "create PV HostPath and change Permission in Kind Cluster");
+        "create FMW domain on PV in Kind Cluster");
   }
 
   /**
