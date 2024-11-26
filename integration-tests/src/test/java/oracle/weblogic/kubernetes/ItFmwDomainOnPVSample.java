@@ -255,7 +255,7 @@ class ItFmwDomainOnPVSample {
     if (KIND_REPO != null) {
       logger.info("loading image {0} to kind", FMWINFRA_IMAGE_TO_USE_IN_SPEC);
       imagePush(FMWINFRA_IMAGE_TO_USE_IN_SPEC);
-      createPVHostPathAndChangePermissionInKindCluster("/shared", envMap);
+      //createPVHostPathAndChangePermissionInKindCluster("/shared", envMap);
     }
 
     testUntil(
