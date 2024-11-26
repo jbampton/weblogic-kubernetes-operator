@@ -9,6 +9,7 @@ import oracle.weblogic.kubernetes.actions.impl.primitive.Command;
 import oracle.weblogic.kubernetes.actions.impl.primitive.CommandParams;
 
 import static oracle.weblogic.kubernetes.TestConstants.WLSIMG_BUILDER;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The Sample utility class for tests.
@@ -36,6 +37,7 @@ public class SampleUtils {
               .redirect(true)
       ).execute();
     }
+    assertTrue(pathExistsInKindCluster(hostPath, envMap), "Failed to create HostPath");
   }
 
   private static boolean pathExistsInKindCluster(String hostPath, Map<String, String> envMap) {
