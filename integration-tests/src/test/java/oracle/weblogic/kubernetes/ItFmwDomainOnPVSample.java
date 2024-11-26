@@ -97,6 +97,7 @@ class ItFmwDomainOnPVSample {
     logger.info("Creating unique namespace for Operator");
     assertNotNull(namespaces.get(0), "Namespace list is null");
     String opNamespace = namespaces.get(0);
+    logger.info("Namespace for FMW sample Operator is: " + opNamespace);
 
     logger.info("Creating unique namespace for Domain");
     assertNotNull(namespaces.get(1), "Namespace list is null");
@@ -109,6 +110,7 @@ class ItFmwDomainOnPVSample {
     logger.info("Creating unique namespace for db");
     assertNotNull(namespaces.get(3), "Namespace list is null");
     String dbNamespace = namespaces.get(3);
+    logger.info("Namespace for FMW sample DB is: " + dbNamespace);
 
     String domainOnPvSampleWorkDir =
         RESULTS_ROOT + "/" + domainNamespace + "/domain-on-pv-sample-work-dir";
