@@ -72,8 +72,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static oracle.weblogic.kubernetes.TestConstants.ARM;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
-import static oracle.weblogic.kubernetes.TestConstants.DB_19C_IMAGE_TAG;
-import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_PREBUILT_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.DB_PREBUILT_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.IMAGE_PULL_POLICY;
@@ -837,7 +835,8 @@ public class DbUtils {
       String namespace) throws ApiException, IOException {
 
     LoggingFacade logger = getLogger();
-    final String DB_IMAGE_19C = DB_IMAGE_NAME + ":" + DB_19C_IMAGE_TAG;    
+    //final String DB_IMAGE_19C = DB_IMAGE_NAME + ":" + DB_19C_IMAGE_TAG;    
+    final String DB_IMAGE_19C = "phx.ocir.io/devweblogic/test-images/database/enterprise:19.3.0.0";
     String secretName = "db-password";
     String secretKey = "password";
     Map<String, String> secretMap = new HashMap<>();
