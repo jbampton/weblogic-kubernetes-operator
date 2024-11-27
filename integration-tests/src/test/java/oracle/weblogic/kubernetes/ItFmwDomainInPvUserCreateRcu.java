@@ -38,7 +38,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
-import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.TestConstants.ELASTICSEARCH_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.FMWINFRA_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.TestConstants.MII_AUXILIARY_IMAGE_NAME;
@@ -170,8 +169,9 @@ public class ItFmwDomainInPvUserCreateRcu {
 
     // start DB
     logger.info("Start DB in namespace: {0}, dbListenerPort: {1}, dbUrl: {2}, dbImage: {3}",
-        dbNamespace, dbListenerPort, dbUrl, DB_IMAGE_TO_USE_IN_SPEC);
-    assertDoesNotThrow(() -> setupDB(DB_IMAGE_TO_USE_IN_SPEC, dbNamespace, getNextFreePort(), dbListenerPort),
+        dbNamespace, dbListenerPort, dbUrl, "localhost:5000/test-images/database/enterprise:12.2.0.1-slim");
+    assertDoesNotThrow(() -> setupDB("localhost:5000/test-images/database/enterprise:12.2.0.1-slim",
+        dbNamespace, getNextFreePort(), dbListenerPort),
         String.format("Failed to setup DB in the namespace %s with dbUrl %s, dbListenerPost %s",
             dbNamespace, dbUrl, dbListenerPort));
 
