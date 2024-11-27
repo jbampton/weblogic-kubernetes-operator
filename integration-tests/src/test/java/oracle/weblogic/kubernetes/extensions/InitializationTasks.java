@@ -697,10 +697,9 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
   
   private void installOracleDBOperator() {
     //install Oracle Database Operator
+    getLogger().info("Starting install Oracle Database Operator");
     String namespace = ORACLE_OPERATOR_NS;
-    if (namespace == null) {
-      assertDoesNotThrow(() -> new Namespace().name(namespace).create());
-    }
+    assertDoesNotThrow(() -> new Namespace().name(namespace).create());
     assertDoesNotThrow(() -> installDBOperator(), "Failed to install database operator");
   }
 
