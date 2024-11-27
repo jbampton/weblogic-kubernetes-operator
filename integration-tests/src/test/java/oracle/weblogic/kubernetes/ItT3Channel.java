@@ -245,8 +245,7 @@ class ItT3Channel {
             .serverPod(new ServerPod() //serverpod
                 .addEnvItem(new V1EnvVar()
                     .name("JAVA_OPTIONS")
-                    .value("-Dweblogic.StdoutDebugEnabled=false "
-                        + "-Dweblogic.security.SSL.ignoreHostnameVerification=true"))
+                    .value("-Dweblogic.StdoutDebugEnabled=false"))
                 .addEnvItem(new V1EnvVar()
                     .name("USER_MEM_ARGS")
                     .value("-Djava.security.egd=file:/dev/./urandom"))
@@ -304,7 +303,7 @@ class ItT3Channel {
           clusterViewAppPath, clusterName);
       deployUsingWlst(adminServerPodName, Integer.toString(t3ChannelPort),
           ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT, adminServerName + "," + clusterName,
-          clusterViewAppPath, domainNamespace, true);
+          clusterViewAppPath, domainNamespace);
     }
 
     List<String> managedServerNames = new ArrayList<String>();

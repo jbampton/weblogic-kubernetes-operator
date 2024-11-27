@@ -1210,31 +1210,28 @@ class ItIntrospectVersion {
 
     // deploy application and verify all servers functions normally
     logger.info("Getting port for default channel");
-    int defaultChannelPort;
-    String channelName = "default-secure";
-    if (WEBLOGIC_IMAGE_TO_USE_IN_SPEC.contains("12.2.1.4")) {
-      channelName = "default";
-    }
-    defaultChannelPort = 
-        getServicePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), channelName);
+    int defaultChannelPort = assertDoesNotThrow(()
+        -> getServicePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), "default"),
+        "Getting admin server default port failed");
     logger.info("default channel port: {0}", defaultChannelPort);
     assertNotEquals(-1, defaultChannelPort, "admin server defaultChannelPort is not valid");
 
-    int serviceNodePort
-        = getServiceNodePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), channelName);
+    int serviceNodePort = assertDoesNotThrow(() ->
+            getServiceNodePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), "default"),
+        "Getting admin server node port failed");
     logger.info("Admin Server default node port : {0}", serviceNodePort);
     assertNotEquals(-1, serviceNodePort, "admin server default node port is not valid");
 
     //deploy clusterview application
     logger.info("Deploying clusterview app {0} to cluster {1}", clusterViewAppPath, cluster1Name);
 
-    deployUsingWlst(adminServerPodName,
-        String.valueOf("9002"),
+    assertDoesNotThrow(() -> deployUsingWlst(adminServerPodName,
+        String.valueOf(adminPort),
         wlsUserName,
         wlsPassword,
         cluster1Name + "," + adminServerName,
         clusterViewAppPath,
-        introDomainNamespace, channelName.equals("default-secure"));
+        introDomainNamespace),"Deploying the application");
 
     List<String> managedServerNames = new ArrayList<>();
     for (int i = 1; i <= cluster1ReplicaCount; i++) {
