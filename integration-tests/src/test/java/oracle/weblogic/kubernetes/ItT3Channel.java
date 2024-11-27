@@ -304,7 +304,7 @@ class ItT3Channel {
           clusterViewAppPath, clusterName);
       deployUsingWlst(adminServerPodName, Integer.toString(t3ChannelPort),
           ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT, adminServerName + "," + clusterName,
-          clusterViewAppPath, domainNamespace);
+          clusterViewAppPath, domainNamespace, true);
     }
 
     List<String> managedServerNames = new ArrayList<String>();

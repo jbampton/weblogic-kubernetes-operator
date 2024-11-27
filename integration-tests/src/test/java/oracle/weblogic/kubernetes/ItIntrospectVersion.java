@@ -1211,9 +1211,9 @@ class ItIntrospectVersion {
     // deploy application and verify all servers functions normally
     logger.info("Getting port for default channel");
     int defaultChannelPort;
-    String channelName = "default";
-    if (WEBLOGIC_IMAGE_TO_USE_IN_SPEC.contains("14.1.2")) {
-      channelName = "default-secure";
+    String channelName = "default-secure";
+    if (WEBLOGIC_IMAGE_TO_USE_IN_SPEC.contains("12.2.1.4")) {
+      channelName = "default";
     }
     defaultChannelPort = 
         getServicePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), channelName);
