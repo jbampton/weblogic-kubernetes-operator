@@ -849,6 +849,7 @@ public class DbUtils {
     assertTrue(secretCreated, String.format("create secret failed for %s", secretName));
 
     createTestRepoSecret(namespace);
+    createBaseRepoSecret(namespace);
     
     final String pvName = getUniqueName(dbName + "-pv");
     createPV(pvName);

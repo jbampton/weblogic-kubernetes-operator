@@ -513,7 +513,7 @@ public class ImageUtils {
     LoggingFacade logger = getLogger();
     logger.info("Creating base image pull secret {0} in namespace {1}", BASE_IMAGES_REPO_SECRET_NAME, namespace);
     createImageRegistrySecret(BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD, BASE_IMAGES_REPO_EMAIL,
-            TestConstants.BASE_IMAGES_REPO, BASE_IMAGES_REPO_SECRET_NAME, namespace);
+            "phx.ocir.io", BASE_IMAGES_REPO_SECRET_NAME, namespace);
   }
 
   /**
