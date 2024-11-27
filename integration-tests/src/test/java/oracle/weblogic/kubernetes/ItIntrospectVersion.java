@@ -1210,28 +1210,31 @@ class ItIntrospectVersion {
 
     // deploy application and verify all servers functions normally
     logger.info("Getting port for default channel");
-    int defaultChannelPort = assertDoesNotThrow(()
-        -> getServicePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), "default"),
-        "Getting admin server default port failed");
+    int defaultChannelPort;
+    String channelName = "default";
+    if (WEBLOGIC_IMAGE_TO_USE_IN_SPEC.contains("14.1.2")) {
+      channelName = "default-secure";
+    }
+    defaultChannelPort = 
+        getServicePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), channelName);
     logger.info("default channel port: {0}", defaultChannelPort);
     assertNotEquals(-1, defaultChannelPort, "admin server defaultChannelPort is not valid");
 
-    int serviceNodePort = assertDoesNotThrow(() ->
-            getServiceNodePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), "default"),
-        "Getting admin server node port failed");
+    int serviceNodePort
+        = getServiceNodePort(introDomainNamespace, getExternalServicePodName(adminServerPodName), channelName);
     logger.info("Admin Server default node port : {0}", serviceNodePort);
     assertNotEquals(-1, serviceNodePort, "admin server default node port is not valid");
 
     //deploy clusterview application
     logger.info("Deploying clusterview app {0} to cluster {1}", clusterViewAppPath, cluster1Name);
 
-    assertDoesNotThrow(() -> deployUsingWlst(adminServerPodName,
-        String.valueOf(adminPort),
+    deployUsingWlst(adminServerPodName,
+        String.valueOf("9002"),
         wlsUserName,
         wlsPassword,
         cluster1Name + "," + adminServerName,
         clusterViewAppPath,
-        introDomainNamespace),"Deploying the application");
+        introDomainNamespace, channelName.equals("default-secure"));
 
     List<String> managedServerNames = new ArrayList<>();
     for (int i = 1; i <= cluster1ReplicaCount; i++) {
