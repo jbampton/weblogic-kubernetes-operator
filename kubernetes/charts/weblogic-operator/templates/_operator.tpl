@@ -8,7 +8,7 @@
 {{- define "operator.operator" -}}
 {{- include "operator.operatorClusterRoleGeneral" . }}
 {{- include "operator.operatorClusterRoleNamespace" . }}
-{{- $useClusterRole := and (default true .enableClusterRoleBinding) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
+{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
 {{- if $useClusterRole }}
 {{-   include "operator.operatorClusterRoleNonResource" . }}
 {{- end }}

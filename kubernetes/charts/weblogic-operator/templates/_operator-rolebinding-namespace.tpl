@@ -3,7 +3,7 @@
 
 {{- define "operator.operatorRoleBindingNamespace" }}
 ---
-{{- $useClusterRole := and (default true .enableClusterRoleBinding) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
+{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
 {{- if $useClusterRole }}
 kind: "ClusterRoleBinding"
 {{- else }}
@@ -17,6 +17,11 @@ metadata:
   name: "weblogic-operator-rolebinding-namespace"
   namespace: {{ .domainNamespace | quote }}
   {{- end }}
+  annotations:
+    test.enableClusterRoleBinding: {{ .enableClusterRoleBinding | quote }}
+    test.default: {{ (default true .enableClusterRoleBinding) | quote }}
+    test.hasKey: {{ (hasKey . "enableClusterRoleBinding") | quote }}
+    test.domainNamespaceSelectionStrategy: {{ .domainNamespaceSelectionStrategy | quote }}
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}
 subjects:

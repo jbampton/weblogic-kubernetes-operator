@@ -4,7 +4,7 @@
 {{- define "operator.clusterRoleBindingGeneral" }}
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
-{{- $useClusterRole := and (default true .enableClusterRoleBinding) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
+{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
 {{- if $useClusterRole }}
 kind: "ClusterRoleBinding"
 {{- else }}
