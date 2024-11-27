@@ -17,11 +17,6 @@ metadata:
   name: "weblogic-operator-rolebinding-namespace"
   namespace: {{ .domainNamespace | quote }}
   {{- end }}
-  annotations:
-    test.enableClusterRoleBinding: {{ .enableClusterRoleBinding | quote }}
-    test.default: {{ (default true .enableClusterRoleBinding) | quote }}
-    test.hasKey: {{ (hasKey . "enableClusterRoleBinding") | quote }}
-    test.domainNamespaceSelectionStrategy: {{ .domainNamespaceSelectionStrategy | quote }}
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}
 subjects:
