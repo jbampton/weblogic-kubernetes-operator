@@ -52,7 +52,6 @@ import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.CLUSTER_VERSION;
-import static oracle.weblogic.kubernetes.TestConstants.DEFAULT_LISTEN_PORT;
 import static oracle.weblogic.kubernetes.TestConstants.DOMAIN_API_VERSION;
 import static oracle.weblogic.kubernetes.TestConstants.DOMAIN_IMAGES_PREFIX;
 import static oracle.weblogic.kubernetes.TestConstants.FAILURE_RETRY_INTERVAL_SECONDS;
@@ -329,7 +328,7 @@ class ItT3Channel {
         -> getServicePort(domainNamespace,
               domainUid + "-cluster-" + clusterName, "default"),
               "Getting Cluster Service default port failed");
-    assertEquals(DEFAULT_LISTEN_PORT, servicePort, "Default Service Port is not set to 7100");
+    assertEquals(7001, servicePort, "Default Service Port is not set to 7001");
     int napPort = assertDoesNotThrow(()
         -> getServicePort(domainNamespace,
               domainUid + "-cluster-" + clusterName, "ms-nap"),
@@ -340,7 +339,7 @@ class ItT3Channel {
         -> getServicePort(domainNamespace,
               domainUid + "-managed-server1", "default"),
               "Getting Managed Server Service default port failed");
-    assertEquals(DEFAULT_LISTEN_PORT, servicePort, "Default Managed Service Port is not 7100");
+    assertEquals(7001, servicePort, "Default Managed Service Port is not 7100");
 
   }
 

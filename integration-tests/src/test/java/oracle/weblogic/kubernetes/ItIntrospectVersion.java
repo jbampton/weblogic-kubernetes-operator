@@ -223,7 +223,7 @@ class ItIntrospectVersion {
 
   private static Path clusterViewAppPath;
   private static LoggingFacade logger = null;
-  private static final int managedServerPort = 7100;
+  private static final int managedServerPort = 7001;
   private static int adminPort = 7001;
   private static String hostHeader;
 
