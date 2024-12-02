@@ -206,7 +206,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
           images.add(WEBLOGIC_IMAGE_NAME + ":" + WEBLOGIC_IMAGE_TAG);
           images.add(FMWINFRA_IMAGE_NAME + ":" + FMWINFRA_IMAGE_TAG);
-          images.add("phx.ocir.io/devweblogic/test-images/database/enterprise:12.2.0.1-slim");
+          images.add("phx.ocir.io/devweblogic/test-images/database/enterprise:19.3.0.0");
           images.add(LOCALE_IMAGE_NAME + ":" + LOCALE_IMAGE_TAG);
 
           for (String image : images) {

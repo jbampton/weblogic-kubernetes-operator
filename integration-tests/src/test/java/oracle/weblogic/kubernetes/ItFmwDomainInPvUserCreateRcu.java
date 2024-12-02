@@ -169,8 +169,8 @@ public class ItFmwDomainInPvUserCreateRcu {
 
     // start DB
     logger.info("Start DB in namespace: {0}, dbListenerPort: {1}, dbUrl: {2}, dbImage: {3}",
-        dbNamespace, dbListenerPort, dbUrl, "localhost:5000/test-images/database/enterprise:12.2.0.1-slim");
-    assertDoesNotThrow(() -> setupDB("localhost:5000/test-images/database/enterprise:12.2.0.1-slim",
+        dbNamespace, dbListenerPort, dbUrl, "localhost:5000/test-images/database/enterprise:19.3.0.0");
+    assertDoesNotThrow(() -> setupDB("localhost:5000/test-images/database/enterprise:19.3.0.0",
         dbNamespace, getNextFreePort(), dbListenerPort),
         String.format("Failed to setup DB in the namespace %s with dbUrl %s, dbListenerPost %s",
             dbNamespace, dbUrl, dbListenerPort));
