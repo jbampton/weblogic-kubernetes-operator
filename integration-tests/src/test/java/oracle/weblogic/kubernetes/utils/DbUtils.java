@@ -321,7 +321,7 @@ public class DbUtils {
     // check if DB is ready to be used by searching pod log
     logger.info("Check for DB pod {0} log contains ready message in namespace {1}",
         dbPodName, dbNamespace);
-    String msg = "The database is ready for use";
+    String msg = "DATABASE IS READY TO USE!";
     if (ARM) {
       msg = "DATABASE IS READY TO USE!";
     }
