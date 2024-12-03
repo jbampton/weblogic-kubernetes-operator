@@ -600,6 +600,29 @@ diff_model() {
     exitOrLoop
   fi
 
+  # DEBUG
+  if [ -f $1 ] ; then
+    trace "COMPARING MODELS 1 "
+    cat $1
+  fi
+
+  if [ -f $2 ] ; then
+    trace "COMPARING MODELS 2 "
+    cat $2
+  fi
+
+  if [ -f "/tmp/compare_model_stdout" ] ; then
+    trace "STDOUT"
+    cat /tmp/compare_model_stdout
+  fi
+
+  if [  -f "/tmp/diffed_model.yaml" ] ; then
+    trace "RESULTS "
+    cat /tmp/diffed_model.yaml
+  fi
+
+  # DEBUG
+
   if [ "true" == "$MII_USE_ONLINE_UPDATE" ] ; then
     if [  ! -f "/tmp/diffed_model.yaml" ] ; then
       if [ -f "/tmp/compare_model_stdout" ] ; then
