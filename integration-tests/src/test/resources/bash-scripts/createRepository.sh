@@ -13,7 +13,7 @@ sysPassword="$(cat /rcu-secret/sys_password)"
 
 echo "DB Connection String [$connectString], schemaPrefix [${schemaPrefix}] rcuType [${rcuType}]"
 
-max=100
+max=200
 counter=0
 while [ $counter -le ${max} ]
 do
