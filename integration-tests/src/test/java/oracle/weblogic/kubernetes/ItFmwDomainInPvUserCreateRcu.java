@@ -59,11 +59,11 @@ import static oracle.weblogic.kubernetes.utils.ClusterUtils.createClusterResourc
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.addSccToDBSvcAccount;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.checkPodReadyAndServiceExists;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.createCustomConditionFactory;
-import static oracle.weblogic.kubernetes.utils.CommonTestUtils.getNextFreePort;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.getUniqueName;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.verifyConfiguredSystemResource;
 import static oracle.weblogic.kubernetes.utils.ConfigMapUtils.createConfigMapAndVerify;
+import static oracle.weblogic.kubernetes.utils.DbUtils.createOracleDBUsingOperator;
 import static oracle.weblogic.kubernetes.utils.DbUtils.createRcuAccessSecret;
 import static oracle.weblogic.kubernetes.utils.DbUtils.createRcuSchema;
 import static oracle.weblogic.kubernetes.utils.DbUtils.startOracleDB;
@@ -131,6 +131,8 @@ public class ItFmwDomainInPvUserCreateRcu {
   private final String opsswalletfileSecretName1 = domainUid1 + "-opss-wallet-file-secret";
   private final String opsswalletfileSecretName3 = domainUid3 + "-opss-wallet-file-secret";
   private final String opsswalletfileSecretName4 = domainUid4 + "-opss-wallet-file-secret";
+  private static String dbName = "my-orcl-sidb";
+  private static final String RCUSYSPASSWORD = "Oradoc_db1";
   private static final int replicaCount = 1;
 
   private final String fmwModelFilePrefix = "model-fmwdomainonpv-rcu-wdt";
@@ -153,9 +155,6 @@ public class ItFmwDomainInPvUserCreateRcu {
     logger.info("Assign a unique namespace for DB and RCU");
     assertNotNull(namespaces.get(0), "Namespace is null");
     dbNamespace = namespaces.get(0);
-    final int dbListenerPort = getNextFreePort();
-    ORACLEDBSUFFIX = ".svc.cluster.local:" + dbListenerPort + "/devpdb.k8s";
-    dbUrl = ORACLEDBURLPREFIX + dbNamespace + ORACLEDBSUFFIX;
 
     // get a new unique opNamespace
     logger.info("Assign a unique namespace for operator1");
@@ -168,12 +167,7 @@ public class ItFmwDomainInPvUserCreateRcu {
     domainNamespace = namespaces.get(2);
 
     // start DB
-    logger.info("Start DB in namespace: {0}, dbListenerPort: {1}, dbUrl: {2}, dbImage: {3}",
-        dbNamespace, dbListenerPort, dbUrl, "localhost:5000/test-images/database/enterprise:19.3.0.0");
-    assertDoesNotThrow(() -> setupDB("localhost:5000/test-images/database/enterprise:19.3.0.0",
-        dbNamespace, getNextFreePort(), dbListenerPort),
-        String.format("Failed to setup DB in the namespace %s with dbUrl %s, dbListenerPost %s",
-            dbNamespace, dbUrl, dbListenerPort));
+    dbUrl = assertDoesNotThrow(() -> createOracleDBUsingOperator(dbName, RCUSYSPASSWORD, dbNamespace));
 
     // install operator with DomainOnPvSimplification=true"
     HelmParams opHelmParams =
