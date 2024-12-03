@@ -711,7 +711,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
   private void installOnPremWebLogic() {
     Path installScript = Paths.get(RESOURCE_DIR, "bash-scripts", "install-wls.sh");
     String command
-        = String.format("%s %s %s", installScript, RESULTS_ROOT, WEBLOGIC_SHIPHOME);
+        = String.format("%s %s %s %s", "/bin/bash", installScript, RESULTS_ROOT, WEBLOGIC_SHIPHOME);
     getLogger().info("WebLogic installation command {0}", command);
     assertTrue(() -> Command.withParams(
         defaultCommandParams()
