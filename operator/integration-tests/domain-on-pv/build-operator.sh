@@ -68,7 +68,7 @@ fi
 if [ -n "${no_proxy:-}" ]; then
   HTTP_BUILD_ARG="$HTTP_BUILD_ARG --build-arg no_proxy=$no_proxy"
 fi
-${WLSIMG_BUILDER:-docker} build ${HTTP_BUILD_ARG:-} -t "$OPER_IMAGE_NAME:$OPER_IMAGE_TAG"  --build-arg VERSION=$OPER_JAR_VERSION --no-cache=true .
+${WLSIMG_BUILDER:-podman} build ${HTTP_BUILD_ARG:-} -t "$OPER_IMAGE_NAME:$OPER_IMAGE_TAG"  --build-arg VERSION=$OPER_JAR_VERSION --no-cache=true .
 
 save_cksum
 
