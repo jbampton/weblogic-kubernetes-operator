@@ -175,7 +175,7 @@ class ItOnPremCrossDomainTransaction {
    * Stop on premise domain.
    */
   @AfterEach
-  public static void stopOnPremDomain() throws UnknownHostException {
+  public void stopOnPremDomain() throws UnknownHostException {
     shutdownServers(List.of(wlstScript.toString(),
         Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/shutdown.py",
         getExternalDNSName()),
