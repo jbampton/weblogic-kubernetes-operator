@@ -87,6 +87,7 @@ import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_N
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME_DEFAULT;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.ITTESTS_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.MODEL_DIR;
@@ -1188,7 +1189,7 @@ class ItIntrospectVersion {
         cluster1ReplicaCount,
         t3ChannelPort,
         configuration,
-        "phx.ocir.io/devweblogic/test-images/weblogic:12.2.1.4");
+        WEBLOGIC_IMAGE_TO_USE_IN_SPEC);
 
     setPodAntiAffinity(domain);
     // verify the domain custom resource is created
