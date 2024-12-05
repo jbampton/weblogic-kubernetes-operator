@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -29,14 +30,16 @@ import oracle.weblogic.domain.DomainResource;
 import oracle.weblogic.domain.DomainSpec;
 import oracle.weblogic.domain.Model;
 import oracle.weblogic.domain.ServerPod;
+import oracle.weblogic.kubernetes.actions.impl.AppParams;
 import oracle.weblogic.kubernetes.actions.impl.primitive.Command;
 import oracle.weblogic.kubernetes.actions.impl.primitive.CommandParams;
 import oracle.weblogic.kubernetes.annotations.IntegrationTest;
 import oracle.weblogic.kubernetes.annotations.Namespaces;
 import oracle.weblogic.kubernetes.logging.LoggingFacade;
 import oracle.weblogic.kubernetes.utils.ExecResult;
+import oracle.weblogic.kubernetes.utils.FileUtils;
 import oracle.weblogic.kubernetes.utils.OracleHttpClient;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -53,11 +56,14 @@ import static oracle.weblogic.kubernetes.TestConstants.RESULTS_ROOT;
 import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
+import static oracle.weblogic.kubernetes.actions.ActionConstants.ARCHIVE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.DOWNLOAD_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.RESOURCE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WDT_DOWNLOAD_URL;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WORK_DIR;
+import static oracle.weblogic.kubernetes.actions.TestActions.archiveApp;
 import static oracle.weblogic.kubernetes.actions.TestActions.createDomainCustomResource;
+import static oracle.weblogic.kubernetes.actions.TestActions.defaultAppParams;
 import static oracle.weblogic.kubernetes.assertions.TestAssertions.domainExists;
 import static oracle.weblogic.kubernetes.utils.ApplicationUtils.checkAppIsActive;
 import static oracle.weblogic.kubernetes.utils.BuildApplication.buildApplication;
@@ -98,6 +104,8 @@ class ItOnPremCrossDomainTransaction {
   private static String onpremIngressClass = null;
   private static final String WDT_MODEL_FILE_JMS = "model-cdt-jms.yaml";
   private static final String WDT_MODEL_FILE_JMS2 = "model2-cdt-jms.yaml";
+  
+  private static List<String> applicationsList;
 
   private static final String WDT_IMAGE_NAME1 = "domain1-onprem-wdt-image";
   private static final String PROPS_TEMP_DIR = RESULTS_ROOT + "/crossdomainonpremtemp";
@@ -155,25 +163,30 @@ class ItOnPremCrossDomainTransaction {
     // required for this to take effect. So, copying the property file to RESULT_ROOT and updating the
     // property file
     updatePropertyFiles();
-    createOnPremDomain();
+    createOnPremDomains();
     createOnPremDomainRoutingRules();
     modifyDNS();
-    
 
     // install and verify operator
     installAndVerifyOperator(opNamespace, domain1Namespace);
-    createK8sDomain();
   }
   
   /**
    * Stop on premise domain.
    */
-  @AfterAll
+  @AfterEach
   public static void stopOnPremDomain() throws UnknownHostException {
     shutdownServers(List.of(wlstScript.toString(),
         Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/shutdown.py",
         getExternalDNSName()),
         Path.of(domainHome.toString(), "wlst.log"));
+  }
+
+  private static void createOnPremDomains() throws IOException, InterruptedException {
+    logger.info("creating on premise domain");
+    Path createDomainScript = downloadAndInstallWDT();
+    createOnPremDomain2(createDomainScript);
+    createOnPremDomain1(createDomainScript);    
   }
   
   /**
@@ -188,8 +201,9 @@ class ItOnPremCrossDomainTransaction {
    */
   @Test
   @DisplayName("Check cross domain transcated MDB communication ")
-  void testCrossDomainTranscatedMDB() throws IOException, InterruptedException {
+  void testCrossDomainTranscatedMDBExternalJMSProvider() throws IOException, InterruptedException {
 
+    createK8sDomain();
     // No extra header info
     String curlHostHeader = "";
     if (TestConstants.KIND_CLUSTER
@@ -277,8 +291,9 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void createK8sDomain() throws UnknownHostException, IOException {
+    String jmsprovider = "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003";
+    applicationsList = buildApplications(jmsprovider);
 
-    List<String> applicationsList = buildApplications();
     // create admin credential secret for domain1
     logger.info("Create admin credential secret for domain1");
     String domain1AdminSecretName = domainUid1 + "-weblogic-credentials";
@@ -301,7 +316,7 @@ class ItOnPremCrossDomainTransaction {
 
     //create domain1
     createDomain(domainUid1, domain1Namespace, domain1AdminSecretName, domain1Image);
-    
+
     if (TestConstants.KIND_CLUSTER
         && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
       hostHeader = createIngressHostRouting(domain1Namespace, domainUid1, adminServerName, 7001);
@@ -312,7 +327,7 @@ class ItOnPremCrossDomainTransaction {
     }
   }
 
-  private static List<String> buildApplications() {
+  private static List<String> buildApplications(String jmsProvider) {
     //build jmsservlet client application archive
     Path targetDir;
     Path distDir;
@@ -340,7 +355,7 @@ class ItOnPremCrossDomainTransaction {
     // so that it can communicate with remote destination on domain2
     assertDoesNotThrow(() -> replaceStringInFile(
         template.toString(), "t3://domain2-cluster-cluster-1.domain2-namespace:8001",
-        "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003"),
+        jmsProvider),
         "Could not modify the provider url in MDB Template file");
     //build application archive for MDB
     targetDir = Paths.get(WORK_DIR,
@@ -445,13 +460,12 @@ class ItOnPremCrossDomainTransaction {
         + "for %s in namespace %s", domainUid, domNamespace));
   }
 
-  private static void createOnPremDomain() throws IOException, InterruptedException {
-    logger.info("creating on premise domain");
-    Path createDomainScript = downloadAndInstallWDT();
+  private static void createOnPremDomain1(Path createDomainScript) throws IOException, InterruptedException {
+    logger.info("creating on premise domain2");
     mwHome = Path.of(RESULTS_ROOT, "mwhome");
     String modelFileList = RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2 + ","
         + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2;
-    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "domain2");
+    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "onpremdomain2");
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);
     Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
@@ -468,6 +482,52 @@ class ItOnPremCrossDomainTransaction {
     startServers(domainHome);
     wlstScript = Path.of(mwHome.toString(), "oracle_common", "common", "bin", "wlst.sh");
   }
+  
+  private static void createOnPremDomain2(Path createDomainScript) throws IOException, InterruptedException {
+    String domainName = "onpremdomain1";
+    
+    // build the applications to be deployed in onprem domain
+    String jmsprovider = "t3://domain1.ns-abcd.svc.cluster.cluster1:8001";    
+    applicationsList = buildApplications(jmsprovider);
+    Path buildAppArchiveZip = buildAppArchiveZip(applicationsList);
+    
+    //create model property file
+    Path propFile = File.createTempFile(domainName, ".props").toPath();
+    Path modelFile = File.createTempFile(domainName, ".yaml").toPath();
+    Files.writeString(propFile,
+        "DOMAIN_NAME=" + domainName + "\n"
+        + "ADMIN_USERNAME=weblogic\n"
+        + "ADMIN_PASSWORD=welcome1", StandardOpenOption.TRUNCATE_EXISTING);
+    FileUtils.copy(Path.of(RESOURCE_DIR, "/onpremcrtx/", WDT_MODEL_FILE_DOMAIN1), modelFile);
+
+    //modify the model file to add proper external dns entries
+    FileUtils.replaceStringInFile(modelFile.toString(),
+        "@@PROP:DOMAIN_NAME@@-admin-server.@@PROP:NAMESPACE@@", getExternalDNSName());
+    FileUtils.replaceStringInFile(modelFile.toString(),
+        "@@PROP:DOMAIN_NAME@@-managed-server${id}.@@PROP:NAMESPACE@@", getExternalDNSName());
+    
+    logger.info("creating on premise domain {0}", domainName);
+    mwHome = Path.of(RESULTS_ROOT, "mwhome");
+    String modelFileList = modelFile.toString() + "," + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS;
+    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", domainName);
+    logger.info("creating on premise domain home {0}", domainHome);
+    Files.createDirectories(domainHome);       
+    
+    //call WDT create domain to create actual domain
+    List<String> command = List.of(
+        createDomainScript.toString(),
+        "-oracle_home", mwHome.toString(),
+        "-domain_type", "WLS",
+        "-domain_home", domainHome.toString(),
+        "-archive_file", buildAppArchiveZip.toString(),
+        "-model_file", modelFileList,
+        "-variable_file", propFile.toString()
+    );
+    runWDTandCreateDomain(command.stream().collect(Collectors.joining(" ")));
+    createBootProperties(domainHome.toString());
+    startServers(domainHome);
+    wlstScript = Path.of(mwHome.toString(), "oracle_common", "common", "bin", "wlst.sh");
+  }  
 
   private static Path downloadAndInstallWDT() throws IOException {
     String wdtUrl = WDT_DOWNLOAD_URL + "/download/weblogic-deploy.zip";
@@ -593,4 +653,15 @@ class ItOnPremCrossDomainTransaction {
         IT_ONPREMCRDOMAINTX_INGRESS_HTTP_NODEPORT, 0).getIngressClassName();
   }
 
+  private static Path buildAppArchiveZip(List<String> archiveAppsList) {
+    Random random = new Random(System.currentTimeMillis());
+    char[] cacheSfx = new char[4];
+    for (int i = 0; i < cacheSfx.length; i++) {
+      cacheSfx[i] = (char) (random.nextInt(25) + (int) 'a');
+    }
+    AppParams appParams = defaultAppParams().appArchiveDir(ARCHIVE_DIR + cacheSfx);
+    assertTrue(archiveApp(appParams.srcDirList(archiveAppsList)));
+    return Path.of(appParams.appArchiveDir(), appParams.appName() + ".zip");
+  }
+  
 }
