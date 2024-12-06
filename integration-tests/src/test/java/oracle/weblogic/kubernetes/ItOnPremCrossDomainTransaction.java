@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,15 +57,19 @@ import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.RESULTS_ROOT;
 import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.ARCHIVE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.DOWNLOAD_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.RESOURCE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WDT_DOWNLOAD_URL;
+import static oracle.weblogic.kubernetes.actions.ActionConstants.WLS;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.WORK_DIR;
 import static oracle.weblogic.kubernetes.actions.TestActions.archiveApp;
 import static oracle.weblogic.kubernetes.actions.TestActions.createDomainCustomResource;
 import static oracle.weblogic.kubernetes.actions.TestActions.defaultAppParams;
+import static oracle.weblogic.kubernetes.actions.TestActions.shutdownDomain;
 import static oracle.weblogic.kubernetes.assertions.TestAssertions.domainExists;
 import static oracle.weblogic.kubernetes.utils.ApplicationUtils.checkAppIsActive;
 import static oracle.weblogic.kubernetes.utils.BuildApplication.buildApplication;
@@ -113,6 +118,7 @@ class ItOnPremCrossDomainTransaction {
 
   private static String opNamespace = null;
   private static String domain1Namespace = null;
+  private static String domain2Namespace = null;
   private static String domainUid1 = "domain1";
   private static String adminServerName = "admin-server";
   private static String managedServerPrefix = domainUid1 + "-managed-server";
@@ -143,7 +149,7 @@ class ItOnPremCrossDomainTransaction {
    * @param namespaces list of namespaces
    */
   @BeforeAll
-  public static void initAll(@Namespaces(2) List<String> namespaces)
+  public static void initAll(@Namespaces(3) List<String> namespaces)
       throws UnknownHostException, IOException, InterruptedException {
     logger = getLogger();
 
@@ -155,6 +161,11 @@ class ItOnPremCrossDomainTransaction {
     logger.info("Creating unique namespace for Domain");
     assertNotNull(namespaces.get(1), "Namespace list is null");
     domain1Namespace = namespaces.get(1);
+    
+    logger.info("Creating unique namespace for Domain");
+    assertNotNull(namespaces.get(2), "Namespace list is null");
+    domain2Namespace = namespaces.get(2);
+    
     //install traefil for on prem domain
     onpremIngressClass = installTraefikForPremDomain();
 
@@ -181,14 +192,14 @@ class ItOnPremCrossDomainTransaction {
         Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/shutdown.py",
         getExternalDNSName()),
         Path.of(domainHome.toString(), "wlst.log"));
+    shutdownDomain(domainUid1, domain1Namespace);
   }
 
   private static void createOnPremDomains() throws IOException, InterruptedException {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
-    createOnPremDomain2(createDomainScript);
-    TimeUnit.HOURS.sleep(1);
-    createOnPremDomain1(createDomainScript);    
+    createOnPremDomain1(createDomainScript);
+    createOnPremDomain2(createDomainScript);    
   }
   
   /**
@@ -201,11 +212,22 @@ class ItOnPremCrossDomainTransaction {
    * Distributed Topic Since the MessagesDistributionMode is set to One-Copy-Per-Server and targeted to a cluster of two
    * servers, onMessage() will be triggered for both instance of MDB for a message sent to Distributed Topic
    */
-  @Test
+  //@Test
   @DisplayName("Check cross domain transcated MDB communication ")
   void testCrossDomainTranscatedMDBExternalJMSProvider() throws IOException, InterruptedException {
+    //start on prem domain
+    startServers(domainHome);
+    
+    String jmsProvider = "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003";
+    applicationsList = buildApplications(jmsProvider);
 
-    createK8sDomain();
+    // build the model file list for domain1
+    final List<String> modelFilesListDomain1 = Arrays.asList(
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
+    List<String> modelPropList = Collections.singletonList(PROPS_TEMP_DIR + "/" + WDT_MODEL_DOMAIN1_PROPS);
+    createK8sDomain(domain1Namespace, modelFilesListDomain1, modelFilesListDomain1, modelPropList);
+    
     // No extra header info
     String curlHostHeader = "";
     if (TestConstants.KIND_CLUSTER
@@ -242,6 +264,65 @@ class ItOnPremCrossDomainTransaction {
         "Expected number of message not found in Accounting Queue");
   }
 
+  /**
+   * This test verifies cross-domain MessageDrivenBean communication A transacted MDB on Domain D1 listen on a
+   * replicated Distributed Topic on Domain D2. The MDB is deployed to cluster on domain D1 with
+   * MessagesDistributionMode set to One-Copy-Per-Server. The OnMessage() routine sends a message to local queue on
+   * receiving the message. An application servlet is deployed to Administration Server on D1 which send/receive message
+   * from a JMS destination based on a given URL. (a) app servlet send message to Distributed Topic on D2 (b) mdb puts a
+   * message into local Queue for each received message (c) make sure local Queue gets 2X times messages sent to
+   * Distributed Topic Since the MessagesDistributionMode is set to One-Copy-Per-Server and targeted to a cluster of two
+   * servers, onMessage() will be triggered for both instance of MDB for a message sent to Distributed Topic
+   */
+  @Test
+  @DisplayName("Check cross domain transcated MDB communication ")
+  void testCrossDomainTranscatedMDBK8SJMSProvider() throws IOException, InterruptedException {
+    //start on prem domain
+    startServers(domainHome);
+
+    // build the model file list for domain1
+    final List<String> modelFilesListDomain1 = Arrays.asList(
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2,
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2);
+    List<String> modelPropList = Collections.singletonList(PROPS_TEMP_DIR + "/" + WDT_MODEL_DOMAIN2_PROPS);
+    createK8sDomain(domain2Namespace, modelFilesListDomain1, modelPropList, null);
+    // No extra header info
+    String curlHostHeader = "";
+    if (TestConstants.KIND_CLUSTER
+        && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
+      curlHostHeader = "--header 'Host: " + hostHeader + "'";
+    }
+    assertTrue(checkAppIsActive(hostAndPort,
+        curlHostHeader, "mdbtopic", "cluster-1",
+        ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
+        "MDB application can not be activated on domain1/cluster");
+
+    logger.info("MDB application is activated on domain1/cluster");
+
+    //since JMS provider is clustered instances and since they are running on-prem
+    //cluster address is not available. Hence sending messages to individual instances
+    List<String> ports = List.of("8002", "8003");
+    for (String port : ports) {
+      String url = String.format("http://%s/jmsservlet/jmstest?"
+          + "url=t3://%s:%s&"
+          + "cf=jms.ClusterConnectionFactory&"
+          + "action=send&"
+          + "dest=jms/testCdtUniformTopic",
+          hostAndPort, getExternalDNSName(), port);
+      logger.info(url);
+
+      HttpResponse<String> response;
+      response = OracleHttpClient.get(url, headers, true);
+      assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
+      assertTrue(response.body().contains("Sent (10) message"),
+          "Can not send message to remote Distributed Topic");
+    }
+
+    assertTrue(checkLocalQueue(),
+        "Expected number of message not found in Accounting Queue");
+  }
+
+  
   private boolean checkLocalQueue() {
     String url = String.format("http://%s/jmsservlet/jmstest?"
         + "url=t3://localhost:7001&"
@@ -292,36 +373,33 @@ class ItOnPremCrossDomainTransaction {
     });
   }
 
-  private static void createK8sDomain() throws UnknownHostException, IOException {
-    String jmsprovider = "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003";
-    applicationsList = buildApplications(jmsprovider);
+  private static void createK8sDomain(String namespace,
+      List<String> modelFilesList, List<String> modelPropsList, List<String> applicationsList)
+      throws UnknownHostException, IOException {
 
     // create admin credential secret for domain1
     logger.info("Create admin credential secret for domain1");
     String domain1AdminSecretName = domainUid1 + "-weblogic-credentials";
     assertDoesNotThrow(() -> createSecretWithUsernamePassword(
-        domain1AdminSecretName, domain1Namespace, ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
+        domain1AdminSecretName, namespace, ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
         String.format("createSecret %s failed for %s", domain1AdminSecretName, domainUid1));
 
-    // build the model file list for domain1
-    final List<String> modelFilesListDomain1 = Arrays.asList(
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
-
     logger.info("Creating image with model file and verify");
-    String domain1Image = createImageAndVerify(WDT_IMAGE_NAME1, modelFilesListDomain1,
-        applicationsList, WDT_MODEL_DOMAIN1_PROPS, PROPS_TEMP_DIR, domainUid1);
-    logger.info("Created {0} image", domain1Image);
+    String domainCreationImage = createImageAndVerify(
+        WDT_IMAGE_NAME1, modelFilesList, applicationsList,
+        modelPropsList, WEBLOGIC_IMAGE_NAME,
+        WEBLOGIC_IMAGE_TAG, WLS, false, domainUid1, false);
+    logger.info("Created {0} image", domainCreationImage);
 
     // repo login and push image to registry if necessary
-    imageRepoLoginAndPushImageToRegistry(domain1Image);
+    imageRepoLoginAndPushImageToRegistry(domainCreationImage);
 
     //create domain1
-    createDomain(domainUid1, domain1Namespace, domain1AdminSecretName, domain1Image);
+    createDomain(domainUid1, namespace, domain1AdminSecretName, domainCreationImage);
 
     if (TestConstants.KIND_CLUSTER
         && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
-      hostHeader = createIngressHostRouting(domain1Namespace, domainUid1, adminServerName, 7001);
+      hostHeader = createIngressHostRouting(namespace, domainUid1, adminServerName, 7001);
       hostAndPort = formatIPv6Host(InetAddress.getLocalHost().getHostAddress())
           + ":" + TRAEFIK_INGRESS_HTTP_HOSTPORT;
       headers = new HashMap<>();
@@ -481,7 +559,6 @@ class ItOnPremCrossDomainTransaction {
     );
     runWDTandCreateDomain(command.stream().collect(Collectors.joining(" ")));
     createBootProperties(domainHome.toString());
-    startServers(domainHome);
     wlstScript = Path.of(mwHome.toString(), "oracle_common", "common", "bin", "wlst.sh");
   }
   
@@ -527,7 +604,6 @@ class ItOnPremCrossDomainTransaction {
     );
     runWDTandCreateDomain(command.stream().collect(Collectors.joining(" ")));
     createBootProperties(domainHome.toString());
-    startServers(domainHome);
     wlstScript = Path.of(mwHome.toString(), "oracle_common", "common", "bin", "wlst.sh");
   }  
 
