@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -654,14 +655,22 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static Path buildAppArchiveZip(List<String> archiveAppsList) {
-    Random random = new Random(System.currentTimeMillis());
-    char[] cacheSfx = new char[4];
-    for (int i = 0; i < cacheSfx.length; i++) {
-      cacheSfx[i] = (char) (random.nextInt(25) + (int) 'a');
-    }
-    AppParams appParams = defaultAppParams().appArchiveDir(ARCHIVE_DIR + cacheSfx).srcDirList(archiveAppsList);
+    AppParams appParams = defaultAppParams()
+        .appArchiveDir(ARCHIVE_DIR + generateRandomString()).srcDirList(archiveAppsList);
     assertTrue(archiveApp(appParams));
     return Path.of(appParams.appArchiveDir(), appParams.appName() + ".zip");
+  }
+
+  public static String generateRandomString() {
+    int length = 10; // Desired length of the random string
+    String characterSet = Charset.forName("US-ASCII").toString();
+    Random random = new Random();
+    StringBuilder sb = new StringBuilder(length);
+
+    for (int i = 0; i < length; i++) {
+      sb.append(characterSet.charAt(random.nextInt(characterSet.length())));
+    }
+    return sb.toString();
   }
   
 }
