@@ -57,8 +57,8 @@ if [ "$(old_cksum)" = "$(latest_cksum)" ]; then
   exit 0
 fi
 
-#mvn clean install -DskipTests -Dcheckstyle.skip
-mvn clean install
+mvn clean install -DskipTests -Dcheckstyle.skip
+#mvn clean install
 if [ -n "${http_proxy:-}" ]; then
   HTTP_BUILD_ARG="--build-arg http_proxy=$http_proxy"
 fi
@@ -68,7 +68,7 @@ fi
 if [ -n "${no_proxy:-}" ]; then
   HTTP_BUILD_ARG="$HTTP_BUILD_ARG --build-arg no_proxy=$no_proxy"
 fi
-${WLSIMG_BUILDER:-podman} build ${HTTP_BUILD_ARG:-} -t "$OPER_IMAGE_NAME:$OPER_IMAGE_TAG"  --build-arg VERSION=$OPER_JAR_VERSION --no-cache=true .
+${WLSIMG_BUILDER:-docker} build ${HTTP_BUILD_ARG:-} -t "$OPER_IMAGE_NAME:$OPER_IMAGE_TAG"  --build-arg VERSION=$OPER_JAR_VERSION --no-cache=true .
 
 save_cksum
 
