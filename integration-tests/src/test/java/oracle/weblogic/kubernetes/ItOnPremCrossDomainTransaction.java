@@ -502,9 +502,9 @@ class ItOnPremCrossDomainTransaction {
 
     //modify the model file to add proper external dns entries
     FileUtils.replaceStringInFile(modelFile.toString(),
-        "@@PROP:DOMAIN_NAME@@-admin-server.@@PROP:NAMESPACE@@", getExternalDNSName());
+        "@@PROP:DOMAIN_NAME@@-admin-server\\.@@PROP:NAMESPACE@@", getExternalDNSName());
     FileUtils.replaceStringInFile(modelFile.toString(),
-        "@@PROP:DOMAIN_NAME@@-managed-server${id}.@@PROP:NAMESPACE@@", getExternalDNSName());
+        "@@PROP:DOMAIN_NAME@@-managed-server\\$\\{id\\}\\.@@PROP:NAMESPACE@@", getExternalDNSName());
     
     logger.info("creating on premise domain {0}", domainName);
     mwHome = Path.of(RESULTS_ROOT, "mwhome");
