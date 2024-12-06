@@ -187,6 +187,7 @@ class ItOnPremCrossDomainTransaction {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
     createOnPremDomain2(createDomainScript);
+    TimeUnit.HOURS.sleep(1);
     createOnPremDomain1(createDomainScript);    
   }
   
