@@ -145,7 +145,7 @@ pipeline {
                defaultValue: "${env.WKT_OCIR_HOST}"
         )
         choice(name: 'BASE_IMAGES_REPO',
-               choices: ["${env.WKT_OCIR_HOST}", 'container-registry.oracle.com'],
+               choices: ["${env.WKT_OCIR_HOST}", 'container-registry.oracle.com', 'fmw-paas-sandbox-cert-docker.dockerhub-phx.oci.oraclecorp.com'],
                description: 'Repository to pull the base images. Make sure to modify the image names if you are modifying this parameter value.'
         )
         string(name: 'WEBLOGIC_IMAGE_NAME',
