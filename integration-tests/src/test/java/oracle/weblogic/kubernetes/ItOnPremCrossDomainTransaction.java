@@ -659,10 +659,8 @@ class ItOnPremCrossDomainTransaction {
     for (int i = 0; i < cacheSfx.length; i++) {
       cacheSfx[i] = (char) (random.nextInt(25) + (int) 'a');
     }
-    AppParams appParams = defaultAppParams()
-        .appArchiveDir(ARCHIVE_DIR + cacheSfx)
-        .appName("onpremapps");
-    assertTrue(archiveApp(appParams.srcDirList(archiveAppsList)));
+    AppParams appParams = defaultAppParams().appArchiveDir(ARCHIVE_DIR + cacheSfx).srcDirList(archiveAppsList);
+    assertTrue(archiveApp(appParams));
     return Path.of(appParams.appArchiveDir(), appParams.appName() + ".zip");
   }
   
