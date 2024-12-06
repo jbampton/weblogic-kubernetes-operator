@@ -8,14 +8,13 @@
 {{- define "operator.operator" -}}
 {{- include "operator.operatorClusterRoleGeneral" . }}
 {{- include "operator.operatorClusterRoleNamespace" . }}
-{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
-{{- if $useClusterRole }}
+{{- if not (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 {{-   include "operator.operatorClusterRoleNonResource" . }}
 {{- end }}
 {{- include "operator.operatorClusterRoleOperatorAdmin" . }}
 {{- include "operator.operatorClusterRoleDomainAdmin" . }}
 {{- include "operator.clusterRoleBindingGeneral" . }}
-{{- if $useClusterRole }}
+{{- if not (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 {{-   include "operator.clusterRoleBindingNonResource" . }}
 {{- end }}
 {{- include "operator.operatorRole" . }}
@@ -29,6 +28,7 @@
 {{- include "operator.operatorInternalService" . }}
 {{- include "operator.operatorExternalService" . }}
 {{- include "operator.operatorWebhookExternalService" . }}
+{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
 {{- if $useClusterRole }}
 {{-   include "operator.operatorRoleBindingNamespace" . }}
 {{- else }}

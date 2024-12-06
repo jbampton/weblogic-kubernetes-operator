@@ -3,19 +3,18 @@
 
 {{- define "operator.operatorClusterRoleOperatorAdmin" }}
 ---
-{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
-{{- if $useClusterRole }}
-kind: "ClusterRole"
-{{- else }}
+{{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 kind: "Role"
+{{- else }}
+kind: "ClusterRole"
 {{- end }}
 apiVersion: "rbac.authorization.k8s.io/v1"
 metadata:
-  {{- if $useClusterRole }}
-  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-operator-admin" | join "-" | quote }}
-  {{- else }}
+  {{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
   name: "weblogic-operator-role-operator-admin"
   namespace: {{ .Release.Namespace | quote }}
+  {{- else }}
+  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-operator-admin" | join "-" | quote }}
   {{- end }}
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}

@@ -3,24 +3,23 @@
 
 {{- define "operator.operatorClusterRoleGeneral" }}
 ---
-{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
-{{- if $useClusterRole }}
-kind: "ClusterRole"
-{{- else }}
+{{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 kind: "Role"
+{{- else }}
+kind: "ClusterRole"
 {{- end }}
 apiVersion: "rbac.authorization.k8s.io/v1"
 metadata:
-  {{- if $useClusterRole }}
-  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-general" | join "-" | quote }}
-  {{- else }}
+  {{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
   name: "weblogic-operator-role-general"
   namespace: {{ .Release.Namespace | quote }}
+  {{- else }}
+  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-general" | join "-" | quote }}
   {{- end }}
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}
 rules:
-{{- if $useClusterRole }}
+{{- if not (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get", "list", "watch"]

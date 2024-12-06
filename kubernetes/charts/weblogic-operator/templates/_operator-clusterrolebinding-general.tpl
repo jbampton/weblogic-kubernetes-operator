@@ -4,29 +4,28 @@
 {{- define "operator.clusterRoleBindingGeneral" }}
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
-{{- $useClusterRole := and (or .enableClusterRoleBinding (not (hasKey . "enableClusterRoleBinding"))) (not (eq .domainNamespaceSelectionStrategy "Dedicated")) }}
-{{- if $useClusterRole }}
-kind: "ClusterRoleBinding"
-{{- else }}
+{{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
 kind: "RoleBinding"
+{{- else }}
+kind: "ClusterRoleBinding"
 {{- end }}
 metadata:
   labels:
     weblogic.operatorName: {{ .Release.Namespace | quote }}
-  {{- if $useClusterRole }}
-  name: {{ list .Release.Namespace "weblogic-operator-clusterrolebinding-general" | join "-" | quote }}
-  {{- else }}
+  {{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
   name: "weblogic-operator-rolebinding-general"
   namespace: {{ .Release.Namespace | quote }}
+  {{- else }}
+  name: {{ list .Release.Namespace "weblogic-operator-clusterrolebinding-general" | join "-" | quote }}
   {{- end }}
 roleRef:
   apiGroup: "rbac.authorization.k8s.io"
-  {{- if $useClusterRole }}
-  kind: "ClusterRole"
-  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-general" | join "-" | quote }}
-  {{- else }}
+  {{- if (eq .domainNamespaceSelectionStrategy "Dedicated") }}
   kind: "Role"
   name: "weblogic-operator-role-general"
+  {{- else }}
+  kind: "ClusterRole"
+  name: {{ list .Release.Namespace "weblogic-operator-clusterrole-general" | join "-" | quote }}
   {{- end }}
 subjects:
 - kind: "ServiceAccount"
