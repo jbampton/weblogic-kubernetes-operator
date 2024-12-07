@@ -47,7 +47,7 @@ import static oracle.weblogic.kubernetes.TestConstants.ARM;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_PASSWORD;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_USERNAME;
-import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_TENANCY;
+//import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_TENANCY;
 import static oracle.weblogic.kubernetes.TestConstants.CERT_MANAGER;
 import static oracle.weblogic.kubernetes.TestConstants.CRIO;
 //import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_NAME;
@@ -643,7 +643,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
     return (() -> {
       String kindRepoImage = "";
       if (!image.startsWith("phx")) {
-        kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + BASE_IMAGES_TENANCY.length() + 2);
+        kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + 1);
       } else {
         kindRepoImage = image.replace("phx.ocir.io/devweblogic", "localhost:5000");
       }
