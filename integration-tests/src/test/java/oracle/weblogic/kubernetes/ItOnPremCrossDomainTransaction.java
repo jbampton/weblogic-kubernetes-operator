@@ -200,7 +200,7 @@ class ItOnPremCrossDomainTransaction {
   private static void createOnPremDomains() throws IOException, InterruptedException {
     logger.info("creating on premise domains");
     Path createDomainScript = downloadAndInstallWDT();
-    createOnPremDomain1(createDomainScript);
+    //createOnPremDomain1(createDomainScript);
     createOnPremDomain2(createDomainScript, domain2Namespace);    
   }
   
@@ -382,21 +382,6 @@ class ItOnPremCrossDomainTransaction {
       Files.writeString(domain1Properties, "\nNAMESPACE=" + domain1Namespace, StandardOpenOption.APPEND);
       Files.writeString(domain2Properties, "\nNAMESPACE=" + domain2Namespace, StandardOpenOption.APPEND);
       Files.writeString(domain2Properties, "\nDNS_NAME=" + getExternalDNSName(), StandardOpenOption.APPEND);
-      
-      Path source3 = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING);
-      String content = new String(Files.readAllBytes(source3), StandardCharsets.UTF_8);
-      
-      Path onPremDomainRoutingDomain1 = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING);
-      Files.write(onPremDomainRoutingDomain1,
-          content.replaceAll("NAMESPACE", domain1Namespace)
-              .replaceAll("traefik-onprem", onpremIngressClass)
-              .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
-      
-      Path onPremDomainRoutingDomain2 = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING_DOMAIN2);
-      Files.write(onPremDomainRoutingDomain2,
-          content.replaceAll("NAMESPACE", domain2Namespace)
-              .replaceAll("traefik-onprem", onpremIngressClass)
-              .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
     });
   }
 
@@ -692,6 +677,7 @@ class ItOnPremCrossDomainTransaction {
     List<String> servers = List.of("admin-server", "managed-server1", "managed-server2");
     for (String server : servers) {
       Path securityDir = Files.createDirectories(Path.of(domainHome, "servers", server, "security"));
+      Files.deleteIfExists(Path.of(securityDir.toString(), "boot.properties"));
       Path bootFile = Files.createFile(Path.of(securityDir.toString(), "boot.properties"));
       logger.info("creating boot.properties {0}", bootFile);
       Files.writeString(bootFile, "username=weblogic\n", StandardOpenOption.TRUNCATE_EXISTING);
