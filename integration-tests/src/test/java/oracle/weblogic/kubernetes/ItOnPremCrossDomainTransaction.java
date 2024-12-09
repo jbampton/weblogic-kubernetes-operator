@@ -107,6 +107,7 @@ class ItOnPremCrossDomainTransaction {
   private static final String WDT_MODEL_DOMAIN1_PROPS = "model-crossdomaintransaction-domain1.properties";
   private static final String WDT_MODEL_DOMAIN2_PROPS = "model-crossdomaintransaction-domain2.properties";
   private static final String ONPREM_DOMAIN_ROUTING = "onprem-domain-routing.yaml";
+  private static final String ONPREM_DOMAIN_ROUTING_DOMAIN2 = "onprem-domain-routing_1.yaml";
   private static String onpremIngressClass = null;
   private static final String WDT_MODEL_FILE_JMS = "model-cdt-jms.yaml";
   private static final String WDT_MODEL_FILE_JMS2 = "model2-cdt-jms.yaml";
@@ -120,8 +121,9 @@ class ItOnPremCrossDomainTransaction {
   private static String domain1Namespace = null;
   private static String domain2Namespace = null;
   private static String domainUid1 = "domain1";
+  private static String domainUid2 = "domain2";
   private static String adminServerName = "admin-server";
-  private static String managedServerPrefix = domainUid1 + "-managed-server";
+  
   private static LoggingFacade logger = null;
   private static String hostHeader;
   private static Map<String, String> headers = null;
@@ -168,6 +170,9 @@ class ItOnPremCrossDomainTransaction {
     
     //install traefil for on prem domain
     onpremIngressClass = installTraefikForPremDomain();
+    
+    //add DNS entries in the local machine
+    modifyDNS();
 
     // Now that we got the namespaces for both the domains, we need to update the model properties
     // file with the namespaces. For a cross-domain transaction to work, we need to have the externalDNSName
@@ -176,9 +181,6 @@ class ItOnPremCrossDomainTransaction {
     // property file
     updatePropertyFiles();
     createOnPremDomains();
-    createOnPremDomainRoutingRules();
-    modifyDNS();
-
     // install and verify operator
     installAndVerifyOperator(opNamespace, domain1Namespace, domain2Namespace);
   }
@@ -196,10 +198,10 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void createOnPremDomains() throws IOException, InterruptedException {
-    logger.info("creating on premise domain");
+    logger.info("creating on premise domains");
     Path createDomainScript = downloadAndInstallWDT();
-    //createOnPremDomain1(createDomainScript);
-    createOnPremDomain2(createDomainScript);    
+    createOnPremDomain1(createDomainScript);
+    createOnPremDomain2(createDomainScript, domain2Namespace);    
   }
   
   /**
@@ -226,7 +228,7 @@ class ItOnPremCrossDomainTransaction {
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN1,
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS);
     List<String> modelPropList = Collections.singletonList(PROPS_TEMP_DIR + "/" + WDT_MODEL_DOMAIN1_PROPS);
-    createK8sDomain(domain1Namespace, modelFilesListDomain1, modelFilesListDomain1, modelPropList);
+    createK8sDomain(domainUid1, domain1Namespace, modelFilesListDomain1, modelFilesListDomain1, modelPropList);
     
     // No extra header info
     String curlHostHeader = "";
@@ -279,15 +281,26 @@ class ItOnPremCrossDomainTransaction {
   void testCrossDomainTranscatedMDBK8SJMSProvider() throws IOException, InterruptedException {
     //start on prem domain
     startServers(domainHome);
-
+    
     // build the model file list for domain1
-    final List<String> modelFilesListDomain1 = Arrays.asList(
-        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2,
+    Path modelFile = File.createTempFile("ext-jms-provider", ".yaml").toPath();
+    FileUtils.copy(Path.of(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_FILE_DOMAIN2), modelFile);
+    final List<String> modelFilesListDomain = Arrays.asList(
+        modelFile.toString(),
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2);
-    Files.writeString(Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS),
-        "\n=CALCULATED_LISTENPORTS" + "false", StandardOpenOption.APPEND);
-    List<String> modelPropList = Collections.singletonList(PROPS_TEMP_DIR + "/" + WDT_MODEL_DOMAIN2_PROPS);
-    createK8sDomain(domain2Namespace, modelFilesListDomain1, modelPropList, null);
+    
+    //create model property file
+    Path propFile = File.createTempFile("ext-jms-provider", ".props").toPath();    
+    Files.writeString(propFile, """
+                                DOMAIN_NAME=domain2
+                                ADMIN_USERNAME=weblogic
+                                ADMIN_PASSWORD=welcome1
+                                CALCULATED_LISTENPORTS=false                                
+                                """, StandardOpenOption.TRUNCATE_EXISTING);    
+    List<String> modelPropList = Collections.singletonList(propFile.toString());
+    
+    createK8sDomain(domainUid2, domain2Namespace, modelFilesListDomain, modelPropList, null);
+    
     // No extra header info
     String curlHostHeader = "";
     if (TestConstants.KIND_CLUSTER
@@ -355,10 +368,11 @@ class ItOnPremCrossDomainTransaction {
     Path target = Path.of(PROPS_TEMP_DIR);
     Path source1 = Path.of(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_DOMAIN1_PROPS);
     Path source2 = Path.of(RESOURCE_DIR, "onpremcrtx", WDT_MODEL_DOMAIN2_PROPS);
-    Path source3 = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING);
+    
     Path domain1Properties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN1_PROPS);
     Path domain2Properties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
-    Path onPremDomainRouting = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING);
+    
+    
     logger.info("Copy the properties file to the above area so that we can add namespace property");
     assertDoesNotThrow(() -> {
       Files.createDirectories(target);
@@ -366,31 +380,42 @@ class ItOnPremCrossDomainTransaction {
       Files.copy(source2, domain2Properties, StandardCopyOption.REPLACE_EXISTING);
       //Files.copy(source3, onPremDomainRouting, StandardCopyOption.REPLACE_EXISTING);
       Files.writeString(domain1Properties, "\nNAMESPACE=" + domain1Namespace, StandardOpenOption.APPEND);
+      Files.writeString(domain2Properties, "\nNAMESPACE=" + domain2Namespace, StandardOpenOption.APPEND);
       Files.writeString(domain2Properties, "\nDNS_NAME=" + getExternalDNSName(), StandardOpenOption.APPEND);
+      
+      Path source3 = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING);
       String content = new String(Files.readAllBytes(source3), StandardCharsets.UTF_8);
-      Files.write(onPremDomainRouting,
+      
+      Path onPremDomainRoutingDomain1 = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING);
+      Files.write(onPremDomainRoutingDomain1,
           content.replaceAll("NAMESPACE", domain1Namespace)
+              .replaceAll("traefik-onprem", onpremIngressClass)
+              .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+      
+      Path onPremDomainRoutingDomain2 = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING_DOMAIN2);
+      Files.write(onPremDomainRoutingDomain2,
+          content.replaceAll("NAMESPACE", domain2Namespace)
               .replaceAll("traefik-onprem", onpremIngressClass)
               .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
     });
   }
 
-  private static void createK8sDomain(String namespace,
+  private static void createK8sDomain(String domainUid, String namespace,
       List<String> modelFilesList, List<String> modelPropsList, List<String> applicationsList)
       throws UnknownHostException, IOException {
 
-    // create admin credential secret for domain1
-    logger.info("Create admin credential secret for domain1");
-    String domain1AdminSecretName = domainUid1 + "-weblogic-credentials";
+    // create admin credential secret for domain
+    logger.info("Create admin credential secret for domain {0}", domainUid);
+    String domain1AdminSecretName = domainUid + "-weblogic-credentials";
     assertDoesNotThrow(() -> createSecretWithUsernamePassword(
         domain1AdminSecretName, namespace, ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
-        String.format("createSecret %s failed for %s", domain1AdminSecretName, domainUid1));
+        String.format("createSecret %s failed for %s", domain1AdminSecretName, domainUid));
 
     logger.info("Creating image with model file and verify");
     String domainCreationImage = createImageAndVerify(
         WDT_IMAGE_NAME1, modelFilesList, applicationsList,
         modelPropsList, WEBLOGIC_IMAGE_NAME,
-        WEBLOGIC_IMAGE_TAG, WLS, false, domainUid1, false);
+        WEBLOGIC_IMAGE_TAG, WLS, false, domainUid, false);
     logger.info("Created {0} image", domainCreationImage);
 
     // repo login and push image to registry if necessary
@@ -401,7 +426,7 @@ class ItOnPremCrossDomainTransaction {
 
     if (TestConstants.KIND_CLUSTER
         && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
-      hostHeader = createIngressHostRouting(namespace, domainUid1, adminServerName, 7001);
+      hostHeader = createIngressHostRouting(namespace, domainUid, adminServerName, 7001);
       hostAndPort = formatIPv6Host(InetAddress.getLocalHost().getHostAddress())
           + ":" + TRAEFIK_INGRESS_HTTP_HOSTPORT;
       headers = new HashMap<>();
@@ -543,14 +568,27 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void createOnPremDomain1(Path createDomainScript) throws IOException, InterruptedException {
-    logger.info("creating on premise domain2");
-    mwHome = Path.of(RESULTS_ROOT, "mwhome");
-    String modelFileList = RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2 + ","
+    //creating routing rules for on prem domain1
+    Path srcRoutingFile = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING);
+    String content = new String(Files.readAllBytes(srcRoutingFile), StandardCharsets.UTF_8);
+    Path dstRoutingFile = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING);
+    Files.write(dstRoutingFile,
+        content.replaceAll("NAMESPACE", domain1Namespace)
+            .replaceAll("traefik-onprem", onpremIngressClass)
+            .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+    createOnPremDomainRoutingRules(dstRoutingFile);
+    
+    String modelFileList
+        = RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2 + ","
         + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2;
+    Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
+    
+    mwHome = Path.of(RESULTS_ROOT, "mwhome");
     domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "onpremdomain2");
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);
-    Path modelProperties = Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS);
+    
+    logger.info("creating on premise onpremdomain2");
     List<String> command = List.of(
         createDomainScript.toString(),
         "-oracle_home", mwHome.toString(),
@@ -564,32 +602,48 @@ class ItOnPremCrossDomainTransaction {
     wlstScript = Path.of(mwHome.toString(), "oracle_common", "common", "bin", "wlst.sh");
   }
   
-  private static void createOnPremDomain2(Path createDomainScript) throws IOException, InterruptedException {
-    String domainName = "onpremdomain1";
+  private static void createOnPremDomain2(Path createDomainScript, 
+      String namespace) throws IOException, InterruptedException {
+    String domainName = "onpremdomain2";
+
+    //creating routing rules for on prem domain1
+    Path srcRoutingFile = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING_DOMAIN2);
+    String content = new String(Files.readAllBytes(srcRoutingFile), StandardCharsets.UTF_8);
+    Path dstRoutingFile = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING_DOMAIN2);
+    Files.write(dstRoutingFile,
+        content.replaceAll("NAMESPACE", domain2Namespace)
+            .replaceAll("traefik-onprem", onpremIngressClass)
+            .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+    //create routing rules for on prem domain to communicate to K8S JMS provider
+    createOnPremDomainRoutingRules(dstRoutingFile);
     
     // build the applications to be deployed in onprem domain
-    String jmsprovider = "t3://domain1.ns-abcd.svc.cluster.cluster1:8001";    
+    String jmsprovider = "t3://domain2-cluster-cluster-1." + namespace + ":8001";
     applicationsList = buildApplications(jmsprovider);
     Path buildAppArchiveZip = buildAppArchiveZip(applicationsList);
     
-    //create model property file
-    Path propFile = File.createTempFile(domainName, ".props").toPath();
-    Path modelFile = File.createTempFile(domainName, ".yaml").toPath();
+    //create model property file for on prem domain
+    Path propFile = File.createTempFile(domainName, ".props").toPath();    
     Files.writeString(propFile,
         "DOMAIN_NAME=" + domainName + "\n"
         + "ADMIN_USERNAME=weblogic\n"
+        + "CALCULATED_LISTENPORTS=true\n"
         + "ADMIN_PASSWORD=welcome1", StandardOpenOption.TRUNCATE_EXISTING);
+    
+    //create model files for on prem domain
+    Path modelFile = File.createTempFile(domainName, ".yaml").toPath();
     FileUtils.copy(Path.of(RESOURCE_DIR, "/onpremcrtx/", WDT_MODEL_FILE_DOMAIN1), modelFile);
-
     //modify the model file to add proper external dns entries
     FileUtils.replaceStringInFile(modelFile.toString(),
         "@@PROP:DOMAIN_NAME@@-admin-server\\.@@PROP:NAMESPACE@@", getExternalDNSName());
     FileUtils.replaceStringInFile(modelFile.toString(),
         "@@PROP:DOMAIN_NAME@@-managed-server\\$\\{id\\}\\.@@PROP:NAMESPACE@@", getExternalDNSName());
     
+    String modelFileList = modelFile.toString() + "," 
+        + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS;
+    
     logger.info("creating on premise domain {0}", domainName);
-    mwHome = Path.of(RESULTS_ROOT, "mwhome");
-    String modelFileList = modelFile.toString() + "," + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS;
+    mwHome = Path.of(RESULTS_ROOT, "mwhome");    
     domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", domainName);
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);       
@@ -704,10 +758,12 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void modifyDNS() throws UnknownHostException, IOException, InterruptedException {
+    String managedServerPrefix = domainUid1 + "-managed-server";
     String dnsEntries = getExternalDNSName()
         + " " + managedServerPrefix + "1." + domain1Namespace
         + " " + managedServerPrefix + "2." + domain1Namespace
-        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace;
+        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace
+        + " " + domainUid2 + "-" + "cluster-cluster-1." + domain2Namespace;
     String command = "echo \"" + dnsEntries + "\" | sudo tee -a /etc/hosts > /dev/null";
     logger.info("adding DNS entries with command {0}", command);
     ExecResult result;
@@ -717,8 +773,8 @@ class ItOnPremCrossDomainTransaction {
     assertEquals(0, result.exitValue(), "adding DNS entries for on prem domain failed");
   }
 
-  private static void createOnPremDomainRoutingRules() throws IOException, InterruptedException {
-    String command = KUBERNETES_CLI + " apply -f " + Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING);
+  private static void createOnPremDomainRoutingRules(Path routingFile) throws IOException, InterruptedException {    
+    String command = KUBERNETES_CLI + " apply -f " + routingFile;
     logger.info("creating ingress routing rules for onprem domain \n{0}", command);
     ExecResult result;
     result = exec(command, true);

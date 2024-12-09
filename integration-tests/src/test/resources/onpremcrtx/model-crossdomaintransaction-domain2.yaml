@@ -20,11 +20,11 @@ topology:
   Server:
     "admin-server":
       ListenPort: 7001
-      ExternalDNSName: '@@PROP:DNS_NAME@@'
+      ExternalDNSName: '@@PROP:DOMAIN_NAME@@-admin-server.@@PROP:NAMESPACE@@'
   ServerTemplate:
     "cluster-1-template":
       Cluster: "cluster-1"
       ListenPort : 8001
-      ExternalDNSName: '@@PROP:DNS_NAME@@'
+      ExternalDNSName: '@@PROP:DOMAIN_NAME@@-managed-server${id}.@@PROP:NAMESPACE@@'
       DataSource:
         RmiJDBCSecurity: Compatibility

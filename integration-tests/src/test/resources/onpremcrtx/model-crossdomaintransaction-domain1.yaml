@@ -16,7 +16,7 @@ topology:
         ServerNamePrefix: "managed-server"
         DynamicClusterSize: 2
         MaxDynamicClusterSize: 2
-        CalculatedListenPorts: false
+        CalculatedListenPorts: '@@CALCULATED_LISTENPORTS@@'
   Server:
     "admin-server":
       ListenPort: 7001
