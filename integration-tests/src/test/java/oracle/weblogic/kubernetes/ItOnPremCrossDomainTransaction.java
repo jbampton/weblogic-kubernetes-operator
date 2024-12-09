@@ -291,12 +291,13 @@ class ItOnPremCrossDomainTransaction {
     
     //create model property file
     Path propFile = File.createTempFile("ext-jms-provider", ".props").toPath();    
-    Files.writeString(propFile, """
-                                DOMAIN_NAME=domain2
-                                ADMIN_USERNAME=weblogic
-                                ADMIN_PASSWORD=welcome1
-                                CALCULATED_LISTENPORTS=false                                
-                                """, StandardOpenOption.TRUNCATE_EXISTING);    
+    Files.writeString(propFile,
+        "NAMESPACE=" + domain2Namespace + "\n"
+        + "DOMAIN_NAME=domain2\n"
+        + "ADMIN_USERNAME=weblogic\n"
+        + "ADMIN_PASSWORD=welcome1\n"
+        + "CALCULATED_LISTENPORTS=false\n",
+        StandardOpenOption.TRUNCATE_EXISTING);  
     List<String> modelPropList = Collections.singletonList(propFile.toString());
     
     createK8sDomain(domainUid2, domain2Namespace, modelFilesListDomain, modelPropList, null);
