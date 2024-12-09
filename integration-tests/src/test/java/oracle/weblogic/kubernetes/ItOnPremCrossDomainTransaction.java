@@ -180,7 +180,7 @@ class ItOnPremCrossDomainTransaction {
     modifyDNS();
 
     // install and verify operator
-    installAndVerifyOperator(opNamespace, domain1Namespace);
+    installAndVerifyOperator(opNamespace, domain1Namespace, domain2Namespace);
   }
   
   /**
@@ -198,7 +198,7 @@ class ItOnPremCrossDomainTransaction {
   private static void createOnPremDomains() throws IOException, InterruptedException {
     logger.info("creating on premise domain");
     Path createDomainScript = downloadAndInstallWDT();
-    createOnPremDomain1(createDomainScript);
+    //createOnPremDomain1(createDomainScript);
     createOnPremDomain2(createDomainScript);    
   }
   
@@ -284,6 +284,8 @@ class ItOnPremCrossDomainTransaction {
     final List<String> modelFilesListDomain1 = Arrays.asList(
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2,
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2);
+    Files.writeString(Path.of(PROPS_TEMP_DIR, WDT_MODEL_DOMAIN2_PROPS),
+        "\n=CALCULATED_LISTENPORTS" + "false", StandardOpenOption.APPEND);
     List<String> modelPropList = Collections.singletonList(PROPS_TEMP_DIR + "/" + WDT_MODEL_DOMAIN2_PROPS);
     createK8sDomain(domain2Namespace, modelFilesListDomain1, modelPropList, null);
     // No extra header info
