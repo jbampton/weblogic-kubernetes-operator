@@ -303,7 +303,7 @@ class ItOnPremCrossDomainTransaction {
     //start on prem domain
     startServers(domainHome);
 
-    String host = formatIPv6Host(InetAddress.getLocalHost().getHostAddress()) + ":8002";
+    String host = formatIPv6Host(InetAddress.getLocalHost().getHostAddress()) + ":7001";
     assertTrue(checkAppIsActive(host,
         "", "mdbtopic", "cluster-1",
         ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
