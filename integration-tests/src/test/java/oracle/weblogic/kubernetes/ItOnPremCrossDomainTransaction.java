@@ -445,7 +445,7 @@ class ItOnPremCrossDomainTransaction {
         jmsProvider),
         "Could not modify the provider url in MDB Template file");
     if (null != localServerAddress) {
-      assertDoesNotThrow(() -> replaceStringInFile(template.toString(), "t3://domain1-admin-server:7001",
+      assertDoesNotThrow(() -> replaceStringInFile(template.toString(), "domain1-admin-server",
           localServerAddress),
           "Could not modify the local server url in MDB Template file");
     }
