@@ -169,7 +169,8 @@ class ItOnPremCrossDomainTransaction {
     domain2Namespace = namespaces.get(2);
     
     //install traefil for on prem domain
-    onpremIngressClass = installTraefikForPremDomain();
+    //onpremIngressClass = installTraefikForPremDomain();
+    onpremIngressClass = "dummy-abcd";
     
     //add DNS entries in the local machine
     modifyDNS();
@@ -322,7 +323,7 @@ class ItOnPremCrossDomainTransaction {
 
     HttpResponse<String> response;
     response = OracleHttpClient.get(url, null, true);
-    TimeUnit.HOURS.sleep(1);
+    TimeUnit.HOURS.sleep(3);
     assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
     assertTrue(response.body().contains("Sent (10) message"),
         "Can not send message to remote Distributed Topic");    
