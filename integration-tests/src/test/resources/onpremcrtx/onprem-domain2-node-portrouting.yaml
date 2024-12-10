@@ -1,0 +1,22 @@
+# Copyright (c) 2024, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: NAMESPACE
+  name: domain2-cluster-cluster-1-ext
+  labels:
+    weblogic.domainUID: domain2
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  sessionAffinity: ClientIP
+  selector:
+    weblogic.domainUID: domain2
+    weblogic.clusterName: cluster-1
+  ports:
+  - name: myclustert3channel
+    nodePort: 31132
+    port: 7999
+    protocol: TCP
+    targetPort: 7999

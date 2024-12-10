@@ -107,7 +107,7 @@ class ItOnPremCrossDomainTransaction {
   private static final String WDT_MODEL_DOMAIN1_PROPS = "model-crossdomaintransaction-domain1.properties";
   private static final String WDT_MODEL_DOMAIN2_PROPS = "model-crossdomaintransaction-domain2.properties";
   private static final String ONPREM_DOMAIN_ROUTING = "onprem-domain-routing.yaml";
-  private static final String ONPREM_DOMAIN_ROUTING_DOMAIN2 = "onprem-domain-routing_1.yaml";
+  private static final String ONPREM_DOMAIN_ROUTING_DOMAIN2 = "onprem-domain2-node-portrouting.yaml";
   private static String onpremIngressClass = null;
   private static final String WDT_MODEL_FILE_JMS = "model-cdt-jms.yaml";
   private static final String WDT_MODEL_FILE_JMS2 = "model2-cdt-jms.yaml";
@@ -591,18 +591,15 @@ class ItOnPremCrossDomainTransaction {
       String namespace) throws IOException, InterruptedException {
     String domainName = "onpremdomain2";
 
-    /*
     //creating routing rules for on prem domain1
     Path srcRoutingFile = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING_DOMAIN2);
     String content = new String(Files.readAllBytes(srcRoutingFile), StandardCharsets.UTF_8);
     Path dstRoutingFile = Path.of(PROPS_TEMP_DIR, ONPREM_DOMAIN_ROUTING_DOMAIN2);
     Files.write(dstRoutingFile,
         content.replaceAll("NAMESPACE", domain2Namespace)
-            .replaceAll("traefik-onprem", onpremIngressClass)
             .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
     //create routing rules for on prem domain to communicate to K8S JMS provider
     createOnPremDomainRoutingRules(dstRoutingFile);
-     */
     
     // build the applications to be deployed in onprem domain
     String jmsprovider = "t3://" + InetAddress.getLocalHost().getHostAddress() + ":8001";
