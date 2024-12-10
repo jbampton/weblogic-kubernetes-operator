@@ -605,7 +605,7 @@ class ItOnPremCrossDomainTransaction {
         "DOMAIN_NAME=" + domainName + "\n"
         + "ADMIN_USERNAME=weblogic\n"
         + "CALCULATED_LISTENPORTS=true\n"
-        + "ADMIN_PASSWORD=welcome1", StandardOpenOption.TRUNCATE_EXISTING);
+        + "ADMIN_PASSWORD=welcome1\n", StandardOpenOption.TRUNCATE_EXISTING);
     
     //create model files for on prem domain
     Path modelFile = File.createTempFile(domainName, ".yaml").toPath();
