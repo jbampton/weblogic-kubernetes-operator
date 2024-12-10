@@ -747,7 +747,8 @@ class ItOnPremCrossDomainTransaction {
     String dnsEntries = getExternalDNSName()
         + " " + managedServerPrefix + "1." + domain1Namespace
         + " " + managedServerPrefix + "2." + domain1Namespace
-        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace;
+        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace
+        + " " + domainUid2 + "-managed-server1 " + domainUid2 + "-managed-server2";
     String command = "echo \"" + dnsEntries + "\" | sudo tee -a /etc/hosts > /dev/null";
     logger.info("adding DNS entries with command {0}", command);
     ExecResult result;
