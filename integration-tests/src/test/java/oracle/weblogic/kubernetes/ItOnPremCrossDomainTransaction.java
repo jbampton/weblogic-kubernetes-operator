@@ -279,8 +279,6 @@ class ItOnPremCrossDomainTransaction {
   @Test
   @DisplayName("Check cross domain transcated MDB communication ")
   void testCrossDomainTranscatedMDBK8SJMSProvider() throws IOException, InterruptedException {
-    //start on prem domain
-    startServers(domainHome);
     
     // build the model file list for domain1
     Path modelFile = File.createTempFile("ext-jms-provider", ".yaml").toPath();
@@ -302,37 +300,30 @@ class ItOnPremCrossDomainTransaction {
     
     createK8sDomain(domainUid2, domain2Namespace, modelFilesListDomain, modelPropList, null);
     
-    // No extra header info
-    String curlHostHeader = "";
-    if (TestConstants.KIND_CLUSTER
-        && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
-      curlHostHeader = "--header 'Host: " + hostHeader + "'";
-    }
-    assertTrue(checkAppIsActive(hostAndPort,
-        curlHostHeader, "mdbtopic", "cluster-1",
+    //start on prem domain
+    startServers(domainHome);
+
+    String host = formatIPv6Host(InetAddress.getLocalHost().getHostAddress()) + ":8002";
+    assertTrue(checkAppIsActive(host,
+        "", "mdbtopic", "cluster-1",
         ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
         "MDB application can not be activated on domain1/cluster");
 
     logger.info("MDB application is activated on domain1/cluster");
 
-    //since JMS provider is clustered instances and since they are running on-prem
-    //cluster address is not available. Hence sending messages to individual instances
-    List<String> ports = List.of("8002", "8003");
-    for (String port : ports) {
-      String url = String.format("http://%s/jmsservlet/jmstest?"
-          + "url=t3://%s:%s&"
-          + "cf=jms.ClusterConnectionFactory&"
-          + "action=send&"
-          + "dest=jms/testCdtUniformTopic",
-          hostAndPort, getExternalDNSName(), port);
-      logger.info(url);
+    String url = String.format("http://%s/jmsservlet/jmstest?"
+        + "url=t3://%s:%s&"
+        + "cf=jms.ClusterConnectionFactory&"
+        + "action=send&"
+        + "dest=jms/testCdtUniformTopic",
+        host, domainUid2 + "-cluster-cluster-1." + domain2Namespace, 8001);
+    logger.info(url);
 
-      HttpResponse<String> response;
-      response = OracleHttpClient.get(url, headers, true);
-      assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
-      assertTrue(response.body().contains("Sent (10) message"),
-          "Can not send message to remote Distributed Topic");
-    }
+    HttpResponse<String> response;
+    response = OracleHttpClient.get(url, null, true);
+    assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
+    assertTrue(response.body().contains("Sent (10) message"),
+        "Can not send message to remote Distributed Topic");    
 
     assertTrue(checkLocalQueue(),
         "Expected number of message not found in Accounting Queue");
@@ -408,7 +399,7 @@ class ItOnPremCrossDomainTransaction {
     imageRepoLoginAndPushImageToRegistry(domainCreationImage);
 
     //create domain1
-    createDomain(domainUid1, namespace, domain1AdminSecretName, domainCreationImage);
+    createDomain(domainUid, namespace, domain1AdminSecretName, domainCreationImage);
 
     if (TestConstants.KIND_CLUSTER
         && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
