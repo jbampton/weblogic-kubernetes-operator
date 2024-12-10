@@ -294,7 +294,8 @@ class ItOnPremCrossDomainTransaction {
         + "DOMAIN_NAME=domain2\n"
         + "ADMIN_USERNAME=weblogic\n"
         + "ADMIN_PASSWORD=welcome1\n"
-        + "CALCULATED_LISTENPORTS=false\n",
+        + "CALCULATED_LISTENPORTS=false\n"
+        + "PUBLIC_LB_ADDRESS=" + domainUid2 + "-cluster-cluster-1." + domain2Namespace + "\n",
         StandardOpenOption.TRUNCATE_EXISTING);  
     List<String> modelPropList = Collections.singletonList(propFile.toString());
     
@@ -321,6 +322,7 @@ class ItOnPremCrossDomainTransaction {
 
     HttpResponse<String> response;
     response = OracleHttpClient.get(url, null, true);
+    TimeUnit.HOURS.sleep(1);
     assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
     assertTrue(response.body().contains("Sent (10) message"),
         "Can not send message to remote Distributed Topic");    

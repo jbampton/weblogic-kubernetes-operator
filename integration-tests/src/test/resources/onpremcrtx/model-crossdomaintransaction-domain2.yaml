@@ -24,7 +24,16 @@ topology:
   ServerTemplate:
     "cluster-1-template":
       Cluster: "cluster-1"
-      ListenPort : 8001
-      #ExternalDNSName: '@@PROP:DOMAIN_NAME@@-managed-server${id}.@@PROP:NAMESPACE@@'
-      DataSource:
-        RmiJDBCSecurity: Compatibility
+      ListenPort : 9001
+      NetworkAccessPoint:
+        MyT3Channel:
+          Protocol: 't3'
+          ListenPort: 7999
+          PublicPort: 8001
+          PublicAddress: '@@PROP:PUBLIC_LB_ADDRESS@@'
+          HttpEnabledForThisProtocol: true
+          TunnelingEnabled: true
+          OutboundEnabled: false
+          Enabled: true
+          TwoWaySSLEnabled: false
+          ClientCertificateEnforced: false
