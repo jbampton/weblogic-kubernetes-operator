@@ -222,7 +222,7 @@ class ItOnPremCrossDomainTransaction {
     startServers(domainHome);
     
     String jmsProvider = "t3://" + getExternalDNSName() + ":8002," + getExternalDNSName() + ":8003";
-    applicationsList = buildApplications(jmsProvider);
+    applicationsList = buildApplications(jmsProvider, null);
 
     // build the model file list for domain1
     final List<String> modelFilesListDomain1 = Arrays.asList(
@@ -296,7 +296,7 @@ class ItOnPremCrossDomainTransaction {
         + "ADMIN_USERNAME=weblogic\n"
         + "ADMIN_PASSWORD=welcome1\n"
         + "CALCULATED_LISTENPORTS=false\n"
-        + "PUBLIC_LB_ADDRESS=" + domainUid2 + "-cluster-cluster-1." + domain2Namespace + "\n",
+        + "PUBLIC_LB_ADDRESS=" + InetAddress.getLocalHost().getHostAddress() + "\n",
         StandardOpenOption.TRUNCATE_EXISTING);  
     List<String> modelPropList = Collections.singletonList(propFile.toString());
     
@@ -318,7 +318,7 @@ class ItOnPremCrossDomainTransaction {
         + "cf=jms.ClusterConnectionFactory&"
         + "action=send&"
         + "dest=jms/testCdtUniformTopic",
-        host, domainUid2 + "-cluster-cluster-1." + domain2Namespace, 8001);
+        host, InetAddress.getLocalHost().getHostAddress(), 8001);
     logger.info(url);
 
     HttpResponse<String> response;
@@ -414,7 +414,7 @@ class ItOnPremCrossDomainTransaction {
     }
   }
 
-  private static List<String> buildApplications(String jmsProvider) {
+  private static List<String> buildApplications(String jmsProvider, String localServerAddress) {
     //build jmsservlet client application archive
     Path targetDir;
     Path distDir;
@@ -444,6 +444,11 @@ class ItOnPremCrossDomainTransaction {
         template.toString(), "t3://domain2-cluster-cluster-1.domain2-namespace:8001",
         jmsProvider),
         "Could not modify the provider url in MDB Template file");
+    if (null != localServerAddress) {
+      assertDoesNotThrow(() -> replaceStringInFile(template.toString(), "t3://domain1-admin-server:7001",
+          localServerAddress),
+          "Could not modify the local server url in MDB Template file");
+    }
     //build application archive for MDB
     targetDir = Paths.get(WORK_DIR,
         ItOnPremCrossDomainTransaction.class.getName() + "/mdbtopic");
@@ -586,6 +591,7 @@ class ItOnPremCrossDomainTransaction {
       String namespace) throws IOException, InterruptedException {
     String domainName = "onpremdomain2";
 
+    /*
     //creating routing rules for on prem domain1
     Path srcRoutingFile = Path.of(RESOURCE_DIR, "onpremcrtx", ONPREM_DOMAIN_ROUTING_DOMAIN2);
     String content = new String(Files.readAllBytes(srcRoutingFile), StandardCharsets.UTF_8);
@@ -596,10 +602,11 @@ class ItOnPremCrossDomainTransaction {
             .getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
     //create routing rules for on prem domain to communicate to K8S JMS provider
     createOnPremDomainRoutingRules(dstRoutingFile);
+     */
     
     // build the applications to be deployed in onprem domain
-    String jmsprovider = "t3://domain2-cluster-cluster-1." + namespace + ":8001";
-    applicationsList = buildApplications(jmsprovider);
+    String jmsprovider = "t3://" + InetAddress.getLocalHost().getHostAddress() + ":8001";
+    applicationsList = buildApplications(jmsprovider, InetAddress.getLocalHost().getHostAddress());
     Path buildAppArchiveZip = buildAppArchiveZip(applicationsList);
     
     //create model property file for on prem domain
@@ -743,8 +750,7 @@ class ItOnPremCrossDomainTransaction {
     String dnsEntries = getExternalDNSName()
         + " " + managedServerPrefix + "1." + domain1Namespace
         + " " + managedServerPrefix + "2." + domain1Namespace
-        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace
-        + " " + domainUid2 + "-" + "cluster-cluster-1." + domain2Namespace;
+        + " " + domainUid1 + "-" + adminServerName + "." + domain1Namespace;
     String command = "echo \"" + dnsEntries + "\" | sudo tee -a /etc/hosts > /dev/null";
     logger.info("adding DNS entries with command {0}", command);
     ExecResult result;
