@@ -206,7 +206,7 @@ class ItOnPremCrossDomainTransaction {
    * Distributed Topic Since the MessagesDistributionMode is set to One-Copy-Per-Server and targeted to a cluster of two
    * servers, onMessage() will be triggered for both instance of MDB for a message sent to Distributed Topic
    */
-  //@Test
+  @Test
   @DisplayName("Check cross domain transcated MDB communication ")
   void testCrossDomainWithExternalJMSProvider() throws IOException, InterruptedException {
     createOnPremDomainJMSProvider();
@@ -353,15 +353,24 @@ class ItOnPremCrossDomainTransaction {
         hostAndPort, localAddress, IT_ONPREMCRDOMAINTX_CLUSTER_HOSTPORT);
     logger.info(url);
 
-    HttpResponse<String> response;
-    response = OracleHttpClient.get(url, null, true);
-    TimeUnit.HOURS.sleep(3);
-    assertEquals(200, response.statusCode(), "Didn't get the 200 HTTP status");
-    assertTrue(response.body().contains("Sent (10) message"),
-        "Can not send message to remote Distributed Topic");    
-
-    assertTrue(checkLocalQueue(hostAndPort),
-        "Expected number of message not found in Accounting Queue");
+    HttpResponse<String> response1;
+    response1 = OracleHttpClient.get(url, null, true);
+    assertEquals(200, response1.statusCode(), "Didn't get the 200 HTTP status");
+    assertTrue(response1.body().contains("Sent (10) message"),
+        "Can not send message to remote Distributed Topic");
+    
+    String url2 = String.format("http://%s/jmsservlet/jmstest?"
+        + "url=t3://localhost:" + adminServerPort + "&"
+        + "action=receive&dest=jms.testAccountingQueue",
+        hostAndPort);
+    
+    logger.info("Queue check url {0}", url);
+    testUntil(() -> {
+      HttpResponse<String> response;
+      response = OracleHttpClient.get(url2, null, true);
+      return response.statusCode() == 200
+          && response.body().contains("Total messages received so far is [11]");
+    }, logger, "local queue to be updated");
   }
 
   
