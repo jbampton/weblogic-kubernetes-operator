@@ -237,7 +237,8 @@ class ItOnPremCrossDomainTransaction {
         ADMIN_USERNAME=weblogic
         ADMIN_PASSWORD=welcome1
         DOMAIN_NAME=domain1
-        CALCULATED_LISTENPORTS=false""",
+        CALCULATED_LISTENPORTS=false
+        NAMESPACE=""" + domain1Namespace,
         StandardOpenOption.TRUNCATE_EXISTING);
     List<String> modelPropList = Collections.singletonList(propFile.toString());    
     createK8sDomain(domainUid1, domain1Namespace, modelFilesListDomain1, modelPropList, applicationsList);
@@ -409,7 +410,8 @@ class ItOnPremCrossDomainTransaction {
         domain1AdminSecretName, namespace, ADMIN_USERNAME_DEFAULT, ADMIN_PASSWORD_DEFAULT),
         String.format("createSecret %s failed for %s", domain1AdminSecretName, domainUid));
 
-    logger.info("Creating image with model files and verify");
+    logger.info("Creating image with model files {0} and property files {1}",
+        modelFilesList, modelPropsList);
     String domainCreationImage = createImageAndVerify(
         WDT_IMAGE_NAME1, modelFilesList, applicationsList,
         modelPropsList, WEBLOGIC_IMAGE_NAME,
@@ -571,7 +573,7 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void createOnPremDomainJMSProvider() throws IOException, InterruptedException {
-    
+    String onPremDomainName = "onpremJMSProdomain";
     logger.info("creating on prem domain model list");
     String modelFileList
         = RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN2 + ","
@@ -588,11 +590,11 @@ class ItOnPremCrossDomainTransaction {
         StandardOpenOption.TRUNCATE_EXISTING);   
     
     mwHome = Path.of(RESULTS_ROOT, "mwhome");
-    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", "onpremdomain2");
+    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", onPremDomainName);
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);
     
-    logger.info("creating on premise onpremdomain2");
+    logger.info("creating on premise {0}", onPremDomainName);
     List<String> command = List.of(
         createDomainScript.toString(),
         "-oracle_home", mwHome.toString(),
@@ -607,23 +609,23 @@ class ItOnPremCrossDomainTransaction {
   }
   
   private static void createOnPremDomainJMSClient(String jmsprovider) throws IOException, InterruptedException {
-    String domainName = "onpremdomain2";
+    String onPremDomainName = "onpremJMSClidomain";
     
     logger.info("build the applications to be deployed in onprem domain "
         + "with JMS provider pointing to K8S domain and JMS client as local on prem domain");    
     applicationsList = buildApplications(jmsprovider, InetAddress.getLocalHost().getHostAddress());
     Path buildAppArchiveZip = buildAppArchiveZip(applicationsList);
     
-    logger.info("creating model property file for on prem domain {0}", domainName);
-    Path propFile = File.createTempFile(domainName, ".props").toPath();    
+    logger.info("creating model property file for on prem domain {0}", onPremDomainName);
+    Path propFile = File.createTempFile(onPremDomainName, ".props").toPath();    
     Files.writeString(propFile,
-        "DOMAIN_NAME=" + domainName + "\n"
+        "DOMAIN_NAME=" + onPremDomainName + "\n"
         + "ADMIN_USERNAME=weblogic\n"
         + "CALCULATED_LISTENPORTS=true\n"
         + "ADMIN_PASSWORD=welcome1\n", StandardOpenOption.TRUNCATE_EXISTING);
     
-    logger.info("creating model file for on prem domain {0}", domainName);
-    Path modelFile = File.createTempFile(domainName, ".yaml").toPath();
+    logger.info("creating model file for on prem domain {0}", onPremDomainName);
+    Path modelFile = File.createTempFile(onPremDomainName, ".yaml").toPath();
     FileUtils.copy(Path.of(RESOURCE_DIR, "/onpremcrtx/", WDT_MODEL_FILE_DOMAIN1), modelFile);
     //modify the model file to add proper external dns entries
     FileUtils.replaceStringInFile(modelFile.toString(),
@@ -635,9 +637,9 @@ class ItOnPremCrossDomainTransaction {
         + RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS;
     
     logger.info("creating on premise domain {0} with model files {1} and property file {2}", 
-        domainName, modelFileList, propFile);
+        onPremDomainName, modelFileList, propFile);
     mwHome = Path.of(RESULTS_ROOT, "mwhome");    
-    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", domainName);
+    domainHome = Path.of(RESULTS_ROOT, "mwhome", "domains", onPremDomainName);
     logger.info("creating on premise domain home {0}", domainHome);
     Files.createDirectories(domainHome);       
     
