@@ -250,6 +250,7 @@ class ItRemoteConsole {
           "admin-server", adminServerSecurePort);
         hostAndPort = "localhost:" + TRAEFIK_INGRESS_HTTPS_HOSTPORT;
         header = " -H 'host: " + httpsHostHeader + "' ";
+        logger.info("On Podman with Traefik hostAndPort: " + hostAndPort);
       } else {
         String ingressServiceName = traefikHelmParams.getReleaseName();
         hostAndPort = getServiceExtIPAddrtOke(ingressServiceName, traefikNamespace) != null
