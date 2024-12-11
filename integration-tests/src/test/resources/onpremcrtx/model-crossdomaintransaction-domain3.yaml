@@ -28,7 +28,7 @@ topology:
         MyT3Channel:
           Protocol: 't3'
           ListenPort: 7999
-          PublicPort: 8001
+          PublicPort: @@PROP:PUBLIC_LB_PORT@@
           PublicAddress: '@@PROP:PUBLIC_LB_ADDRESS@@'
           HttpEnabledForThisProtocol: true
           TunnelingEnabled: true

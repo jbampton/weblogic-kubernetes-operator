@@ -176,12 +176,12 @@ class ItOnPremCrossDomainTransaction {
     onpremIngressClass = installTraefikForPremDomain();
     
     //add DNS entries in the local machine
+    localAddress = formatIPv6Host(InetAddress.getLocalHost().getHostAddress());
     modifyDNS();
     logger.info("installing WebLogic Deploy Tool");
     downloadAndInstallWDT();
     // install and verify operator
-    installAndVerifyOperator(opNamespace, domain1Namespace, domain3Namespace);
-    localAddress = formatIPv6Host(InetAddress.getLocalHost().getHostAddress());
+    installAndVerifyOperator(opNamespace, domain1Namespace, domain3Namespace);    
   }
   
   /**
@@ -307,7 +307,8 @@ class ItOnPremCrossDomainTransaction {
         ADMIN_PASSWORD=welcome1
         DOMAIN_NAME=domain3
         CALCULATED_LISTENPORTS=false
-        PUBLIC_LB_ADDRESS=""" + localAddress,
+        PUBLIC_LB_ADDRESS=""" + localAddress
+        + "\nPUBLIC_LB_PORT=" + IT_ONPREMCRDOMAINTX_CLUSTER_HOSTPORT,
         StandardOpenOption.TRUNCATE_EXISTING);
     List<String> modelPropList = Collections.singletonList(propFile.toString());
     
