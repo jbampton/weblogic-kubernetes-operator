@@ -456,7 +456,7 @@ class ItRemoteConsole {
 
     String hostAndPort = getLBhostAndPort(nodePortOfLB, type);
 
-    logger.info("For loadbalancer {0} hostAndPort is {0}", type, hostAndPort);
+    logger.info("For loadbalancer {0} hostAndPort is {1}", type, hostAndPort);
 
     String curlCmd = "curl -g -v --user " + ADMIN_USERNAME_DEFAULT + ":" + ADMIN_PASSWORD_DEFAULT
         + " http://localhost:8012/api/providers/AdminServerConnection -H "
