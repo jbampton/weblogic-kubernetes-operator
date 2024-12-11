@@ -296,7 +296,7 @@ class ItOnPremCrossDomainTransaction {
     
     // build the model file list for k8s domain
     final List<String> k8sDomainModelFilesList = Arrays.asList(
-        RESOURCE_DIR + "/onpremcrtx" + WDT_MODEL_FILE_DOMAIN3,
+        RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_DOMAIN3,
         RESOURCE_DIR + "/onpremcrtx/" + WDT_MODEL_FILE_JMS2);
 
     //create model property file list
@@ -421,7 +421,7 @@ class ItOnPremCrossDomainTransaction {
     }
   }
 
-  private static List<String> buildApplications(String jmsProvider, String localServerAddress) {
+  private static List<String> buildApplications(String jmsProvider, String localServerAddress) throws IOException {
     //build jmsservlet client application archive
     Path targetDir;
     Path distDir;
@@ -440,6 +440,7 @@ class ItOnPremCrossDomainTransaction {
     //build the MDB application
     Path mdbSrcDir = Paths.get(APP_DIR, "mdbtopic");
     Path mdbDestDir = Paths.get(PROPS_TEMP_DIR, "mdbtopic");
+    Files.createDirectories(Path.of(PROPS_TEMP_DIR));
     assertDoesNotThrow(() -> copyFolder(
         mdbSrcDir.toString(), mdbDestDir.toString()),
         "Could not copy mdbtopic application directory");
@@ -648,7 +649,7 @@ class ItOnPremCrossDomainTransaction {
   private static void downloadAndInstallWDT() throws IOException {
     String wdtUrl = WDT_DOWNLOAD_URL + "/download/weblogic-deploy.zip";
     Path destLocation = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy.zip");
-    Path createDomainScript = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy", "bin", "createDomain.sh");
+    createDomainScript = Path.of(DOWNLOAD_DIR, "wdt", "weblogic-deploy", "bin", "createDomain.sh");
     if (!Files.exists(destLocation) && !Files.exists(createDomainScript)) {
       logger.info("Downloading WDT to {0}", destLocation);
       Files.createDirectories(destLocation.getParent());
@@ -656,9 +657,7 @@ class ItOnPremCrossDomainTransaction {
       String cmd = "cd " + destLocation.getParent() + ";unzip " + destLocation;
       assertTrue(Command.withParams(new CommandParams().command(cmd)).execute(), "unzip command failed");
     }
-
     assertTrue(Files.exists(createDomainScript), "could not find createDomain.sh script");
-    createDomainScript = createDomainScript;
   }
 
   private static void runWDTandCreateDomain(String command) {
