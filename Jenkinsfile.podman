@@ -22,7 +22,7 @@ CRON_SETTINGS = '''H 1 * * 1-5 % MAVEN_PROFILE_NAME=kind-parallel
                    H 2 * * 1-5 % MAVEN_PROFILE_NAME=kind-sequential'''
 
 pipeline {
-    agent { label 'large-arm' }
+    agent { label 'large-arm-iad' }
     options {
         timeout(time: 800, unit: 'MINUTES')
     }
@@ -35,7 +35,7 @@ pipeline {
 
     tools {
         maven 'maven-3.8.7'
-        jdk 'jdk21'
+        jdk 'jdk21-arm'
     }
 
     environment {
@@ -267,12 +267,10 @@ pipeline {
                     steps {
                         sh '''
                             export PATH=${runtime_path}
-                            oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                                --name=helm/helm-v${HELM_VERSION}.tar.gz --file=helm.tar.gz \
-                                --auth=instance_principal
+			    curl -Lo  helm.tar.gz https://get.helm.sh/helm-v3.16.3-linux-arm64.tar.gz
                             tar zxf helm.tar.gz
-                            mv linux-amd64/helm ${WORKSPACE}/bin/helm
-                            rm -rf linux-amd64
+                            mv linux-arm64/helm ${WORKSPACE}/bin/helm
+                            rm -rf linux-arm64
                             helm version
                         '''
                     }
@@ -296,10 +294,9 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            export PATH=${runtime_path}
-                            oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                                --name=kubectl/kubectl-v${KUBE_VERSION} --file=${WORKSPACE}/bin/kubectl \
-                                --auth=instance_principal
+                            export PATH=${runtime_path} 
+			    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
+			    mv kubectl ${WORKSPACE}/bin/kubectl
                             chmod +x ${WORKSPACE}/bin/kubectl
                             kubectl version --client=true
                         '''
@@ -313,9 +310,8 @@ pipeline {
                     steps {
                         sh '''
                             export PATH=${runtime_path}
-                            oci os object get --namespace=${wko_tenancy} --bucket-name=wko-system-test-files \
-                                --name=kind/kind-v${KIND_VERSION} --file=${WORKSPACE}/bin/kind \
-                                --auth=instance_principal
+			    curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.25.0/kind-linux-arm64
+			    mv kind ${WORKSPACE}/bin/kind
                             chmod +x "${WORKSPACE}/bin/kind"
                             kind version
                         '''
