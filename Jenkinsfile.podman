@@ -209,7 +209,8 @@ pipeline {
                     }
                     steps {
                         sh '''
-			    sudo yum install -y container-tools
+			    sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo
+			    sudo yum install -y podman
                             export PATH=${runtime_path}
                             env|sort
                             java -version
