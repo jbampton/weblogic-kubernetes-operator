@@ -192,6 +192,10 @@ pipeline {
                      description: 'Collect logs for successful runs. Default is false.',
                      defaultValue: false
         )
+	booleanParam(name: 'ARM',
+                     description: 'If base images are ARM, set to true. Default is false.',
+                     defaultValue: false
+        )
     }
 
     stages {
@@ -570,6 +574,7 @@ EOF
                             echo "-Dwko.it.remoteconsole.version=\"${REMOTECONSOLE_VERSION}\""                           >> ${WORKSPACE}/.mvn/maven.config
                             echo "-Djdk.httpclient.allowRestrictedHeaders=\"host\""                                      >> ${WORKSPACE}/.mvn/maven.config    
                             echo "-Dinstall.weblogic=\"true\""                                                           >> ${WORKSPACE}/.mvn/maven.config    
+			    echo "-Dwko.it.arm.cluster=\"${ARM}\""                                                       >> ${WORKSPACE}/.mvn/maven.config
 
                             echo "${WORKSPACE}/.mvn/maven.config contents:"
                             cat "${WORKSPACE}/.mvn/maven.config"
