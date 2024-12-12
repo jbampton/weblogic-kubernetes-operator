@@ -209,7 +209,7 @@ pipeline {
                     }
                     steps {
                         sh '''
-			    sudo dnf install podman -y
+			    sudo yum install podman -y
                             export PATH=${runtime_path}
                             env|sort
                             java -version
