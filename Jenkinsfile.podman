@@ -209,7 +209,7 @@ pipeline {
                     }
                     steps {
                         sh '''
-			    sudo yum module install -y container-tools
+			    sudo yum install -y container-tools
                             export PATH=${runtime_path}
                             env|sort
                             java -version
