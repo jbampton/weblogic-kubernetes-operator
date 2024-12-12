@@ -22,7 +22,7 @@ CRON_SETTINGS = '''H 1 * * 1-5 % MAVEN_PROFILE_NAME=kind-parallel
                    H 2 * * 1-5 % MAVEN_PROFILE_NAME=kind-sequential'''
 
 pipeline {
-    agent { label 'large-arm-iad' }
+    agent { label 'large-arm' }
     options {
         timeout(time: 800, unit: 'MINUTES')
     }
