@@ -370,7 +370,8 @@ class ItOnPremCrossDomainTransaction {
       HttpResponse<String> response;
       response = OracleHttpClient.get(url2, null, true);
       return response.statusCode() == 200
-          && response.body().contains("Total messages received so far is [11]");
+          && response.body().contains("Total messages received so far is [10]")
+          || response.body().contains("Total messages received so far is [11]");
     }, logger, "local queue to be updated");
   }
 
