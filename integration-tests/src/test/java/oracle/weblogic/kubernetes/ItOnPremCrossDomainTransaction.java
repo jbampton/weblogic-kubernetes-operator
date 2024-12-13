@@ -283,13 +283,14 @@ class ItOnPremCrossDomainTransaction {
 
   /**
    * This test verifies cross-domain MessageDrivenBean communication A transacted MDB on Domain D1 listen on a
-   * replicated Distributed Topic on Domain D2. The MDB is deployed to cluster on domain D1 with
+   * replicated Distributed Topic on Domain D2. The MDB is deployed to a on premise domain D1 with
    * MessagesDistributionMode set to One-Copy-Per-Server. The OnMessage() routine sends a message to local queue on
    * receiving the message. An application servlet is deployed to Administration Server on D1 which send/receive message
    * from a JMS destination based on a given URL. (a) app servlet send message to Distributed Topic on D2 (b) mdb puts a
    * message into local Queue for each received message (c) make sure local Queue gets 2X times messages sent to
    * Distributed Topic Since the MessagesDistributionMode is set to One-Copy-Per-Server and targeted to a cluster of two
-   * servers, onMessage() will be triggered for both instance of MDB for a message sent to Distributed Topic
+   * servers, onMessage() will be triggered for both instance of MDB for a message sent to Distributed Topic. Use WLSt
+   * script to get the messages count on the local queue populated by the MDB and verify it matches 20.
    */
   @Test
   @DisplayName("Check cross domain transcated MDB communication ")
