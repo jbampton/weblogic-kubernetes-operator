@@ -354,13 +354,15 @@ class ItOnPremCrossDomainTransaction {
         hostAndPort, localAddress, IT_ONPREMCRDOMAINTX_CLUSTER_HOSTPORT);
     logger.info(url);
     
-    executeWlst(List.of(wlstScript.toString(),
-        Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/getmessages.py", localAddress),
-        Path.of(domainHome.toString(), "accountingQueueMessages.log"), true);
-    String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
-    logger.info(content);
-    assertTrue(content.contains("messagesgot=10"), "testAccountingQueue does not contain 10 messages"); 
-
+    testUntil(() -> {
+      executeWlst(List.of(wlstScript.toString(),
+          Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/getmessages.py", localAddress),
+          Path.of(domainHome.toString(), "accountingQueueMessages.log"), true);
+      String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
+      logger.info(content);
+      return content.contains("messagesgot=10");
+    }, logger, "local queue to be updated");
+    
     HttpResponse<String> response1;
     response1 = OracleHttpClient.get(url, null, true);
     assertEquals(200, response1.statusCode(), "Didn't get the 200 HTTP status");
