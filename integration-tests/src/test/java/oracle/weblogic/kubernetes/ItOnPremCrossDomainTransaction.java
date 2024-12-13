@@ -367,22 +367,7 @@ class ItOnPremCrossDomainTransaction {
       String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
       logger.info(content);
       return content.contains("messagesgot=20");
-    }, logger, "local queue to be updated");    
-    /*
-    String url2 = String.format("http://%s/jmsservlet/jmstest?"
-        + "url=t3://localhost:" + adminServerPort + "&"
-        + "action=receive&dest=jms.testAccountingQueue",
-        hostAndPort);
-    
-    logger.info("Queue check url {0}", url);
-    testUntil(() -> {
-      HttpResponse<String> response;
-      response = OracleHttpClient.get(url2, null, true);
-      return response.statusCode() == 200
-          && response.body().contains("Total messages received so far is [10]")
-          || response.body().contains("Total messages received so far is [11]");
-    }, logger, "local queue to be updated");
-     */
+    }, logger, "checking for messages in testAccountingQueue to be equal to 20"); 
   }
 
   
