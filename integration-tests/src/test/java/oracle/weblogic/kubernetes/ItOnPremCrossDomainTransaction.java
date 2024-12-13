@@ -366,7 +366,7 @@ class ItOnPremCrossDomainTransaction {
           Path.of(domainHome.toString(), "accountingQueueMessages.log"), true);
       String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
       logger.info(content);
-      return content.contains("messagesgot=10");
+      return content.contains("messagesgot=20");
     }, logger, "local queue to be updated");    
     /*
     String url2 = String.format("http://%s/jmsservlet/jmstest?"
