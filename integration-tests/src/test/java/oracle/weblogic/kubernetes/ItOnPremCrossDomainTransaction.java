@@ -353,6 +353,13 @@ class ItOnPremCrossDomainTransaction {
         + "dest=jms/testCdtUniformTopic",
         hostAndPort, localAddress, IT_ONPREMCRDOMAINTX_CLUSTER_HOSTPORT);
     logger.info(url);
+    
+    executeWlst(List.of(wlstScript.toString(),
+        Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/getmessages.py", localAddress),
+        Path.of(domainHome.toString(), "accountingQueueMessages.log"));
+    String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
+    logger.info(content);
+    assertTrue(content.contains("messagesgot=10"), "testAccountingQueue does not contain 10 messages"); 
 
     HttpResponse<String> response1;
     response1 = OracleHttpClient.get(url, null, true);
@@ -729,23 +736,8 @@ class ItOnPremCrossDomainTransaction {
   }
 
   private static void shutdownServers(List<String> command, Path logFile) {
-    Thread serverThread = new Thread(() -> {
-      ProcessBuilder processBuilder = new ProcessBuilder(command);
-      Map<String, String> combinedEnvMap = new HashMap<>();
-      combinedEnvMap.putAll(System.getenv());
-      processBuilder.environment().putAll(combinedEnvMap);
-      processBuilder.redirectError(new File(logFile.toString()));
-      processBuilder.redirectOutput(new File(logFile.toString()));
-      try {
-        logger.info("shutting down servers using wlst " + String.join(" ", command));
-        Process process = processBuilder.start();
-        process.waitFor(); // This will wait for the process to complete in the thread
-        logger.info("Servers are shut down.");
-      } catch (IOException | InterruptedException e) {
-        logger.info(e.getLocalizedMessage());
-      }
-    });
-    serverThread.start();
+    logger.info("shutting down servers using wlst " + String.join(" ", command));
+    executeWlst(command, logFile);
   }
 
   private static void modifyDNS() throws UnknownHostException, IOException, InterruptedException {
@@ -797,6 +789,26 @@ class ItOnPremCrossDomainTransaction {
       sb.append(characterSet.charAt(random.nextInt(characterSet.length())));
     }
     return sb.toString();
+  }
+  
+  private static void executeWlst(List<String> command, Path logFile) {
+    Thread serverThread = new Thread(() -> {
+      ProcessBuilder processBuilder = new ProcessBuilder(command);
+      Map<String, String> combinedEnvMap = new HashMap<>();
+      combinedEnvMap.putAll(System.getenv());
+      processBuilder.environment().putAll(combinedEnvMap);
+      processBuilder.redirectError(new File(logFile.toString()));
+      processBuilder.redirectOutput(new File(logFile.toString()));
+      try {
+        logger.info("running wlst script" + String.join(" ", command));
+        Process process = processBuilder.start();
+        process.waitFor(); // This will wait for the process to complete in the thread
+        logger.info("finished running wlst script.");
+      } catch (IOException | InterruptedException e) {
+        logger.info(e.getLocalizedMessage());
+      }
+    });
+    serverThread.start();
   }
   
 }
