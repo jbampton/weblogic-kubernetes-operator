@@ -18,14 +18,11 @@ import oracle.weblogic.domain.DomainCreationImage;
 import oracle.weblogic.domain.DomainOnPV;
 import oracle.weblogic.domain.DomainOnPVType;
 import oracle.weblogic.domain.DomainResource;
-import oracle.weblogic.kubernetes.actions.impl.primitive.Command;
-import oracle.weblogic.kubernetes.actions.impl.primitive.CommandParams;
 import oracle.weblogic.kubernetes.actions.impl.primitive.HelmParams;
 import oracle.weblogic.kubernetes.actions.impl.primitive.WitParams;
 import oracle.weblogic.kubernetes.annotations.IntegrationTest;
 import oracle.weblogic.kubernetes.annotations.Namespaces;
 import oracle.weblogic.kubernetes.logging.LoggingFacade;
-import oracle.weblogic.kubernetes.utils.ExecResult;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -36,7 +33,6 @@ import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.DOMAIN_IMAGES_PREFIX;
 import static oracle.weblogic.kubernetes.TestConstants.ELASTICSEARCH_HOST;
-import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.MII_BASIC_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.OPERATOR_CHART_DIR;
@@ -194,24 +190,9 @@ class ItWlsDomainOnPV {
       deleteDomainResource(domainNamespace, domainUid);
       // delete the cluster
       deleteClusterCustomResourceAndVerify(domainUid + "-" + clusterName, domainNamespace);
-
-      // debug to check PVC exists
-      CommandParams params = new CommandParams().defaults();
-      params.saveResults(true);
-      params.command(KUBERNETES_CLI + " get pvc " + " -n " + domainNamespace);
-
-      ExecResult result = Command.withParams(params).executeAndReturnResult();
-      logger.info("Get PVC result " + result);
+      // delete pvc
       deletePersistentVolumeClaim(pvcName, domainNamespace);
-
-      // debug to check PV exists
-      params = new CommandParams().defaults();
-      params.saveResults(true);
-      params.command(KUBERNETES_CLI + " get pv " + " -n " + domainNamespace);
-
-      result = Command.withParams(params).executeAndReturnResult();
-      logger.info("Get PV result " + result);
-
+      // delete pv
       String labelSelector = String.format("weblogic.domainUID in (%s)", domainUid);
       deletePersistentVolume(pvName, labelSelector);
     }

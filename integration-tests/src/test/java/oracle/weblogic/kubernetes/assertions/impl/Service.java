@@ -6,6 +6,10 @@ package oracle.weblogic.kubernetes.assertions.impl;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import io.kubernetes.client.openapi.ApiException;
+
+import static oracle.weblogic.kubernetes.utils.ThreadSafeLogger.getLogger;
+
 public class Service {
 
   /**
@@ -19,7 +23,23 @@ public class Service {
   public static Callable<Boolean> serviceExists(String serviceName, Map<String, String> label,
       String namespace) {
     return () -> {
-      return Kubernetes.doesServiceExist(serviceName, label, namespace);
+      try {
+        return Kubernetes.doesServiceExist(serviceName, label, namespace);
+      } catch (ApiException aex) {
+        getLogger().info("Failed to check whether service {0} in namespace {1} exists! Caught ApiException!",
+            serviceName, namespace);
+        getLogger().info("Printing aex.getCode:");
+        aex.getCode();
+        getLogger().info("Printing aex.getResponseBody:");
+        aex.getResponseBody();
+        getLogger().info("Printing aex.printStackTrace:");
+        aex.printStackTrace();
+      } finally {
+        // try one more time
+        getLogger().info("Try one more time to check whether service {0} in namespace {1} exists!",
+            serviceName, namespace);
+        return Kubernetes.doesServiceExist(serviceName, label, namespace);
+      }
     };
   }
 }
