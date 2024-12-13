@@ -188,7 +188,7 @@ class ItOnPremCrossDomainTransaction {
    * Stop on premise domain.
    */
   @AfterEach
-  public void stopOnPremDomain() throws UnknownHostException {
+  public void stopOnPremDomain() throws UnknownHostException, InterruptedException {
     shutdownServers(List.of(wlstScript.toString(),
         Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/shutdown.py",
         localAddress),
@@ -356,7 +356,7 @@ class ItOnPremCrossDomainTransaction {
     
     executeWlst(List.of(wlstScript.toString(),
         Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/getmessages.py", localAddress),
-        Path.of(domainHome.toString(), "accountingQueueMessages.log"));
+        Path.of(domainHome.toString(), "accountingQueueMessages.log"), true);
     String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
     logger.info(content);
     assertTrue(content.contains("messagesgot=10"), "testAccountingQueue does not contain 10 messages"); 
@@ -735,9 +735,9 @@ class ItOnPremCrossDomainTransaction {
     serverThread.start();
   }
 
-  private static void shutdownServers(List<String> command, Path logFile) {
+  private static void shutdownServers(List<String> command, Path logFile) throws InterruptedException {
     logger.info("shutting down servers using wlst " + String.join(" ", command));
-    executeWlst(command, logFile);
+    executeWlst(command, logFile, false);
   }
 
   private static void modifyDNS() throws UnknownHostException, IOException, InterruptedException {
@@ -791,7 +791,7 @@ class ItOnPremCrossDomainTransaction {
     return sb.toString();
   }
   
-  private static void executeWlst(List<String> command, Path logFile) {
+  private static void executeWlst(List<String> command, Path logFile, boolean wait) throws InterruptedException {
     Thread serverThread = new Thread(() -> {
       ProcessBuilder processBuilder = new ProcessBuilder(command);
       Map<String, String> combinedEnvMap = new HashMap<>();
@@ -809,6 +809,12 @@ class ItOnPremCrossDomainTransaction {
       }
     });
     serverThread.start();
+    if (wait) {
+      while (serverThread.isAlive()) {
+        logger.info("waiting for the wlst script to finish executing");
+        TimeUnit.SECONDS.sleep(5);
+      }
+    }
   }
   
 }
