@@ -64,7 +64,7 @@ pipeline {
         wle_download_url="https://github.com/oracle/weblogic-logging-exporter/releases/latest"
 
         kubeconfig_file = "${WORKSPACE}/terraform/${CLUSTER_NAME}_kubeconfig"
-        MAVEN_PROFILE_NAME = "oke-arm"
+        MAVEN_PROFILE_NAME = "wls-srg"
         availability_domain = "mFEn:PHX-AD-1"
         PARALLEL_RUN = "false"
         oke_run = "okemodule"
