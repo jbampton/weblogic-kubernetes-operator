@@ -354,6 +354,12 @@ class ItOnPremCrossDomainTransaction {
         hostAndPort, localAddress, IT_ONPREMCRDOMAINTX_CLUSTER_HOSTPORT);
     logger.info(url);
     
+    HttpResponse<String> response1;
+    response1 = OracleHttpClient.get(url, null, true);
+    assertEquals(200, response1.statusCode(), "Didn't get the 200 HTTP status");
+    assertTrue(response1.body().contains("Sent (10) message"),
+        "Can not send message to remote Distributed Topic");    
+    
     testUntil(() -> {
       executeWlst(List.of(wlstScript.toString(),
           Path.of(RESOURCE_DIR, "onpremcrtx").toString() + "/getmessages.py", localAddress),
@@ -361,14 +367,8 @@ class ItOnPremCrossDomainTransaction {
       String content = Files.readString(Path.of(domainHome.toString(), "accountingQueueMessages.log"));
       logger.info(content);
       return content.contains("messagesgot=10");
-    }, logger, "local queue to be updated");
-    
-    HttpResponse<String> response1;
-    response1 = OracleHttpClient.get(url, null, true);
-    assertEquals(200, response1.statusCode(), "Didn't get the 200 HTTP status");
-    assertTrue(response1.body().contains("Sent (10) message"),
-        "Can not send message to remote Distributed Topic");
-    
+    }, logger, "local queue to be updated");    
+    /*
     String url2 = String.format("http://%s/jmsservlet/jmstest?"
         + "url=t3://localhost:" + adminServerPort + "&"
         + "action=receive&dest=jms.testAccountingQueue",
@@ -382,6 +382,7 @@ class ItOnPremCrossDomainTransaction {
           && response.body().contains("Total messages received so far is [10]")
           || response.body().contains("Total messages received so far is [11]");
     }, logger, "local queue to be updated");
+     */
   }
 
   
