@@ -209,9 +209,6 @@ pipeline {
                     }
                     steps {
                         sh '''
-			    sudo yum --showduplicates list podman
-			    sudo yum clean all
-                            sudo yum makecache
                             sudo curl -L -o /etc/yum.repos.d/podman-stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/RHEL_8/devel:kubic:libcontainers:stable.repo
 			    cat /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo
 			    sudo yum install -y podman
