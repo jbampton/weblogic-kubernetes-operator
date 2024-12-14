@@ -34,7 +34,7 @@ public class Service {
         aex.getResponseBody();
         getLogger().info("Printing aex.printStackTrace:");
         aex.printStackTrace();
-      } finally {
+
         // try one more time
         getLogger().info("Try one more time to check whether service {0} in namespace {1} exists!",
             serviceName, namespace);
