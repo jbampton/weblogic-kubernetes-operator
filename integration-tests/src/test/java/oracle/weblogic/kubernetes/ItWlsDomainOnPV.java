@@ -190,11 +190,8 @@ class ItWlsDomainOnPV {
       deleteDomainResource(domainNamespace, domainUid);
       // delete the cluster
       deleteClusterCustomResourceAndVerify(domainUid + "-" + clusterName, domainNamespace);
-      // delete pvc
       deletePersistentVolumeClaim(pvcName, domainNamespace);
-      // delete pv
-      String labelSelector = String.format("weblogic.domainUID in (%s)", domainUid);
-      deletePersistentVolume(pvName, labelSelector);
+      deletePersistentVolume(pvName);
     }
   }
 

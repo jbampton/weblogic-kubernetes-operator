@@ -83,8 +83,6 @@ import static oracle.weblogic.kubernetes.actions.impl.ConfigMap.doesCMExist;
 import static oracle.weblogic.kubernetes.actions.impl.Operator.start;
 import static oracle.weblogic.kubernetes.actions.impl.Operator.stop;
 import static oracle.weblogic.kubernetes.actions.impl.Prometheus.uninstall;
-import static oracle.weblogic.kubernetes.assertions.impl.PersistentVolume.doesPVExist;
-import static oracle.weblogic.kubernetes.assertions.impl.PersistentVolumeClaim.doesPVCExist;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.withLongRetryPolicy;
 import static oracle.weblogic.kubernetes.utils.ThreadSafeLogger.getLogger;
@@ -892,24 +890,6 @@ public class TestActions {
   }
 
   /**
-   * Delete the Kubernetes Persistent Volume.
-   *
-   * @param name name of the Persistent Volume
-   * @return true if successful, false otherwise
-   */
-  public static boolean deletePersistentVolume(String name, String labelSelector) {
-    try {
-      if (doesPVExist(name, labelSelector)) {
-        return PersistentVolume.delete(name);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return false;
-  }
-
-  /**
    * Get V1PersistentVolumeClaim object in the namespace with the specified Persistent Volume Claim name .
    * @param namespace namespace in which to get the Persistent Volume Claim
    * @param pvcname the name of Persistent Volume Claim
@@ -940,15 +920,7 @@ public class TestActions {
    * @return true if successful, false otherwise
    */
   public static boolean deletePersistentVolumeClaim(String name, String namespace) {
-    try {
-      if (doesPVCExist(name, namespace)) {
-        return PersistentVolumeClaim.delete(name, namespace);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return false;
+    return PersistentVolumeClaim.delete(name, namespace);
   }
 
   // --------------------------  secret  ----------------------------------
