@@ -199,10 +199,14 @@ class ItMonitoringExporterSideCar {
 
     logger.info("install monitoring exporter");
     installMonitoringExporter(monitoringExporterDir);
+
     exporterImage = assertDoesNotThrow(() ->
             buildMonitoringExporterCreateImageAndPushToRepo(monitoringExporterSrcDir, "exporter",
         domain1Namespace, TEST_IMAGES_REPO_SECRET_NAME, getImageBuilderExtraArgs()),
         "Failed to create image for exporter");
+
+
+    exporterImage = "phx.ocir.io/odsbuilddev/sandboxes/fred.tibbitts/dev/weblogic-monitoring-exporter:0.1";
 
     clusterNameMsPortMap = new HashMap<>();
     clusterNameMsPortMap.put(cluster1Name, managedServerPort);
