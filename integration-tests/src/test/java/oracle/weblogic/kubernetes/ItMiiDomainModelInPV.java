@@ -41,6 +41,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
+import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_PASSWORD;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_USERNAME;
@@ -512,7 +513,7 @@ public class ItMiiDomainModelInPV {
     logger = getLogger();
     // login to repo
     logger.info(WLSIMG_BUILDER + " login");
-    testUntil(() -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+    testUntil(() -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
           logger,
           WLSIMG_BUILDER + " login to be successful");
 

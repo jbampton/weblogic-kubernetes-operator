@@ -49,6 +49,7 @@ import static java.nio.file.Paths.get;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_PASSWORD_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.ADMIN_USERNAME_DEFAULT;
+import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_PASSWORD;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_USERNAME;
@@ -184,7 +185,7 @@ class ItTwoDomainsManagedByTwoOperators {
       //   2. WLSIMG_BUILDER pull
       //   3. WLSIMG_BUILDER tag with the KIND_REPO value
       //   4. WLSIMG_BUILDER push to KIND_REPO
-      testUntil(() -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+      testUntil(() -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
           logger,
           WLSIMG_BUILDER + " login to be successful");
     }

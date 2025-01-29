@@ -1,4 +1,4 @@
-// Copyright (c) 2020, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2020, 2025, Oracle and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 package oracle.weblogic.kubernetes.extensions;
@@ -50,10 +50,13 @@ import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_USERNAME
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_TENANCY;
 import static oracle.weblogic.kubernetes.TestConstants.CERT_MANAGER;
 import static oracle.weblogic.kubernetes.TestConstants.CRIO;
+import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_NAME;
+import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.DOMAIN_IMAGES_REPO;
 import static oracle.weblogic.kubernetes.TestConstants.FMWINFRA_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.FMWINFRA_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.INGRESS_CLASS_FILE_NAME;
+import static oracle.weblogic.kubernetes.TestConstants.INSTALL_WEBLOGIC;
 import static oracle.weblogic.kubernetes.TestConstants.KIND_REPO;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.LOCALE_IMAGE_NAME;
@@ -84,6 +87,7 @@ import static oracle.weblogic.kubernetes.TestConstants.WDT_BASIC_MODEL_FILE;
 import static oracle.weblogic.kubernetes.TestConstants.WDT_BASIC_MODEL_PROPERTIES_FILE;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_SHIPHOME;
 import static oracle.weblogic.kubernetes.TestConstants.WLSIMG_BUILDER;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.ARCHIVE_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.DOWNLOAD_DIR;
@@ -105,6 +109,7 @@ import static oracle.weblogic.kubernetes.actions.TestActions.imagePush;
 import static oracle.weblogic.kubernetes.actions.TestActions.imageRepoLogin;
 import static oracle.weblogic.kubernetes.actions.TestActions.imageTag;
 import static oracle.weblogic.kubernetes.actions.TestActions.uninstallOperator;
+import static oracle.weblogic.kubernetes.actions.impl.primitive.Command.defaultCommandParams;
 import static oracle.weblogic.kubernetes.assertions.TestAssertions.doesImageExist;
 import static oracle.weblogic.kubernetes.assertions.TestAssertions.imageExists;
 import static oracle.weblogic.kubernetes.utils.CommonTestUtils.testUntil;
@@ -189,9 +194,9 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
         // login to BASE_IMAGES_REPO 
         logger.info(WLSIMG_BUILDER + " login to BASE_IMAGES_REPO {0}", BASE_IMAGES_REPO);
         testUntil(withVeryLongRetryPolicy,
-                () -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
-               logger,
-               WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
+                () -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+                logger,
+                WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
         // The following code is for pulling WLS images if running tests in Kind cluster
         if (KIND_REPO != null) {
           // The kind clusters can't pull images from BASE_IMAGES_REPO using the image pull secret.
@@ -206,7 +211,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
           images.add(WEBLOGIC_IMAGE_NAME + ":" + WEBLOGIC_IMAGE_TAG);
           images.add(FMWINFRA_IMAGE_NAME + ":" + FMWINFRA_IMAGE_TAG);
-          images.add("phx.ocir.io/devweblogic/test-images/database/enterprise:12.2.0.1-slim");
+          images.add(DB_IMAGE_NAME + ":" + DB_IMAGE_TAG);
           images.add(LOCALE_IMAGE_NAME + ":" + LOCALE_IMAGE_TAG);
 
           for (String image : images) {
@@ -266,7 +271,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
         logger.info(WLSIMG_BUILDER + " login");
         testUntil(withVeryLongRetryPolicy,
-              () -> imageRepoLogin("phx.ocir.io", BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
+              () -> imageRepoLogin(BASE_IMAGES_REPO, BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),
               logger,
               WLSIMG_BUILDER + " login to BASE_IMAGES_REPO to be successful");
 
@@ -326,6 +331,9 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
         if (!OKD && !CRIO) {
           logger.info("Installing istio before any test suites are run");
           installIstio();
+        }
+        if (INSTALL_WEBLOGIC && !OKD && !CRIO && !ARM && !OKE_CLUSTER) {
+          installOnPremWebLogic();
         }
       } finally {
         // Initialization is done. Release all waiting other threads. The latch is now disabled so
@@ -632,12 +640,7 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
 
   private Callable<Boolean> pullImageFromBaseRepoAndPushToKind(String image) {
     return (() -> {
-      String kindRepoImage = "";
-      if (!image.startsWith("phx")) {
-        kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + BASE_IMAGES_TENANCY.length() + 2);
-      } else {
-        kindRepoImage = image.replace("phx.ocir.io/devweblogic", "localhost:5000");
-      }
+      String kindRepoImage = KIND_REPO + image.substring(BASE_IMAGES_REPO.length() + BASE_IMAGES_TENANCY.length() + 2);
       return imagePull(image) && imageTag(image, kindRepoImage) && imagePush(kindRepoImage);
     });
   }
@@ -703,6 +706,18 @@ public class InitializationTasks implements BeforeAllCallback, ExtensionContext.
     String namespace = ORACLE_OPERATOR_NS;
     assertDoesNotThrow(() -> new Namespace().name(namespace).create());
     assertDoesNotThrow(() -> installDBOperator(), "Failed to install database operator");
+  }
+
+  private void installOnPremWebLogic() {
+    Path installScript = Paths.get(RESOURCE_DIR, "bash-scripts", "install-wls.sh");
+    String command
+        = String.format("%s %s %s %s", "/bin/bash", installScript, RESULTS_ROOT, WEBLOGIC_SHIPHOME);
+    getLogger().info("WebLogic installation command {0}", command);
+    assertTrue(() -> Command.withParams(
+        defaultCommandParams()
+            .command(command)
+            .redirect(false))
+        .execute());
   }
 
 }

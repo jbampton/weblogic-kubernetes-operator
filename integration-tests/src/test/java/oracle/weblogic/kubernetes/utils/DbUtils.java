@@ -1,4 +1,4 @@
-// Copyright (c) 2020, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2020, 2025, Oracle and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 package oracle.weblogic.kubernetes.utils;
@@ -72,7 +72,10 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static oracle.weblogic.kubernetes.TestConstants.ARM;
 import static oracle.weblogic.kubernetes.TestConstants.BASE_IMAGES_REPO_SECRET_NAME;
+import static oracle.weblogic.kubernetes.TestConstants.DB_19C_IMAGE_TAG;
+import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.DB_IMAGE_PREBUILT_TAG;
+import static oracle.weblogic.kubernetes.TestConstants.DB_OPERATOR_IMAGE;
 import static oracle.weblogic.kubernetes.TestConstants.DB_PREBUILT_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.IMAGE_PULL_POLICY;
 import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
@@ -780,8 +783,7 @@ public class DbUtils {
     replaceStringInFile(operatorYamlDestFile.toString(), "oracle-database-operator-system", namespace);
     replaceStringInFile(operatorYamlDestFile.toString(), "container-registry-secret", TEST_IMAGES_REPO_SECRET_NAME);
     replaceStringInFile(operatorYamlDestFile.toString(),
-        "container-registry.oracle.com/database/operator:1.0.0",
-        "phx.ocir.io/devweblogic/test-images/database/operator:0.2.1");
+        "container-registry.oracle.com/database/operator:1.0.0", DB_OPERATOR_IMAGE);
     replaceStringInFile(operatorYamlDestFile.toString(), "imagePullPolicy: Always", "imagePullPolicy: IfNotPresent");
     createTestRepoSecret(namespace);
     createBaseRepoSecret(namespace);
@@ -835,8 +837,7 @@ public class DbUtils {
       String namespace) throws ApiException, IOException {
 
     LoggingFacade logger = getLogger();
-    //final String DB_IMAGE_19C = DB_IMAGE_NAME + ":" + DB_19C_IMAGE_TAG;    
-    final String DB_IMAGE_19C = "phx.ocir.io/devweblogic/test-images/database/enterprise:19.3.0.0";
+    final String DB_IMAGE_19C = DB_IMAGE_NAME + ":" + DB_19C_IMAGE_TAG;
     String secretName = "db-password";
     String secretKey = "password";
     Map<String, String> secretMap = new HashMap<>();

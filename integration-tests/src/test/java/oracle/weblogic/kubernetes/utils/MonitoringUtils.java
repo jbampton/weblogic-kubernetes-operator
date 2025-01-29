@@ -499,7 +499,7 @@ public class MonitoringUtils {
       alertManagerNodePort = ports[1];
     }
 
-    assertTrue(imageRepoLogin("phx.ocir.io",
+    assertTrue(imageRepoLogin(TestConstants.BASE_IMAGES_REPO,
         BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD), WLSIMG_BUILDER + " login failed");
 
     // Helm install parameters

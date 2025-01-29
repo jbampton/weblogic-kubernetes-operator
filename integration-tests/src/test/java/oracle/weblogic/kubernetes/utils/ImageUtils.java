@@ -513,7 +513,7 @@ public class ImageUtils {
     LoggingFacade logger = getLogger();
     logger.info("Creating base image pull secret {0} in namespace {1}", BASE_IMAGES_REPO_SECRET_NAME, namespace);
     createImageRegistrySecret(BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD, BASE_IMAGES_REPO_EMAIL,
-            "phx.ocir.io", BASE_IMAGES_REPO_SECRET_NAME, namespace);
+            TestConstants.BASE_IMAGES_REPO, BASE_IMAGES_REPO_SECRET_NAME, namespace);
   }
 
   /**
@@ -583,7 +583,7 @@ public class ImageUtils {
     if (!DOMAIN_IMAGES_REPO.isEmpty() && image.contains(DOMAIN_IMAGES_REPO)) {
       // repo login, if necessary
       logger.info(WLSIMG_BUILDER + " login");
-      assertTrue(imageRepoLogin("phx.ocir.io",
+      assertTrue(imageRepoLogin(TestConstants.BASE_IMAGES_REPO,
            BASE_IMAGES_REPO_USERNAME, BASE_IMAGES_REPO_PASSWORD),  WLSIMG_BUILDER + " login failed");
       logger.info(WLSIMG_BUILDER + " push image {0} to {1}", image, DOMAIN_IMAGES_REPO);
       testUntil(() -> imagePush(image),
