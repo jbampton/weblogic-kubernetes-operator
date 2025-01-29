@@ -62,6 +62,7 @@ import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.MANAGED_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG_DEFAULT;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.MODEL_DIR;
@@ -328,7 +329,13 @@ class ItT3Channel {
         -> getServicePort(domainNamespace,
               domainUid + "-cluster-" + clusterName, "default"),
               "Getting Cluster Service default port failed");
-    assertEquals(7001, servicePort, "Default Service Port is not set to 7001");
+    int managedServerPort;
+    if (WEBLOGIC_IMAGE_TAG_DEFAULT.contains("12")) {
+      managedServerPort = 7100;
+    } else {
+      managedServerPort = 7001;
+    }
+    assertEquals(managedServerPort, servicePort, "Default Service Port is not set to " + managedServerPort);
     int napPort = assertDoesNotThrow(()
         -> getServicePort(domainNamespace,
               domainUid + "-cluster-" + clusterName, "ms-nap"),
@@ -339,7 +346,7 @@ class ItT3Channel {
         -> getServicePort(domainNamespace,
               domainUid + "-managed-server1", "default"),
               "Getting Managed Server Service default port failed");
-    assertEquals(7001, servicePort, "Default Managed Service Port is not 7100");
+    assertEquals(managedServerPort, servicePort, "Default Managed Service Port is not " + managedServerPort);
 
   }
 
