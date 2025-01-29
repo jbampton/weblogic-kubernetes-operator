@@ -7,7 +7,7 @@
   <parent>
     <groupId>oracle.kubernetes</groupId>
     <artifactId>operator-parent</artifactId>
-    <version>4.2.13-SNAPSHOT</version>
+    <version>4.2.14-SNAPSHOT</version>
   </parent>
 
   <artifactId>weblogic-kubernetes-operator</artifactId>
@@ -423,11 +423,6 @@
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-common</artifactId>
     </dependency>
 
     <dependency>
