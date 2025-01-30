@@ -225,6 +225,7 @@ class ItIntrospectVersion {
   private static Path clusterViewAppPath;
   private static LoggingFacade logger = null;
   private static int managedServerPort;
+  
   static {
     if (WEBLOGIC_IMAGE_TAG_DEFAULT.contains("12")) {
       managedServerPort = 7100;
@@ -232,6 +233,7 @@ class ItIntrospectVersion {
       managedServerPort = 7001;
     }
   }
+  
   private static int adminPort = 7001;
   private static String hostHeader;
 
