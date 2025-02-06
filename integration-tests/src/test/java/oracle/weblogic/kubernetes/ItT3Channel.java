@@ -62,7 +62,7 @@ import static oracle.weblogic.kubernetes.TestConstants.KUBERNETES_CLI;
 import static oracle.weblogic.kubernetes.TestConstants.MANAGED_SERVER_NAME_BASE;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
-import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG_DEFAULT;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.MODEL_DIR;
@@ -330,7 +330,7 @@ class ItT3Channel {
               domainUid + "-cluster-" + clusterName, "default"),
               "Getting Cluster Service default port failed");
     int managedServerPort;
-    if (WEBLOGIC_IMAGE_TAG_DEFAULT.contains("12")) {
+    if (WEBLOGIC_IMAGE_TAG.contains("12")) {
       managedServerPort = 7100;
     } else {
       managedServerPort = 7001;
