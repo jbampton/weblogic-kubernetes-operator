@@ -151,8 +151,8 @@ pipeline {
                defaultValue: "test-images/fmw-infrastructure"
         )
         string(name: 'FMWINFRA_IMAGE_TAG',
-               description: 'FWM Infra image tag',
-               defaultValue: '12.2.1.4'
+               description: '14.1.2.0-jdk17-ol8, 14.1.2.0-jdk17-ol9, 14.1.2.0-jdk21-ol8, 14.1.2.0-jdk21-ol9',
+               defaultValue: '14.1.2.0-jdk17-ol8'
         )
         string(name: 'DB_IMAGE_NAME',
                description: 'Oracle DB image name. Default is the image name in BASE_IMAGES_REPO, use database/enterprise for OCR.',
