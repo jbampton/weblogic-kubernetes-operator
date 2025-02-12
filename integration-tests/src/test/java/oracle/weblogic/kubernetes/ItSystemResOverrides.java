@@ -466,6 +466,7 @@ class ItSystemResOverrides {
                         + "-Dweblogic.debug.DebugSituationalConfigDumpXml=true "
                         + "-Dweblogic.kernel.debug=true "
                         + "-Dweblogic.debug.DebugMessaging=true "
+                        + "-Dweblogic.security.SSL.ignoreHostnameVerification=true "
                         + "-Dweblogic.debug.DebugConnection=true "
                         + "-Dweblogic.ResolveDNSName=true"))
                 .addEnvItem(new V1EnvVar()
