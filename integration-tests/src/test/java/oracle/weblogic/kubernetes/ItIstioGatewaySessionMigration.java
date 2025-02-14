@@ -254,11 +254,15 @@ class ItIstioGatewaySessionMigration {
 
     String clusterService = domainUid + "-cluster-" + clusterName + "." + domainNamespace + ".svc.cluster.local";
 
-    Map<String, String> templateMap  = new HashMap<>();
+    Map<String, String> templateMap = new HashMap<>();
     templateMap.put("NAMESPACE", domainNamespace);
     templateMap.put("DUID", domainUid);
-    templateMap.put("ADMIN_SERVICE",adminServerPodName);
+    templateMap.put("ADMIN_SERVICE", adminServerPodName);
     templateMap.put("CLUSTER_SERVICE", clusterService);
+    if (!WEBLOGIC_IMAGE_TAG.startsWith("12")) {
+      templateMap.put("7100", String.valueOf(managedServerPort));
+      templateMap.put("8001", String.valueOf(managedServerPort));
+    }
 
     // create Istio gateway
     Path srcHttpFile = Paths.get(RESOURCE_DIR, "istio", istioGatewayConfigFile);
