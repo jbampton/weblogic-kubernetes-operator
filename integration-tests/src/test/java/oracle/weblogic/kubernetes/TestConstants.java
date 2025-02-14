@@ -361,7 +361,7 @@ public interface TestConstants {
   public static final String DEFAULT_EXTERNAL_REST_IDENTITY_SECRET_NAME = "weblogic-operator-external-rest-identity";
 
   public static final String ISTIO_VERSION =
-      getNonEmptySystemProperty("wko.it.istio.version", "1.13.2");
+      getNonEmptySystemProperty("wko.it.istio.version", "1.23.0");
   public static final int ISTIO_HTTP_HOSTPORT = 2480;
   public static final int ISTIO_HTTPS_HOSTPORT = 2490;  
 
