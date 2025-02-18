@@ -223,7 +223,7 @@ class ItIstioGatewaySessionMigration {
     httpDataInfo = OKE_CLUSTER ? getServerAndSessionInfoAndVerify(domainNamespace,
             adminServerPodName, serverName, istioIngressIP, 0, webServiceGetUrl, " -b ")
         : getServerAndSessionInfoAndVerify(domainNamespace,
-            adminServerPodName, serverName, istioIngressIP, istioIngressPort, webServiceGetUrl, " -b ");
+            adminServerPodName, serverName, istioIngressIP, servicePort, webServiceGetUrl, " -b ");
     // get server and session info from web service deployed on the cluster
     String primaryServerName = httpDataInfo.get(primaryServerAttr);
     String sessionCreateTime = httpDataInfo.get(sessionCreateTimeAttr);
