@@ -190,10 +190,12 @@ class ItIstioGatewaySessionMigration {
 
     // In internal OKE env, use Istio EXTERNAL-IP; in non-OKE env, use K8S_NODEPORT_HOST + ":" + istioIngressPort
     String istioIngressIP = getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) != null
-        ? getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) : formatIPv6Host(K8S_NODEPORT_HOST);    
+        ? getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) : formatIPv6Host(K8S_NODEPORT_HOST);
+    int servicePort = istioIngressPort;
     if (TestConstants.KIND_CLUSTER
         && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
       istioIngressIP = domainUid + "-cluster-cluster-1." + domainNamespace + ".svc.cluster.local";
+      servicePort = 7001;      
     }
 
     // send a HTTP request to set http session state(count number) and save HTTP session info
@@ -203,7 +205,7 @@ class ItIstioGatewaySessionMigration {
     Map<String, String> httpDataInfo = OKE_CLUSTER ? getServerAndSessionInfoAndVerify(domainNamespace,
             adminServerPodName, serverName, istioIngressIP, 0, webServiceSetUrl, " -c ")
         : getServerAndSessionInfoAndVerify(domainNamespace,
-            adminServerPodName, serverName, istioIngressIP, istioIngressPort, webServiceSetUrl, " -c ");
+            adminServerPodName, serverName, istioIngressIP, servicePort, webServiceSetUrl, " -c ");
     // get server and session info from web service deployed on the cluster
     String origPrimaryServerName = httpDataInfo.get(primaryServerAttr);
     String origSecondaryServerName = httpDataInfo.get(secondaryServerAttr);
