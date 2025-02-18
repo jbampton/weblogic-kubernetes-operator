@@ -3,6 +3,7 @@
 
 package oracle.weblogic.kubernetes;
 
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -178,7 +179,7 @@ class ItIstioGatewaySessionMigration {
   @Test
   @DisplayName("When istio is enabled using Istio gateway, stop the primary server, "
       + "verify that a new primary server is picked and HTTP session state is migrated")
-  void testSessionMigrationIstioGateway() {
+  void testSessionMigrationIstioGateway() throws UnknownHostException {
     final String primaryServerAttr = "primary";
     final String secondaryServerAttr = "secondary";
     final String sessionCreateTimeAttr = "sessioncreatetime";
@@ -189,8 +190,12 @@ class ItIstioGatewaySessionMigration {
 
     // In internal OKE env, use Istio EXTERNAL-IP; in non-OKE env, use K8S_NODEPORT_HOST + ":" + istioIngressPort
     String istioIngressIP = getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) != null
-        ? getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) : formatIPv6Host(K8S_NODEPORT_HOST);
-    
+        ? getServiceExtIPAddrtOke(istioIngressServiceName, istioNamespace) : formatIPv6Host(K8S_NODEPORT_HOST);    
+    if (TestConstants.KIND_CLUSTER
+        && !TestConstants.WLSIMG_BUILDER.equals(TestConstants.WLSIMG_BUILDER_DEFAULT)) {
+      istioIngressIP = domainUid + "-cluster-cluster-1." + domainNamespace + ".svc.cluster.local";
+    }
+
     // send a HTTP request to set http session state(count number) and save HTTP session info
     // before shutting down the primary server
     // the NodePort services created by the operator are not usable, because they would expose ports
