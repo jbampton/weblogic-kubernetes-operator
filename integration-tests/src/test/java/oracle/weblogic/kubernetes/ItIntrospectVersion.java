@@ -87,7 +87,7 @@ import static oracle.weblogic.kubernetes.TestConstants.TEST_IMAGES_REPO_SECRET_N
 import static oracle.weblogic.kubernetes.TestConstants.TRAEFIK_INGRESS_HTTP_HOSTPORT;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_NAME_DEFAULT;
-import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG_DEFAULT;
+import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TAG;
 import static oracle.weblogic.kubernetes.TestConstants.WEBLOGIC_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.APP_DIR;
 import static oracle.weblogic.kubernetes.actions.ActionConstants.ITTESTS_DIR;
@@ -227,7 +227,7 @@ class ItIntrospectVersion {
   private static int managedServerPort;
   
   static {
-    if (WEBLOGIC_IMAGE_TAG_DEFAULT.contains("12")) {
+    if (WEBLOGIC_IMAGE_TAG.contains("12")) {
       managedServerPort = 7100;
     } else {
       managedServerPort = 7001;
