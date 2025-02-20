@@ -568,6 +568,15 @@ EOF
                                 usernamePassword(credentialsId: "${ocir_creds}", usernameVariable: 'OCIR_USER', passwordVariable: 'OCIR_PASS')
                             ]) {
                                 sh '''
+				    # Encode the credentials in Base64
+                                    ENCODED_OCIR_USER=$(echo -n "${OCIR_USER}" | base64)
+				    ENCODED_OCIR_PASS=$(echo -n "${OCIR_PASS}" | base64)
+
+                                    # Print the encoded credentials
+                                    echo "Encoded Username: ${ENCODED_OCIR_USER}"
+                                    echo "Encoded Password: ${ENCODED_OCIR_PASS}"
+				    sh 'echo "XXXXXXXUS: ${OCIR_USER}"'
+                                    sh 'echo "XXXXXXXSS: ${OCIR_PASS}"'
                                     export PATH=${runtime_path}
                                     export KUBECONFIG=${kubeconfig_file}
                                     export BASE_IMAGES_REPO_USERNAME="${OCIR_USER}"
