@@ -568,12 +568,6 @@ EOF
                                 usernamePassword(credentialsId: "${ocir_creds}", usernameVariable: 'OCIR_USER', passwordVariable: 'OCIR_PASS')
                             ]) {
                                 sh '''
-				    mkdir -p ${result_root}/diagnostics
-				    ENCODED_OCIR_USER=$(echo -n "${OCIR_USER}" | base64)
-                                    ENCODED_OCIR_PASS=$(echo -n "${OCIR_PASS}" | base64)
-
-                                    echo "Encoded Username: ${ENCODED_OCIR_USER}" > ${result_root}/diagnostics/temp.log
-                                    echo "Encoded Password: ${ENCODED_OCIR_PASS}" >> ${result_root}/diagnostics/temp.log
                                     export PATH=${runtime_path}
                                     export KUBECONFIG=${kubeconfig_file}
                                     export BASE_IMAGES_REPO_USERNAME="${OCIR_USER}"

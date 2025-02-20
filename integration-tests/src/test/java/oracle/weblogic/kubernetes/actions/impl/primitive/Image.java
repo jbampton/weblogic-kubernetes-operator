@@ -30,8 +30,6 @@ public class Image {
   public static boolean login(String registryName, String username, String password) {
     String cmdToExecute = String.format(WLSIMG_BUILDER + " login %s -u %s -p '%s'",
         registryName, username, password);
-    String encodedString = Base64.getEncoder().encodeToString(cmdToExecute.getBytes());
-    getLogger().info(encodedString);
     return Command
         .withParams(new CommandParams()
             .verbose(false)
