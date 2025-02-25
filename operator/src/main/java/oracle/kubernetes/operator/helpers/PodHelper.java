@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -393,6 +394,32 @@ public class PodHelper {
         .orElse(null);
   }
 
+  /**
+   * Check if the pod is already annotated for shut down.
+   * @param pod Pod
+   * @return true, if the pod is already annotated.
+   */
+  public static boolean isPodAlreadyAnnotatedForShutdown(V1Pod pod) {
+    return !Objects.isNull(getPodShutdownAnnotation(pod));
+  }
+
+  public static String getPodShutdownAnnotation(V1Pod pod) {
+    return getPodAnnotation(pod, LabelConstants.TO_BE_SHUTDOWN_LABEL);
+  }
+
+  /**
+   * get pod's annotation value for a annotation name.
+   * @param pod pod
+   * @param annotationName annotation name
+   * @return annotation value
+   */
+  public static String getPodAnnotation(V1Pod pod, String annotationName) {
+    return Optional.ofNullable(pod)
+            .map(V1Pod::getMetadata)
+            .map(V1ObjectMeta::getAnnotations)
+            .map(m -> m.get(annotationName))
+            .orElse(null);
+  }
   /**
    * Get the message from the pod's status.
    * @param pod pod
