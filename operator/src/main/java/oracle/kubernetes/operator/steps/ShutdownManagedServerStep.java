@@ -67,9 +67,9 @@ public class ShutdownManagedServerStep extends Step {
   /**
    * Creates asynchronous {@link Step}.
    *
-   * @param next Next processing step
+   * @param next       Next processing step
    * @param serverName name of server
-   * @param pod server pod
+   * @param pod        server pod
    * @return asynchronous step
    */
   static Step createShutdownManagedServerStep(Step next, String serverName, V1Pod pod) {
@@ -86,11 +86,11 @@ public class ShutdownManagedServerStep extends Step {
       return doNext(PodHelper.annotatePodAsNeedingToShutdown(pod, now, getNext()), packet);
     }
     return doNext(
-          Step.chain(
-              SecretHelper.createAuthorizationSourceStep(),
-              PodHelper.annotatePodAsNeedingToShutdown(pod, now,
-                  new ShutdownManagedServerWithHttpStep(service, pod, getNext()))),
-          packet);
+            Step.chain(
+                    SecretHelper.createAuthorizationSourceStep(),
+                    PodHelper.annotatePodAsNeedingToShutdown(pod, now,
+                            new ShutdownManagedServerWithHttpStep(service, pod, getNext()))),
+            packet);
   }
 
   static final class ShutdownManagedServerProcessing extends HttpRequestProcessing {

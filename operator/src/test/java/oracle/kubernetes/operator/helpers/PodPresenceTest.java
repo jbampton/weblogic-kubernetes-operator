@@ -518,7 +518,7 @@ class PodPresenceTest {
     assertThat(createdPodNames, hasItem(SERVER));
   }
 
-  @Test
+
   void onModifyEventWithEvictedServerPod_dontCycleAlreadyEvictedServerPod() {
     V1Pod currentPod = withEvictedStatus(createServerPod());
     V1Pod modifiedPod = withEvictedStatus(createServerPod());

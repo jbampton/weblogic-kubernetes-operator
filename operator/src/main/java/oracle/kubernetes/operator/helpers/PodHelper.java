@@ -49,6 +49,7 @@ import oracle.kubernetes.weblogic.domain.model.DomainStatus;
 import oracle.kubernetes.weblogic.domain.model.ServerStatus;
 import oracle.kubernetes.weblogic.domain.model.Shutdown;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static oracle.kubernetes.operator.KubernetesConstants.EVICTED_REASON;
 import static oracle.kubernetes.operator.KubernetesConstants.POD_SCHEDULED;
 import static oracle.kubernetes.operator.KubernetesConstants.UNSCHEDULABLE_REASON;
@@ -419,18 +420,41 @@ public class PodHelper {
   private static Step patchPodAnnotation(V1Pod pod, String annotation, String value, Step next) {
 
     if (!hasAnnotation(pod, annotation)) {
-        try {
-          JsonPatchBuilder patchBuilder = Json.createPatchBuilder();
-          patchBuilder.add("/metadata/annotations/" + annotation, value);
-          new CallBuilder()
-                  .patchPod(pod.getMetadata().getName(), pod.getMetadata().getNamespace(),
-                          pod.getMetadata().getLabels().get(LabelConstants.DOMAINUID_LABEL),
-                          new V1Patch(patchBuilder.build().toString()));
-        } catch (ApiException ignored) {
-          System.out.println("DEBUG: Error " + ignored.getMessage());
-        }
+      JsonPatchBuilder patchBuilder = Json.createPatchBuilder();
+      patchBuilder.add("/metadata/annotations/" + annotation, value);
+      new CallBuilder()
+              .patchPodAsync(pod.getMetadata().getName(), pod.getMetadata().getNamespace(),
+                      pod.getMetadata().getLabels().get(LabelConstants.DOMAINUID_LABEL),
+                      new V1Patch(patchBuilder.build().toString()),
+                      patchResponse(next));
     }
     return next;
+  }
+
+  private static ResponseStep<V1Pod> patchResponse(Step next) {
+    return new PatchPodResponseStep(next);
+  }
+
+  private static class PatchPodResponseStep extends ResponseStep<V1Pod> {
+    PatchPodResponseStep(Step next) {
+      super(next);
+    }
+
+    @Override
+    public NextAction onSuccess(Packet packet, CallResponse<V1Pod> callResponse) {
+      DomainPresenceInfo info =  packet.getSpi(DomainPresenceInfo.class);
+      V1Pod pod = callResponse.getResult();
+      info.setServerPod(getPodServerName(pod), pod);
+      return doNext(packet);
+    }
+
+    @Override
+    public NextAction onFailure(Packet packet, CallResponse<V1Pod> callResponse) {
+      if (callResponse.getStatusCode() == HTTP_NOT_FOUND) {
+        return doNext(packet);
+      }
+      return super.onFailure(packet, callResponse);
+    }
   }
 
   /**
