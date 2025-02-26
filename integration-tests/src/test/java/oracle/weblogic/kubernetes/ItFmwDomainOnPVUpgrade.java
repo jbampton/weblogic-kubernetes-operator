@@ -132,7 +132,8 @@ class ItFmwDomainOnPVUpgrade {
 
   private final String fmwModelFilePrefix = "model-fmwdomain-upgrade";  
   
-  private final String imageTag1412 = "14.1.2.0.0-jdk17";
+  private final String imageTag12c = "12.2.1.4";
+  private final String imageTag1412 = "14.1.2.0-jdk17-ol8";
   private final String image1412 = BASE_IMAGES_PREFIX + FMWINFRA_IMAGE_NAME_DEFAULT + ":" + imageTag1412;
 
   /**
@@ -330,6 +331,8 @@ class ItFmwDomainOnPVUpgrade {
         .domainType(DomainOnPVType.JRF)
         .opss(new Opss()
             .walletPasswordSecret(opsswalletpassSecretName)));
+    String image = FMWINFRA_IMAGE_TO_USE_IN_SPEC.substring(0, FMWINFRA_IMAGE_TO_USE_IN_SPEC.lastIndexOf(":"))
+        + ":" + imageTag12c;
     DomainResource domain = createDomainResourceOnPv(
         domainName,
         domainNamespace,
@@ -341,7 +344,7 @@ class ItFmwDomainOnPVUpgrade {
         DOMAINHOMEPREFIX,
         replicaCount,
         configuration,
-        FMWINFRA_IMAGE_TO_USE_IN_SPEC);
+        image);
 
     // Set the inter-pod anti-affinity for the domain custom resource
     setPodAntiAffinity(domain);
