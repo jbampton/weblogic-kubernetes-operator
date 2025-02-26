@@ -63,7 +63,6 @@ import static oracle.weblogic.kubernetes.TestConstants.ELASTICSEARCH_HOST;
 import static oracle.weblogic.kubernetes.TestConstants.FAILURE_RETRY_INTERVAL_SECONDS;
 import static oracle.weblogic.kubernetes.TestConstants.FAILURE_RETRY_LIMIT_MINUTES;
 import static oracle.weblogic.kubernetes.TestConstants.FMWINFRA_IMAGE_NAME_DEFAULT;
-import static oracle.weblogic.kubernetes.TestConstants.FMWINFRA_IMAGE_TO_USE_IN_SPEC;
 import static oracle.weblogic.kubernetes.TestConstants.IMAGE_PULL_POLICY;
 import static oracle.weblogic.kubernetes.TestConstants.OKD;
 import static oracle.weblogic.kubernetes.TestConstants.OKE_CLUSTER;
@@ -132,7 +131,8 @@ class ItFmwDomainOnPVUpgrade {
 
   private final String fmwModelFilePrefix = "model-fmwdomain-upgrade";  
   
-  private final String imageTag12c = "12.2.1.4";
+  private final String imageTag12214 = "12.2.1.4";
+  private final String image12214 = BASE_IMAGES_PREFIX + FMWINFRA_IMAGE_NAME_DEFAULT + ":" + imageTag12214;
   private final String imageTag1412 = "14.1.2.0-jdk17-ol8";
   private final String image1412 = BASE_IMAGES_PREFIX + FMWINFRA_IMAGE_NAME_DEFAULT + ":" + imageTag1412;
 
@@ -331,8 +331,6 @@ class ItFmwDomainOnPVUpgrade {
         .domainType(DomainOnPVType.JRF)
         .opss(new Opss()
             .walletPasswordSecret(opsswalletpassSecretName)));
-    String image = FMWINFRA_IMAGE_TO_USE_IN_SPEC.substring(0, FMWINFRA_IMAGE_TO_USE_IN_SPEC.lastIndexOf(":"))
-        + ":" + imageTag12c;
     DomainResource domain = createDomainResourceOnPv(
         domainName,
         domainNamespace,
@@ -344,7 +342,7 @@ class ItFmwDomainOnPVUpgrade {
         DOMAINHOMEPREFIX,
         replicaCount,
         configuration,
-        image);
+        image12214);
 
     // Set the inter-pod anti-affinity for the domain custom resource
     setPodAntiAffinity(domain);
