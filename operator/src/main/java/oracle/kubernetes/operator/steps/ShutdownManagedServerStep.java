@@ -89,8 +89,7 @@ public class ShutdownManagedServerStep extends Step {
             Step.chain(
                     SecretHelper.createAuthorizationSourceStep(),
                     PodHelper.annotatePodAsNeedingToShutdown(pod, now,
-                            new ShutdownManagedServerWithHttpStep(service, pod, getNext()))),
-            packet);
+                            new ShutdownManagedServerWithHttpStep(service, pod, getNext()))),  packet);
   }
 
   static final class ShutdownManagedServerProcessing extends HttpRequestProcessing {
