@@ -24,7 +24,7 @@ CRON_SETTINGS = '''H 1 * * 1-5 % MAVEN_PROFILE_NAME=kind-parallel
 pipeline {
     agent { label 'large-ol9u4' }
     options {
-        timeout(time: 800, unit: 'MINUTES')
+        timeout(time: 1200, unit: 'MINUTES')
     }
 
     triggers {
