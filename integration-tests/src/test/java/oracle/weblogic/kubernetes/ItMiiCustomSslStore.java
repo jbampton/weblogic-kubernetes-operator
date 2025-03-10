@@ -224,7 +224,7 @@ class ItMiiCustomSslStore {
     if (WEBLOGIC_IMAGE_TAG.contains("12")) {
       managedServerPort = "8100";
     } else {
-      managedServerPort = "8001";
+      managedServerPort = "7002";
     }
     testUntil(
         runClientInsidePod(adminServerPodName, domainNamespace,
