@@ -514,6 +514,9 @@ public class JobStepContext extends BasePodStepContext {
     if (isInitDomainOnPVRunAsRoot()) {
       return new V1SecurityContext().runAsGroup(0L).runAsUser(0L);
     }
+    if (getServerSpec().getContainerSecurityContext() != null) {
+      return getServerSpec().getContainerSecurityContext();
+    }
     if (getPodSecurityContext().equals(PodSecurityHelper.getDefaultPodSecurityContext())) {
       return PodSecurityHelper.getDefaultContainerSecurityContext();
     }
