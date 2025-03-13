@@ -587,6 +587,9 @@ public class PodHelper {
 
     @Override
     V1SecurityContext getInitContainerSecurityContext() {
+      if (getServerSpec().getContainerSecurityContext() != null) {
+        return getServerSpec().getContainerSecurityContext();
+      }
       if (getPodSecurityContext().equals(PodSecurityHelper.getDefaultPodSecurityContext())) {
         return PodSecurityHelper.getDefaultContainerSecurityContext();
       }
@@ -895,6 +898,9 @@ public class PodHelper {
 
     @Override
     V1SecurityContext getInitContainerSecurityContext() {
+      if (getServerSpec().getContainerSecurityContext() != null) {
+        return getServerSpec().getContainerSecurityContext();
+      }
       if (getPodSecurityContext().equals(PodSecurityHelper.getDefaultPodSecurityContext())) {
         return PodSecurityHelper.getDefaultContainerSecurityContext();
       }
