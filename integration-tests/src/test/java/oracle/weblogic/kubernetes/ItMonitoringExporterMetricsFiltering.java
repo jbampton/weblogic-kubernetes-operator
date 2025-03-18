@@ -838,12 +838,12 @@ class ItMonitoringExporterMetricsFiltering {
     String[] minVersionParts = minVersion.split("\\.");
 
     for (int i = 0; i < 3; i++) {
-      int vPart = Integer.parseInt(versionParts[i]); // Convert to integer
+      int verPart = Integer.parseInt(versionParts[i]); // Convert to integer
       int minVPart = Integer.parseInt(minVersionParts[i]);
 
-      if (vPart > minVPart) {
+      if (verPart > minVPart) {
         return true;
-      } else if (vPart < minVPart) {
+      } else if (verPart < minVPart) {
         return false;
       }
     }
