@@ -430,7 +430,9 @@ class ItSystemResOverrides {
     logger.info("Create WDT passphrase file"); 
     File passphraseFile = createPassphraseFile(passPhrase);    
     logger.info("Run encruptModel.sh script to encrypt clear text password in property file");    
-    encryptModel(Path.of(wlsModelFile), encryptModelScript, wlsModelPropFile.toPath(), passphraseFile.toPath());
+    encryptModel(encryptModelScript,
+        Path.of(MODEL_DIR, wlsModelFile),
+        wlsModelPropFile.toPath(), passphraseFile.toPath());
     createSecretWithUsernamePassword(wlSecretName, opNamespace, clusterName, passPhrase);
     createEncryptionSecret(encryptionSecret, domainNamespace);
 
