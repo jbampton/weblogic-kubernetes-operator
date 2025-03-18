@@ -725,7 +725,7 @@ class ItSystemResOverrides {
   
   public static void createEncryptionSecret(String secretName, String namespace) {
     Map<String, String> secretMap = new HashMap<>();
-    secretMap.put("WebLogicAdminPassword", passPhrase);
+    secretMap.put("passphrase", passPhrase);
 
     if (!secretExists(secretName, namespace)) {
       boolean secretCreated = assertDoesNotThrow(() -> createSecret(new V1Secret()
