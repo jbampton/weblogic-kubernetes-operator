@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
@@ -1313,6 +1315,23 @@ public class MonitoringUtils {
    */
   public static boolean verifyMonExpAppAccess(String uri, String searchKey, String domainUid,
                                         String domainNS, boolean isHttps, String clusterName) {
+    return verifyMonExpAppAccess(uri, searchKey, false, domainUid,
+        domainNS, isHttps, clusterName);
+  }
+
+  /**
+   * Verify the monitoring exporter app can be accessed from all managed servers in the domain
+   * through direct access to managed server dashboard.
+   * @param clusterName - name of cluster
+   * @param domainNS - domain namespace
+   * @param domainUid  - domain uid
+   * @param isHttps  - protocol
+   * @param uri - weburl
+   * @param searchKey  - search key in response
+   * @param isRegex - search key contains regex
+   */
+  public static boolean verifyMonExpAppAccess(String uri, String searchKey, Boolean isRegex, String domainUid,
+                                              String domainNS, boolean isHttps, String clusterName) {
     String protocol = "http";
     String port = "8001";
     if (isHttps) {
@@ -1338,13 +1357,24 @@ public class MonitoringUtils {
       String response = result.stdout().trim();
       logger.info("Response : exitValue {0}, stdout {1}, stderr {2}",
           result.exitValue(), response, result.stderr());
-      isFound = response.contains(searchKey);
+      if (isRegex) {
+        isFound = containsValidServletName(response, searchKey);
+      } else {
+        isFound = response.contains(searchKey);
+      }
       logger.info("isFound value:" + isFound);
     } catch (Exception ex) {
       logger.info("Can't execute command " + command + Arrays.toString(ex.getStackTrace()));
       return false;
     }
     return isFound;
+  }
+
+  // Method to check if the string contains the required pattern
+  private static boolean containsValidServletName(String input, String regex) {
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(input);
+    return matcher.find();
   }
 
   /**

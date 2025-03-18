@@ -249,9 +249,13 @@ class ItMonitoringExporterMetricsFiltering {
   void testFilterIIncludedKeysFromSubLevel() throws Exception {
     logger.info("Testing filtering only included specific app name in the metrics ");
     List<String> checkIncluded = new ArrayList<>();
-    checkIncluded.add("servletName=\"com.oracle.wls.exporter.webapp.ExporterServlet\"");
+    // Regular expression pattern to match servletName="ANYTHING.ExporterServlet"
+    String checkKey1 = "servletName=\"[^\"]*ExporterServlet\"";
+    checkIncluded.add(checkKey1);
     List<String> checkExcluded = new ArrayList<>();
-    checkExcluded.add("servletName=\"com.oracle.wls.exporter.webapp.MainServlet\"");
+    // Regular expression pattern to match servletName="ANYTHING.ExporterServlet"
+    String checkKey2 = "servletName=\"[^\"]*MainServlet\"";
+    checkExcluded.add(checkKey2);
 
     replaceConfigurationWithFilter(RESOURCE_DIR + "/exporter/rest_filter_included_servlet_name.yaml",
         checkIncluded, checkExcluded);
@@ -266,10 +270,12 @@ class ItMonitoringExporterMetricsFiltering {
   void testFilterIIncludedKeysFromBothLevels() throws Exception {
     logger.info("Testing filtering only included specific app name in the metrics ");
     List<String> checkIncluded = new ArrayList<>();
-    checkIncluded.add("servletName=\"com.oracle.wls.exporter.webapp.ExporterServlet\"");
+    String checkKey1 = "servletName=\"[^\"]*ExporterServlet\"";
+    checkIncluded.add(checkKey1);
     checkIncluded.add("app=\"wls-exporter\"");
     List<String> checkExcluded = new ArrayList<>();
-    checkExcluded.add("servletName=\"com.oracle.wls.exporter.webapp.MainServlet\"");
+    String checkKey2 = "servletName=\"[^\"]*MainServlet\"";
+    checkExcluded.add(checkKey2);
     checkExcluded.add("app=\"myear1\"");
     replaceConfigurationWithFilter(RESOURCE_DIR
         + "/exporter/rest_filter_included_webapp_and_servlet_names.yaml",checkIncluded, checkExcluded);
@@ -299,9 +305,11 @@ class ItMonitoringExporterMetricsFiltering {
   void testFilterExcludedKeysFromSubLevel() throws Exception {
     logger.info("Testing filtering only excluded specific app name in the metrics ");
     List<String> checkIncluded = new ArrayList<>();
-    checkIncluded.add("servletName=\"com.oracle.wls.exporter.webapp.MainServlet\"");
+    String checkKey1 = "servletName=\"[^\"]*MainServlet\"";
+    checkIncluded.add(checkKey1);
     List<String> checkExcluded = new ArrayList<>();
-    checkExcluded.add("servletName=\"com.oracle.wls.exporter.webapp.ExporterServlet\"");
+    String checkKey2 = "servletName=\"[^\"]*ExporterServlet\"";
+    checkExcluded.add(checkKey2);
 
     replaceConfigurationWithFilter(RESOURCE_DIR + "/exporter/rest_filter_excluded_servlet_name.yaml",
         checkIncluded, checkExcluded);
@@ -316,10 +324,12 @@ class ItMonitoringExporterMetricsFiltering {
   void testFilterExcludedKeysFromBothLevels() throws Exception {
     logger.info("Testing filtering only excluded specific app name in the metrics ");
     List<String> checkIncluded = new ArrayList<>();
-    checkIncluded.add("servletName=\"com.oracle.wls.exporter.webapp.ExporterServlet\"");
+    String checkKey1 = "servletName=\"[^\"]*ExporterServlet\"";
+    checkIncluded.add(checkKey1);
     checkIncluded.add("app=\"myear1\"");
     List<String> checkExcluded = new ArrayList<>();
-    checkExcluded.add("servletName=\"com.oracle.wls.exporter.webapp.MainServlet\"");
+    String checkKey2 = "servletName=\"[^\"]*MainServlet\"";
+    checkExcluded.add(checkKey2);
     checkExcluded.add("app=\"myear123\"");
     replaceConfigurationWithFilter(RESOURCE_DIR
         + "/exporter/rest_filter_excluded_webapp_and_servlet_names.yaml",checkIncluded, checkExcluded);
@@ -728,17 +738,25 @@ class ItMonitoringExporterMetricsFiltering {
   }
 
   private static void verifyMetrics(List<String> checkIncluded, List<String> checkExcluded) {
+    boolean isRegexInc = false;
+    boolean isRegexExc = false;
     for (String includedString : checkIncluded) {
+      if (checkIncluded.contains("servletName=\"[^\"]*")) {
+        isRegexInc = true;
+      }
       assertTrue(verifyMonExpAppAccess("wls-exporter/metrics",
-              includedString,
+              includedString, isRegexInc,
               domain1Uid,
               domain1Namespace,
               false, cluster1Name),
           "monitoring exporter metrics can't filter to included " + includedString);
     }
     for (String excludedString : checkExcluded) {
+      if (checkExcluded.contains("servletName=\"[^\"]*")) {
+        isRegexExc = true;
+      }
       assertFalse(verifyMonExpAppAccess("wls-exporter/metrics",
-              excludedString,
+              excludedString, isRegexExc,
               domain1Uid,
               domain1Namespace,
               false, cluster1Name),
@@ -758,7 +776,6 @@ class ItMonitoringExporterMetricsFiltering {
     assertTrue(page.asNormalizedText().contains("Unable to Update Configuration"),
         "Page does not contain expected Unable to Update Configuration");
   }
-
 
   private static void installTraefikIngressController() throws IOException {
     // install and verify Traefik
