@@ -1378,6 +1378,8 @@ public class MonitoringUtils {
   }
 
   // Method to check if the string contains the required pattern
+  // Regular expression pattern to match servletName="ANYTHING.ExporterServlet"
+  // regex = "servletName=\"[^\"]*ExporterServlet\"";
   private static boolean containsValidServletName(String input, String regex) {
     Pattern pattern = Pattern.compile(regex);
     Matcher matcher = pattern.matcher(input);

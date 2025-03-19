@@ -233,7 +233,7 @@ class ItMonitoringExporterMetricsFiltering {
       servletPath = "com.oracle.wls.exporter.webapp";
     } else {
       servletPath = servletPath + ((WEBLOGIC_IMAGE_TAG.contains("14.1")
-          || WEBLOGIC_IMAGE_TAG.contains("12.1")) ? ".javax" : ".jakarta");
+          || WEBLOGIC_IMAGE_TAG.contains("12.")) ? ".javax" : ".jakarta");
     }
   }
 
