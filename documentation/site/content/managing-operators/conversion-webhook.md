@@ -85,9 +85,9 @@ A webhook install is skipped if there's already a webhook deployment at the same
 
 ### Upgrade the conversion webhook
 
-We support having exactly one installation of the webhook and having one or more installations of the operator. To have more than one installation of the operator, you would need to install a Helm release with just the webhook and then separately install multiple Helm releases with just the operator.
+We support having exactly one installation of the webhook and having one or more installations of the operator. To have more than one installation of the operator, you would need to install a Helm release with just the webhook and then separately install multiple Helm releases with just the operator. The conversion webhook should be updated to at least match the version of the most recent operator in the cluster.
 
-To upgrade the conversion webhook only, you must have _first_ installed a Helm release with the `--set webhookOnly=true` option; then you can update that release.
+To upgrade the webhook only, you must have installed a Helm release with the webhook _only_, and then update that release.
 
 The following example installs the conversion webhook only (at the specified version), and then upgrades it (to a later, specified version).
 ```
