@@ -85,21 +85,25 @@ A webhook install is skipped if there's already a webhook deployment at the same
 
 ### Upgrade the conversion webhook
 
-To upgrade the webhook (only) or the operator + webhook (typical installation), you run the Helm command for an upgrade as you typically would, but also include the option for `webhookOnly=true` as you would when you installed just the webhook. For example:
+We support having exactly one installation of the webhook and having one or more installations of the operator. To have more than one installation of the operator, you would need to install a Helm release with just the webhook and then separately install multiple Helm releases with just the operator.
+
+To upgrade the conversion webhook only, you must have _first_ installed a Helm release with the `--set webhookOnly=true` option; then you can update that release.
+
+The following example installs the conversion webhook only (at the specified version), and then upgrades it (to a later, specified version).
 ```
-kubectl create namespace weblogic-operator-webhook
+kubectl create namespace <your-namespace>
 
-helm repo add weblogic-operator https://oracle.github.io/weblogic-kubernetes-operator/charts --force-update
+helm repo add weblogic-helm-repository https://oracle.github.io/weblogic-kubernetes-operator/charts --force-update
 
-helm install weblogic-operator-webhook weblogic-operator/weblogic-operator --namespace weblogic-operator-webhook --set webhookOnly=true --version 4.2.13
+helm install <your-release-name> weblogic-helm-repository/weblogic-operator --namespace <your-namespace> --set webhookOnly=true --version <selected-version>
 ```
-The first two steps create the namespace and configures Helm with the chart repository.
+The first two steps create the namespace and configure Helm with the chart repository.
 
-The final step installs the webhook specifying that the install should be for the webhook only and installs a specific version of the operator.
+The final step installs the webhook specifying that the install should be for the webhook only and at a specific version of the product.
 
 To upgrade to a later version of the webhook:
 ```
-helm upgrade weblogic-operator-webhook weblogic-operator/weblogic-operator --namespace weblogic-operator-webhook --version 4.2.15
+helm upgrade <your-release-name> weblogic-helm-repository/weblogic-operator --namespace <your-namespace> --version <selected-new-version>
 ```
 
 ### Uninstall the conversion webhook
